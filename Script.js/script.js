@@ -1,4 +1,5 @@
 /* script.js */
+
 document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById('loginForm');
     const loginContainer = document.getElementById('login-container');
