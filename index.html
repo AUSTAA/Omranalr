@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول والخدمات</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .login-container {
+            width: 300px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .login-container input {
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+
+        .login-container button {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .login-container button:hover {
+            background-color: #0056b3;
+        }
+
+        .services-container {
+            display: none; /* إخفاء واجهة الخدمات بشكل افتراضي */
+        }
+
+        #city-filter {
+            display: none; /* إخفاء عنصر فرز المدينة بشكل افتراضي */
+        }
+    </style>
+</head>
+<body dir="rtl">
+    <div class="login-container" id="login-container">
+        <h2>تسجيل الدخول</h2>
+        <form id="loginForm" method="post" action="/login">
+            <input type="text" id="username" name="username" placeholder="اسم المستخدم">
+            <input type="password" id="password" name="password" placeholder="كلمة المرور">
+            <button type="submit">تسجيل الدخول</button>
+        </form>
+    </div>
+
+    <div class="services-container" id="services-container">
+        <header>
+            <h1>خدمات</h1>
+            <div class="search">
+                <input type="text" placeholder="البحث...">
+                <button>بحث</button>
+            </div>
+            <div class="filter" id="city-filter">
+                <label for="city">المدينة:</label>
+                <select name="city" id="city">
+                    <option value="">الكل</option>
+                    <option value="طرابلس">طرابلس</option>
+                    <option value="زليتن ">زليتن </option>
+                    <option value="سبها">سبها</option>   
+                    <option value="الخمس">الخمس</option>
+                    <option value="غريان">غريان</option>
+                </select>
+            </div>
+        </header>
+        <div class="container">
+            <div class="worker">
+                <img src="worker1.jpg" alt="عامل 1">
+                <h2> علي </h2>
+                <p>بناء</p>
+                <p>المدينة: طرابلس</p>
+                <p>التقييم: 4.5</p>
+                <!-- Add more worker details here -->
+            </div>
+            <div class="worker">
+                <img src="worker2.jpg" alt="عامل 2">
+                <h2>اسامة </h2>
+                <p>سباك</p>
+                <p>المدينة:  زليتن</p>
+                <p>التقييم: 4.8</p>
+                <!-- Add more worker details here -->
+            </div>
+            <!-- Add more workers as needed -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const loginContainer = document.getElementById('login-container');
+            const servicesContainer = document.getElementById('services-container');
+            const cityFilter = document.getElementById('city-filter');
+
+            loginForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                // هنا يمكنك إضافة الكود للتحقق من اسم المستخدم وكلمة المرور وتوجيه المستخدم
+                if (username === 'علي' && password === '123456') {
+                    loginContainer.style.display = 'none'; // إخفاء واجهة تسجيل الدخول
+                    servicesContainer.style.display = 'block'; // عرض واجهة الخدمات
+                    cityFilter.style.display = 'block'; // عرض عنصر فرز المدينة
+                } else {
+                    alert('خطأ في اسم المستخدم أو كلمة المرور. هل نسيت كلمة المرور؟');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
