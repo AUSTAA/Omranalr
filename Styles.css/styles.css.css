@@ -27,15 +27,3 @@ header {
 }
 
 .worker {
-    margin: 20px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    text-align: center;
-}
-
-.worker img {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    margin-bottom: 10px;
-}
