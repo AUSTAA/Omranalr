@@ -2,9 +2,9 @@
 
 /* تنسيق الخلفية والألوان */
 body {
-    background-color: #f4f4f4;
-    color: #333;
-    font-family: Arial, sans-serif;
+    background-color: #f0f2f5;
+    color: #1c1e21;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 /* تنسيق عناصر الواجهة */
@@ -13,14 +13,14 @@ body {
     max-width: 400px;
     margin: 50px auto;
     background-color: #fff;
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 20px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 }
 
 .login-container h2 {
     margin-bottom: 20px;
-    color: #007bff;
+    color: #1877f2; /* لون Facebook الأزرق */
 }
 
 .login-container input,
@@ -28,20 +28,20 @@ body {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid #ccd0d5; /* لون الحدود الرمادي الفاتح */
     border-radius: 5px;
     box-sizing: border-box; /* تجنب الزيادة في حجم العناصر بسبب الحواف */
 }
 
 .login-container button {
-    background-color: #007bff;
+    background-color: #1877f2; /* لون Facebook الأزرق */
     color: #fff;
     font-weight: bold;
     cursor: pointer;
 }
 
 .login-container button:hover {
-    background-color: #0056b3;
+    background-color: #166fe5; /* لون Facebook الأزرق الداكن */
 }
 
 .services-container {
@@ -49,10 +49,10 @@ body {
 }
 
 .header {
-    background-color: #007bff;
+    background-color: #1877f2; /* لون Facebook الأزرق */
     color: #fff;
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 8px;
     margin-bottom: 20px;
 }
 
@@ -86,7 +86,7 @@ body {
 
 .worker h2 {
     margin-bottom: 5px;
-    color: #007bff;
+    color: #1877f2; /* لون Facebook الأزرق */
 }
 
 .worker p {
