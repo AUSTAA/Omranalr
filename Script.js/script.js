@@ -1,23 +1,42 @@
-/* script.js */
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
-document.addEventListener('DOMContentLoaded', function() {
-    const loginForm = document.getElementById('loginForm');
-    const loginContainer = document.getElementById('login-container');
-    const servicesContainer = document.getElementById('services-container');
-    const cityFilter = document.getElementById('city-filter');
+// Your web app's Firebase configuration
+const firebaseConfig = {
+    apiKey: "Your-API-Key",
+    authDomain: "Your-Auth-Domain",
+    projectId: "Your-Project-Id",
+    storageBucket: "Your-Storage-Bucket",
+    messagingSenderId: "Your-Messaging-Sender-Id",
+    appId: "Your-App-Id",
+    measurementId: "Your-Measurement-Id"
+};
 
-    loginForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const auth = getAuth(app);
 
-        // هنا يمكنك إضافة الكود للتحقق من اسم المستخدم وكلمة المرور وتوجيه المستخدم
-        if (username === 'علي' && password === '123456') {
-            loginContainer.style.display = 'none'; // إخفاء واجهة تسجيل الدخول
-            servicesContainer.style.display = 'block'; // عرض واجهة الخدمات
-            cityFilter.style.display = 'block'; // عرض عنصر فرز المدينة
-        } else {
-            alert('خطأ في اسم المستخدم أو كلمة المرور. هل نسيت كلمة المرور؟');
-        }
-    });
+// Listen for the registration form submission event
+const registrationForm = document.getElementById('registration_form');
+registrationForm.addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent default form submission
+    
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const phoneNumber = document.getElementById('phone').value;
+
+    // Use Firebase SDK to create a new account
+    createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            // Handle successful registration
+            console.log("User registered successfully:", userCredential);
+            // Redirect user to their profile page or any other page
+         window.location.href = 'verification_sent.html';
+        })
+        .catch((error) => {
+            // Handle errors
+            console.error("Error registering user:", error);
+        });
 });
