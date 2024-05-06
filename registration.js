@@ -1,7 +1,7 @@
 
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js'
     // Add Firebase products that you want to use
-    import { getAuth , EmailAuthprovider, createUserWithEmailAndPassword  } from 'https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js'
+    import { getAuth , createUserWithEmailAndPassword  } from 'https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js'
     import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js'
 
 
@@ -37,6 +37,23 @@ createUserWithEmailAndPassword(auth, email, password)
     const user = userCredential.user;
     // ...
   })
+    document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('registration_form');
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault(); // يمنع إرسال النموذج
+
+        // استخراج قيم الحقول
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        // هنا يمكنك إجراء العمليات اللازمة للتحقق من صحة البيانات ومعالجتها
+
+        // توجيه المستخدم إلى صفحة البروفايل بعد التسجيل
+        window.location.href = "profile.html";
+    });
+});
   .catch((error) => {
     const errorCode = error.code;
     const errorMessage = error.message;
