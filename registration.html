@@ -1,35 +1,24 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل حساب جديد</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Register</title>
 </head>
-<body dir="rtl">
-    <header>
-        <h1>تسجيل حساب جديد</h1>
-    </header>
-    <main>
-        <!-- نموذج تسجيل حساب جديد -->
-        <form id="registration_form">
-            <!-- حقول إدخال البيانات -->
-            <label for="name">الاسم:</label>
-            <input type="text" id="name" name="name" required>
-            <label for="email">البريد الإلكتروني:</label>
-            <input type="email" id="email" name="email" required>
-            <label for="password">كلمة المرور:</label>
-            <input type="password" id="password" name="password" required>
-            <button type="submit">تأكيد التسجيل</button>
-        </form>
-    </main>
-    <footer>
-        <p>&copy; ٢٠٢٤ خدمات البناء</p>
-    </footer>
+<body>
+    <h2>Register</h2>
+    <form id="registerForm">
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email"><br>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password"><br>
+        <button type="submit">Register</button>
+    </form>
 
-    <!-- تضمين ملف JavaScript لمعالجة عملية التسجيل -->
-    <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js"></script>
-    <script src="registration.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="register.js"></script>
 </body>
 </html>
