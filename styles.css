@@ -1,0 +1,52 @@
+/* styles.css */
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #f0f0f0;
+    margin: 0;
+}
+
+#deck {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 600px;
+    margin-bottom: 20px;
+}
+
+.card {
+    width: 100px;
+    height: 150px;
+    border: 1px solid #000;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 5px;
+    font-size: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.card .suit {
+    font-size: 24px;
+}
+
+.card.Spades .suit {
+    color: black;
+}
+
+.card.Hearts .suit {
+    color: red;
+}
+
+.card.Diamonds .suit {
+    color: red;
+}
+
+.card.Clubs .suit {
+    color: black;
+}
