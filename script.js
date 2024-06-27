@@ -13,6 +13,7 @@ const values = {
     'J': 9,
     'K': 10
 };
+let numPlayers = 0;
 
 // إنشاء مجموعة الأوراق
 function createDeck() {
@@ -33,20 +34,29 @@ function shuffleDeck(deck) {
     }
 }
 
+// بدء اللعبة بناءً على عدد اللاعبين
+function startGame(players) {
+    numPlayers = players;
+    document.getElementById('player-selection').style.display = 'none';
+    document.getElementById('game').style.display = 'flex';
+    document.getElementById('deal-button').style.display = 'block';
+
+    for (let i = 1; i <= numPlayers; i++) {
+        document.getElementById(`player${i}`).style.display = 'block';
+    }
+}
+
 // توزيع الأوراق
 function dealCards() {
     const deck = createDeck();
     shuffleDeck(deck);
 
-    const players = ['player1', 'player2', 'player3', 'player4'];
-    let cardIndex = 0;
-
-    for (const player of players) {
-        const hand = document.getElementById(`hand${player.slice(-1)}`);
+    for (let i = 1; i <= numPlayers; i++) {
+        const hand = document.getElementById(`hand${i}`);
         hand.innerHTML = '';
 
-        for (let i = 0; i < 3; i++) {
-            const card = deck[cardIndex++];
+        for (let j = 0; j < 3; j++) {
+            const card = deck.pop();
             const cardElement = document.createElement('div');
             cardElement.className = `card ${card.suit}`;
             cardElement.innerHTML = `<div class="value">${card.value}</div><div class="suit">${getSuitSymbol(card.suit)}</div>`;
