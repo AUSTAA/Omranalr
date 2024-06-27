@@ -10,16 +10,29 @@ body {
     margin: 0;
 }
 
-#deck {
+#game {
     display: flex;
-    flex-wrap: wrap;
-    max-width: 600px;
+    justify-content: space-around;
+    width: 80%;
+    max-width: 800px;
     margin-bottom: 20px;
 }
 
+.player {
+    text-align: center;
+}
+
+.hand {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
 .card {
-    width: 100px;
-    height: 150px;
+    width: 80px;
+    height: 120px;
     border: 1px solid #000;
     border-radius: 8px;
     display: flex;
@@ -29,24 +42,4 @@ body {
     font-size: 20px;
     background-color: #fff;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.card .suit {
-    font-size: 24px;
-}
-
-.card.Spades .suit {
-    color: black;
-}
-
-.card.Hearts .suit {
-    color: red;
-}
-
-.card.Diamonds .suit {
-    color: red;
-}
-
-.card.Clubs .suit {
-    color: black;
 }
