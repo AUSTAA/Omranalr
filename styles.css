@@ -1,20 +1,27 @@
 /* styles.css */
 body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background-color: #f0f0f0;
+    font-family: 'Arial', sans-serif;
     margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: url('background.jpg') no-repeat center center fixed;
+    background-size: cover;
+}
+
+#game-container {
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 #game {
     display: flex;
     justify-content: space-around;
-    width: 80%;
-    max-width: 800px;
     margin-bottom: 20px;
 }
 
@@ -42,4 +49,19 @@ body {
     font-size: 20px;
     background-color: #fff;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#deal-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+#deal-button:hover {
+    background-color: #0056b3;
 }
