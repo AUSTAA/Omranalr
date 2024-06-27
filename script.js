@@ -26,24 +26,32 @@ function createDeck() {
 }
 
 // خلط الأوراق
-function shuffleDeck() {
-    const deck = createDeck();
+function shuffleDeck(deck) {
     for (let i = deck.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [deck[i], deck[j]] = [deck[j], deck[i]];
     }
-    displayDeck(deck);
 }
 
-// عرض الأوراق
-function displayDeck(deck) {
-    const deckContainer = document.getElementById('deck');
-    deckContainer.innerHTML = '';
-    for (const card of deck) {
-        const cardElement = document.createElement('div');
-        cardElement.className = `card ${card.suit}`;
-        cardElement.innerHTML = `<div class="value">${card.value}</div><div class="suit">${getSuitSymbol(card.suit)}</div>`;
-        deckContainer.appendChild(cardElement);
+// توزيع الأوراق
+function dealCards() {
+    const deck = createDeck();
+    shuffleDeck(deck);
+
+    const players = ['player1', 'player2', 'player3', 'player4'];
+    let cardIndex = 0;
+
+    for (const player of players) {
+        const hand = document.getElementById(`hand${player.slice(-1)}`);
+        hand.innerHTML = '';
+
+        for (let i = 0; i < 3; i++) {
+            const card = deck[cardIndex++];
+            const cardElement = document.createElement('div');
+            cardElement.className = `card ${card.suit}`;
+            cardElement.innerHTML = `<div class="value">${card.value}</div><div class="suit">${getSuitSymbol(card.suit)}</div>`;
+            hand.appendChild(cardElement);
+        }
     }
 }
 
@@ -57,8 +65,3 @@ function getSuitSymbol(suit) {
         default: return '';
     }
 }
-
-// شغل الأوراق عند بدء التحميل
-window.onload = () => {
-    shuffleDeck();
-};
