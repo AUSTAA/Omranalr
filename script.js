@@ -88,25 +88,52 @@ function updateHands() {
 }
 
 function playCard(cardElement, card, playerIndex) {
-    let canPlay = false;
+    const options = centerCards.filter(centerCard =>
+        card.points + centerCard.points === 7 || card.points === centerCard.points
+    );
 
-    centerCards.forEach((centerCard, i) => {
-        if (card.points + centerCard.points === 7 || card.points === centerCard.points) {
-            canPlay = true;
-            centerCards.splice(i, 1);
-            document.getElementById('center-cards').children[i].remove();
-        }
-    });
-
-    if (canPlay) {
-        players[playerIndex] = players[playerIndex].filter(c => c !== card);
-        cardElement.remove();
-        scores[playerIndex] += card.points;
+    if (options.length > 0) {
+        showOptions(card, options, playerIndex, cardElement);
     } else {
         centerCards.push(card);
         document.getElementById('center-cards').appendChild(cardElement);
+        endTurn();
     }
+}
 
+function showOptions(card, options, playerIndex, cardElement) {
+    const optionsContainer = document.createElement('div');
+    optionsContainer.classList.add('options-container');
+
+    options.forEach(option => {
+        const optionElement = createCardElement(option);
+        optionElement.onclick = () => {
+            collectCard(card, option, playerIndex, cardElement, optionElement);
+        };
+        optionsContainer.appendChild(optionElement);
+    });
+
+    document.body.appendChild(optionsContainer);
+}
+
+function collectCard(card, centerCard, playerIndex, cardElement, optionElement) {
+    players[playerIndex] = players[playerIndex].filter(c => c !== card);
+    centerCards = centerCards.filter(c => c !== centerCard);
+
+    cardElement.remove();
+    optionElement.remove();
+
+    const collectedCard = createCardElement(centerCard);
+    collectedCard.classList.add('collected');
+    document.querySelector(`.player:nth-child(${playerIndex + 1}) .hand`).appendChild(collectedCard);
+
+    scores[playerIndex] += card.points + centerCard.points;
+
+    endTurn();
+}
+
+function endTurn() {
+    document.querySelector('.options-container')?.remove();
     currentPlayer = (currentPlayer + 1) % players.length;
     if (players.every(player => player.length === 0)) {
         endRound();
