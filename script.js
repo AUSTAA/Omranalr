@@ -15,6 +15,7 @@ const values = {
 };
 let numPlayers = 0;
 
+// إنشاء مجموعة الأوراق
 function createDeck() {
     const deck = [];
     for (const suit of suits) {
@@ -25,6 +26,7 @@ function createDeck() {
     return deck;
 }
 
+// خلط الأوراق
 function shuffleDeck(deck) {
     for (let i = deck.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -32,6 +34,7 @@ function shuffleDeck(deck) {
     }
 }
 
+// بدء اللعبة بناءً على عدد اللاعبين
 function startGame(players) {
     numPlayers = players;
     document.getElementById('player-selection').style.display = 'none';
@@ -43,10 +46,12 @@ function startGame(players) {
     }
 }
 
+// توزيع الأوراق
 function dealCards() {
     const deck = createDeck();
     shuffleDeck(deck);
 
+    // توزيع 3 أوراق لكل لاعب
     for (let i = 1; i <= numPlayers; i++) {
         const hand = document.getElementById(`hand${i}`);
         hand.innerHTML = '';
@@ -56,21 +61,56 @@ function dealCards() {
             const cardElement = document.createElement('div');
             cardElement.className = `card ${card.suit}`;
             cardElement.innerHTML = `<div class="value">${card.value}</div><div class="suit">${getSuitSymbol(card.suit)}</div>`;
+            cardElement.onclick = () => playCard(cardElement, card, i);
             hand.appendChild(cardElement);
         }
     }
+
+    // وضع 4 أوراق في الوسط
+    const centerCards = document.getElementById('center-cards');
+    centerCards.innerHTML = '';
+    for (let i = 0; i < 4; i++) {
+        const card = deck.pop();
+        const cardElement = document.createElement('div');
+        cardElement.className = `card ${card.suit}`;
+        cardElement.innerHTML = `<div class="value">${card.value}</div><div class="suit">${getSuitSymbol(card.suit)}</div>`;
+        centerCards.appendChild(cardElement);
+    }
 }
 
+// إرجاع رمز الشكل
 function getSuitSymbol(suit) {
     switch (suit) {
         case 'Spades': return '♠';
         case 'Hearts': return '♥';
         case 'Diamonds': return '♦';
-        case 'Clubs': return '♣';
+        case 'Clubs': return '♣';     
         default: return '';
     }
 }
 
+// لعب ورقة
+function playCard(cardElement, card, player) {
+    const centerCards = document.getElementById('center-cards').children;
+    let cardPlayed = false;
+
+    for (let i = 0; i < centerCards.length; i++) {
+        const centerCard = centerCards[i];
+        const centerValue = parseInt(centerCard.querySelector('.value').textContent);
+        
+        // تحقق من الشروط لأخذ الأوراق
+        if (card.points + centerValue === 7 || card.points === centerValue) {
+            cardPlayed = true;
+            centerCard.remove();
+        }
+    }
+
+    if (cardPlayed) {
+        cardElement.remove();
+    }
+}
+
+// تسجيل Service Worker
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js')
         .then(registration => {
@@ -80,3 +120,5 @@ if ('serviceWorker' in navigator) {
             console.log('Service Worker registration failed:', error);
         });
 }
+
+        
