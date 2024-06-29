@@ -97,10 +97,41 @@ body {
 
 .hand {
     display: flex;
-    justify-content: center;
+    justify-content: space-around;
     align-items: center;
-    flex-wrap: wrap;
     margin-top: 10px;
+    flex-wrap: nowrap; /* يمنع التفاف الأوراق */
+}
+
+.card {
+    width: 50px;
+    height: 80px;
+    border: 1px solid #000;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 5px; /* يقلل المسافة بين الأوراق */
+    font-size: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+    cursor: pointer;
+}
+.card {
+    width: 50px;
+    height: 80px;
+    border: 1px solid #000;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 5px; /* يقلل المسافة بين الأوراق */
+    font-size: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+    cursor: pointer;
 }
 
 .card {
