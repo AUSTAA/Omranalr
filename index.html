@@ -15,29 +15,21 @@
             <button onclick="startGame(6)">3 vs 3</button>
         </div>
         <div id="game" style="display: none;">
-            <div class="player" id="player1">
-                <h3>Player 1</h3>
-                <div class="hand" id="hand1"></div>
-            </div>
-            <div class="player" id="player2">
+            <div class="player top" id="player2">
                 <h3>Player 2</h3>
                 <div class="hand" id="hand2"></div>
             </div>
-            <div class="player" id="player3" style="display: none;">
+            <div class="player left" id="player3">
                 <h3>Player 3</h3>
                 <div class="hand" id="hand3"></div>
             </div>
-            <div class="player" id="player4" style="display: none;">
+            <div class="player right" id="player4">
                 <h3>Player 4</h3>
                 <div class="hand" id="hand4"></div>
             </div>
-            <div class="player" id="player5" style="display: none;">
-                <h3>Player 5</h3>
-                <div class="hand" id="hand5"></div>
-            </div>
-            <div class="player" id="player6" style="display: none;">
-                <h3>Player 6</h3>
-                <div class="hand" id="hand6"></div>
+            <div class="player bottom" id="player1">
+                <h3>Player 1</h3>
+                <div class="hand" id="hand1"></div>
             </div>
         </div>
         <button id="deal-button" style="display: none;" onclick="dealCards()">Deal Cards</button>
