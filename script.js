@@ -1,112 +1,116 @@
-// script.js
+// game.js
 
-const suits = ['Spades', 'Hearts', 'Diamonds', 'Clubs'];
-const values = {
-    'A': 1,
-    '2': 2,
-    '3': 3,
-    '4': 4,
-    '5': 5,
-    '6': 6,
-    '7': 7,
-    'Q': 8,
-    'J': 9,
-    'K': 10
-};
-let numPlayers = 0;
+const suits = ['♠', '♥', '♦', '♣'];
+const values = ['A', '2', '3', '4', '5', '6', '7', 'Q', 'J', 'K'];
+let players = [];
+let centerCards = [];
+let currentPlayer = 0;
 
-// إنشاء مجموعة الأوراق
-function createDeck() {
-    const deck = [];
-    for (const suit of suits) {
-        for (const [value, points] of Object.entries(values)) {
-            deck.push({ suit, value, points });
-        }
-    }
-    return deck;
+function startGame(numPlayers) {
+    const game = document.getElementById('game');
+    const playerSelection = document.getElementById('player-selection');
+
+    playerSelection.style.display = 'none';
+    game.style.display = 'flex';
+
+    players = Array.from({ length: numPlayers }, () => []);
+    dealCenterCards();
+    dealPlayerCards();
 }
 
-// خلط الأوراق
-function shuffleDeck(deck) {
-    for (let i = deck.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [deck[i], deck[j]] = [deck[j], deck[i]];
-    }
-}
-
-// بدء اللعبة بناءً على عدد اللاعبين
-function startGame(players) {
-    numPlayers = players;
-    document.getElementById('player-selection').style.display = 'none';
-    document.getElementById('game').style.display = 'flex';
-    document.getElementById('deal-button').style.display = 'block';
-
-    for (let i = 1; i <= numPlayers; i++) {
-        document.getElementById(`player${i}`).style.display = 'block';
-    }
-}
-
-// توزيع الأوراق
-function dealCards() {
-    const deck = createDeck();
-    shuffleDeck(deck);
-
-    // توزيع 3 أوراق لكل لاعب
-    for (let i = 1; i <= numPlayers; i++) {
-        const hand = document.getElementById(`hand${i}`);
-        hand.innerHTML = '';
-
-        for (let j = 0; j < 3; j++) {
-            const card = deck.pop();
-            const cardElement = document.createElement('div');
-            cardElement.className = `card ${card.suit}`;
-            cardElement.innerHTML = `<div class="value">${card.value}</div><div class="suit">${getSuitSymbol(card.suit)}</div>`;
-            cardElement.onclick = () => playCard(cardElement, card, i);
-            hand.appendChild(cardElement);
-        }
-    }
-
-    // وضع 4 أوراق في الوسط
-    const centerCards = document.getElementById('center-cards');
-    centerCards.innerHTML = '';
+function dealCenterCards() {
+    centerCards = [];
+    const center = document.getElementById('center-cards');
+    center.innerHTML = '';
     for (let i = 0; i < 4; i++) {
-        const card = deck.pop();
-        const cardElement = document.createElement('div');
-        cardElement.className = `card ${card.suit}`;
-        cardElement.innerHTML = `<div class="value">${card.value}</div><div class="suit">${getSuitSymbol(card.suit)}</div>`;
-        centerCards.appendChild(cardElement);
+        const card = drawCard();
+        centerCards.push(card);
+        center.appendChild(createCardElement(card));
     }
 }
 
-// إرجاع رمز الشكل
-function getSuitSymbol(suit) {
-    switch (suit) {
-        case 'Spades': return '♠';
-        case 'Hearts': return '♥';
-        case 'Diamonds': return '♦';
-        case 'Clubs': return '♣';     
-        default: return '';
+function dealPlayerCards() {
+    players.forEach(player => {
+        for (let i = 0; i < 3; i++) {
+            const card = drawCard();
+            player.push(card);
+        }
+    });
+    updateHands();
+}
+
+function drawCard() {
+    const suit = suits[Math.floor(Math.random() * suits.length)];
+    const value = values[Math.floor(Math.random() * values.length)];
+    const points = getCardPoints(value);
+    return { suit, value, points };
+}
+
+function getCardPoints(value) {
+    switch (value) {
+        case 'A': return 1;
+        case '2': return 2;
+        case '3': return 3;
+        case '4': return 4;
+        case '5': return 5;
+        case '6': return 6;
+        case '7': return 7;
+        case 'Q': return 8;
+        case 'J': return 9;
+        case 'K': return 10;
+        default: return 0;
     }
 }
 
-// لعب ورقة
-function playCard(cardElement, card, player) {
-    const centerCards = document.getElementById('center-cards').children;
+function createCardElement(card) {
+    const cardElement = document.createElement('div');
+    cardElement.classList.add('card');
+    cardElement.innerHTML = `<div class="value">${card.value}</div><div class="suit">${card.suit}</div>`;
+    return cardElement;
+}
+
+function updateHands() {
+    const playerElements = document.querySelectorAll('.player .hand');
+    playerElements.forEach((hand, index) => {
+        hand.innerHTML = '';
+        players[index].forEach(card => {
+            const cardElement = createCardElement(card);
+            cardElement.onclick = () => playCard(cardElement, card, index);
+            hand.appendChild(cardElement);
+        });
+    });
+}
+
+function playCard(cardElement, card, playerIndex) {
     let cardPlayed = false;
 
-    for (let i = 0; i < centerCards.length; i++) {
-        const centerCard = centerCards[i];
-        const centerValue = parseInt(centerCard.querySelector('.value').textContent);
-        
-        // تحقق من الشروط لأخذ الأوراق
-        if (card.points + centerValue === 7 || card.points === centerValue) {
+    centerCards.forEach((centerCard, i) => {
+        if (card.points + centerCard.points === 7 || card.points === centerCard.points) {
             cardPlayed = true;
-            centerCard.remove();
+            centerCards.splice(i, 1);
+            document.getElementById('center-cards').children[i].remove();
         }
-    }
+    });
 
     if (cardPlayed) {
+        players[playerIndex] = players[playerIndex].filter(c => c !== card);
         cardElement.remove();
+    } else {
+        centerCards.push(card);
+        document.getElementById('center-cards').appendChild(cardElement);
+    }
+
+    currentPlayer = (currentPlayer + 1) % players.length;
+    if (players.every(player => player.length === 0)) {
+        document.getElementById('deal-button').style.display = 'block';
+    }
+}
+
+function dealCards() {
+    if (players.every(player => player.length === 0)) {
+        dealCenterCards();
+        dealPlayerCards();
+        document.getElementById('deal-button').style.display = 'none';
     }
 }
 
@@ -120,5 +124,3 @@ if ('serviceWorker' in navigator) {
             console.log('Service Worker registration failed:', error);
         });
 }
-
-        
