@@ -15,7 +15,6 @@ const values = {
 };
 let numPlayers = 0;
 
-// إنشاء مجموعة الأوراق
 function createDeck() {
     const deck = [];
     for (const suit of suits) {
@@ -26,7 +25,6 @@ function createDeck() {
     return deck;
 }
 
-// خلط الأوراق
 function shuffleDeck(deck) {
     for (let i = deck.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -34,7 +32,6 @@ function shuffleDeck(deck) {
     }
 }
 
-// بدء اللعبة بناءً على عدد اللاعبين
 function startGame(players) {
     numPlayers = players;
     document.getElementById('player-selection').style.display = 'none';
@@ -46,7 +43,6 @@ function startGame(players) {
     }
 }
 
-// توزيع الأوراق
 function dealCards() {
     const deck = createDeck();
     shuffleDeck(deck);
@@ -65,7 +61,6 @@ function dealCards() {
     }
 }
 
-// إرجاع رمز الشكل
 function getSuitSymbol(suit) {
     switch (suit) {
         case 'Spades': return '♠';
@@ -76,7 +71,6 @@ function getSuitSymbol(suit) {
     }
 }
 
-// تسجيل الـ Service Worker لتحويل التطبيق إلى PWA
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js')
         .then(registration => {
