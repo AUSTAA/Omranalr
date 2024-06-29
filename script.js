@@ -5,6 +5,7 @@ const values = ['A', '2', '3', '4', '5', '6', '7', 'Q', 'J', 'K'];
 let players = [];
 let centerCards = [];
 let currentPlayer = 0;
+let scores = [];
 
 function startGame(numPlayers) {
     const game = document.getElementById('game');
@@ -14,6 +15,7 @@ function startGame(numPlayers) {
     game.style.display = 'flex';
 
     players = Array.from({ length: numPlayers }, () => []);
+    scores = Array(numPlayers).fill(0);
     dealCenterCards();
     dealPlayerCards();
 }
@@ -75,26 +77,31 @@ function updateHands() {
         hand.innerHTML = '';
         players[index].forEach(card => {
             const cardElement = createCardElement(card);
-            cardElement.onclick = () => playCard(cardElement, card, index);
+            cardElement.onclick = () => {
+                if (currentPlayer === index) {
+                    playCard(cardElement, card, index);
+                }
+            };
             hand.appendChild(cardElement);
         });
     });
 }
 
 function playCard(cardElement, card, playerIndex) {
-    let cardPlayed = false;
+    let canPlay = false;
 
     centerCards.forEach((centerCard, i) => {
         if (card.points + centerCard.points === 7 || card.points === centerCard.points) {
-            cardPlayed = true;
+            canPlay = true;
             centerCards.splice(i, 1);
             document.getElementById('center-cards').children[i].remove();
         }
     });
 
-    if (cardPlayed) {
+    if (canPlay) {
         players[playerIndex] = players[playerIndex].filter(c => c !== card);
         cardElement.remove();
+        scores[playerIndex] += card.points;
     } else {
         centerCards.push(card);
         document.getElementById('center-cards').appendChild(cardElement);
@@ -102,8 +109,17 @@ function playCard(cardElement, card, playerIndex) {
 
     currentPlayer = (currentPlayer + 1) % players.length;
     if (players.every(player => player.length === 0)) {
-        document.getElementById('deal-button').style.display = 'block';
+        endRound();
+    } else {
+        updateHands();
     }
+}
+
+function endRound() {
+    const minScore = Math.min(...scores);
+    const dealerIndex = scores.indexOf(minScore);
+    currentPlayer = dealerIndex;
+    document.getElementById('deal-button').style.display = 'block';
 }
 
 function dealCards() {
