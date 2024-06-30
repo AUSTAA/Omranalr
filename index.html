@@ -7,29 +7,27 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="game-container">
-        <div id="player-selection">
-            <button onclick="startGame(2)">1 ضد 1</button>
-            <button onclick="startGame(4)">2 ضد 2</button>
-            <button onclick="startGame(6)">3 ضد 3</button>
+    <div id="player-selection">
+        <button onclick="startGame(2)">بدء لعبة بـ 2 لاعبين</button>
+        <button onclick="startGame(3)">بدء لعبة بـ 3 لاعبين</button>
+        <button onclick="startGame(4)">بدء لعبة بـ 4 لاعبين</button>
+    </div>
+    <div id="game" style="display: none;">
+        <div id="center-cards" class="center-cards"></div>
+        <div class="player" id="player1">
+            <div class="hand" id="hand1"></div>
         </div>
-        <div id="game" style="display: none;">
-            <div class="player top">
-                <div class="hand"></div>
-            </div>
-            <div class="player bottom">
-                <div class="hand"></div>
-            </div>
-            <div class="player left">
-                <div class="hand"></div>
-            </div>
-            <div class="player right">
-                <div class="hand"></div>
-            </div>
-            <div class="center" id="center-cards"></div>
-            <button id="deal-button" onclick="dealCards()">توزيع الأوراق</button>
+        <div class="player" id="player2">
+            <div class="hand" id="hand2"></div>
+        </div>
+        <div class="player" id="player3" style="display: none;">
+            <div class="hand" id="hand3"></div>
+        </div>
+        <div class="player" id="player4" style="display: none;">
+            <div class="hand" id="hand4"></div>
         </div>
     </div>
-    <script src="script.js"></script>
+    <button id="deal-button" style="display: none;" onclick="dealCards()">توزيع الأوراق</button>
+    <script src="game.js"></script>
 </body>
 </html>
