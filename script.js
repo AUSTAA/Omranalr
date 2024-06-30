@@ -1,5 +1,3 @@
-// game.js
-
 const suits = ['♠', '♥', '♦', '♣'];
 const values = ['A', '2', '3', '4', '5', '6', '7', 'Q', 'J', 'K'];
 let players = [];
@@ -73,17 +71,26 @@ function createCardElement(card) {
 
 function updateHands() {
     const playerElements = document.querySelectorAll('.player .hand');
+    if (!playerElements) {
+        console.error('No player elements found');
+        return;
+    }
+
     playerElements.forEach((hand, index) => {
-        hand.innerHTML = '';
-        players[index].forEach(card => {
-            const cardElement = createCardElement(card);
-            cardElement.onclick = () => {
-                if (currentPlayer === index) {
-                    playCard(cardElement, card, index);
-                }
-            };
-            hand.appendChild(cardElement);
-        });
+        if (players[index]) {
+            hand.innerHTML = '';
+            players[index].forEach(card => {
+                const cardElement = createCardElement(card);
+                cardElement.onclick = () => {
+                    if (currentPlayer === index) {
+                        playCard(cardElement, card, index);
+                    }
+                };
+                hand.appendChild(cardElement);
+            });
+        } else {
+            console.error(`No player data found for index ${index}`);
+        }
     });
 }
 
@@ -179,7 +186,7 @@ function dealCards() {
 
 // تسجيل Service Worker
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker.register('/Omranalr/sw.js')
         .then(registration => {
             console.log('Service Worker registered with scope:', registration.scope);
         })
