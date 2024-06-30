@@ -115,54 +115,53 @@ function showOptions(card, options, playerIndex, cardElement) {
 }
 
 function collectCard(card, centerCard, playerIndex, cardElement, optionElement) {
-    players[playerIndex] =players[playerIndex].filter(c => c !== card);
-centerCards = centerCards.filter(c => c !== centerCard);
+    players[playerIndex] = players[playerIndex].filter(c => c !== card);
+    centerCards = centerCards.filter(c => c !== centerCard);
 
-cardElement.remove();
-optionElement.remove();
+    cardElement.remove();
+    optionElement.remove();
 
-const collectedCard = createCardElement(centerCard);
-collectedCard.classList.add('collected');
-document.querySelector(`.player:nth-child(${playerIndex + 1}) .hand`).appendChild(collectedCard);
+    const collectedCard = createCardElement(centerCard);
+    collectedCard.classList.add('collected');
+    document.querySelector(`.player:nth-child(${playerIndex + 1}) .hand`).appendChild(collectedCard);
 
-scores[playerIndex] += card.points + centerCard.points;
+    scores[playerIndex] += card.points + centerCard.points;
 
-endTurn();
-
+    endTurn();
 }
 
 function endTurn() {
-document.querySelector(’.options-container’)?.remove();
-currentPlayer = (currentPlayer + 1) % players.length;
-if (players.every(player => player.length === 0)) {
-endRound();
-} else {
-updateHands();
-}
+    document.querySelector('.options-container')?.remove();
+    currentPlayer = (currentPlayer + 1) % players.length;
+    if (players.every(player => player.length === 0)) {
+        endRound();
+    } else {
+        updateHands();
+    }
 }
 
 function endRound() {
-const minScore = Math.min(…scores);
-const dealerIndex = scores.indexOf(minScore);
-currentPlayer = dealerIndex;
-document.getElementById(‘deal-button’).style.display = ‘block’;
+    const minScore = Math.min(...scores);
+    const dealerIndex = scores.indexOf(minScore);
+    currentPlayer = dealerIndex;
+    document.getElementById('deal-button').style.display = 'block';
 }
 
 function dealCards() {
-if (players.every(player => player.length === 0)) {
-dealCenterCards();
-dealPlayerCards();
-document.getElementById(‘deal-button’).style.display = ‘none’;
-}
+    if (players.every(player => player.length === 0)) {
+        dealCenterCards();
+        dealPlayerCards();
+        document.getElementById('deal-button').style.display = 'none';
+    }
 }
 
 // تسجيل Service Worker
-if (‘serviceWorker’ in navigator) {
-navigator.serviceWorker.register(’/sw.js’)
-.then(registration => {
-console.log(‘Service Worker registered with scope:’, registration.scope);
-})
-.catch(error => {
-console.log(‘Service Worker registration failed:’, error);
-});
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+        .then(registration => {
+            console.log('Service Worker registered with scope:', registration.scope);
+        })
+        .catch(error => {
+            console.log('Service Worker registration failed:', error);
+        });
 }
