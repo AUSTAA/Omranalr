@@ -14,6 +14,17 @@ function startGame(numPlayers) {
 
     players = Array.from({ length: numPlayers }, () => []);
     scores = Array(numPlayers).fill(0);
+
+    // Display the correct number of player sections
+    for (let i = 1; i <= 4; i++) {
+        const playerElement = document.getElementById(`player${i}`);
+        if (i <= numPlayers) {
+            playerElement.style.display = 'block';
+        } else {
+            playerElement.style.display = 'none';
+        }
+    }
+
     dealCenterCards();
     dealPlayerCards();
 }
@@ -71,11 +82,6 @@ function createCardElement(card) {
 
 function updateHands() {
     const playerElements = document.querySelectorAll('.player .hand');
-    if (!playerElements) {
-        console.error('No player elements found');
-        return;
-    }
-
     playerElements.forEach((hand, index) => {
         if (players[index]) {
             hand.innerHTML = '';
@@ -99,7 +105,7 @@ function playCard(cardElement, card, playerIndex) {
     const sumOptions = getSumOptions(card.points, centerCards);
 
     if (matchingCards.length > 0) {
-        showOptions(card, matchingCards, playerIndex, cardElement);
+        showOptions(card, [matchingCards], playerIndex, cardElement);
     } else if (sumOptions.length > 0) {
         showOptions(card, sumOptions, playerIndex, cardElement);
     } else {
@@ -129,13 +135,17 @@ function showOptions(card, options, playerIndex, cardElement) {
     optionsContainer.classList.add('options-container');
 
     options.forEach(option => {
-        const optionElement = document.createElement('div');
-        option.forEach(c => optionElement.appendChild(createCardElement(c)));
-        optionElement.classList.add('option');
-        optionElement.onclick = () => {
-            collectCards(card, option, playerIndex, cardElement);
-        };
-        optionsContainer.appendChild(optionElement);
+        if (Array.isArray(option)) {
+            const optionElement = document.createElement('div');
+            option.forEach(c => optionElement.appendChild(createCardElement(c)));
+            optionElement.classList.add('option');
+            optionElement.onclick = () => {
+                collectCards(card, option, playerIndex, cardElement);
+            };
+            optionsContainer.appendChild(optionElement);
+        } else {
+            console.error('Option is not an array:', option);
+        }
     });
 
     document.body.appendChild(optionsContainer);
@@ -146,7 +156,10 @@ function collectCards(card, selectedCards, playerIndex, cardElement) {
     centerCards = centerCards.filter(c => !selectedCards.includes(c));
 
     cardElement.remove();
-    selectedCards.forEach(c => document.querySelector(`#center-cards .card[data-value="${c.value}"][data-suit="${c.suit}"]`).remove());
+    selectedCards.forEach(c => {
+        const cardElementToRemove = document.querySelector(`#center-cards .card .value:contains("${c.value}")`);
+        if (cardElementToRemove) cardElementToRemove.parentNode.remove();
+    });
 
     const collectedStack = document.createElement('div');
     collectedStack.classList.add('collected-stack');
@@ -160,7 +173,8 @@ function collectCards(card, selectedCards, playerIndex, cardElement) {
 }
 
 function endTurn() {
-    document.querySelector('.options-container')?.remove();
+    const optionsContainer = document.querySelector('.options-container');
+    if (optionsContainer) optionsContainer.remove();
     currentPlayer = (currentPlayer + 1) % players.length;
     if (players.every(player => player.length === 0)) {
         endRound();
@@ -186,7 +200,7 @@ function dealCards() {
 
 // تسجيل Service Worker
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/Omranalr/sw.js')
+    navigator.serviceWorker.register('/sw.js')
         .then(registration => {
             console.log('Service Worker registered with scope:', registration.scope);
         })
