@@ -97,6 +97,8 @@ function playCard(cardElement, card, playerIndex) {
     } else {
         centerCards.push(card);
         document.getElementById('center-cards').appendChild(cardElement);
+        players[playerIndex] = players[playerIndex].filter(c => c !== card);
+        updateHands();
         endTurn();
     }
 }
