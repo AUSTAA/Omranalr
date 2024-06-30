@@ -1,3 +1,5 @@
+// game.js
+
 const suits = ['♠', '♥', '♦', '♣'];
 const values = ['A', '2', '3', '4', '5', '6', '7', 'Q', 'J', 'K'];
 let players = [];
@@ -86,12 +88,13 @@ function updateHands() {
 }
 
 function playCard(cardElement, card, playerIndex) {
-    const options = centerCards.filter(centerCard =>
-        card.points + centerCard.points === 7 || card.points === centerCard.points
-    );
+    const matchingCards = centerCards.filter(centerCard => card.points === centerCard.points);
+    const sumOptions = getSumOptions(card.points, centerCards);
 
-    if (options.length > 0) {
-        showOptions(card, options, playerIndex, cardElement);
+    if (matchingCards.length > 0) {
+        showOptions(card, matchingCards, playerIndex, cardElement);
+    } else if (sumOptions.length > 0) {
+        showOptions(card, sumOptions, playerIndex, cardElement);
     } else {
         centerCards.push(card);
         document.getElementById('center-cards').appendChild(cardElement);
@@ -99,14 +102,31 @@ function playCard(cardElement, card, playerIndex) {
     }
 }
 
+function getSumOptions(target, cards) {
+    let results = [];
+    function findSum(current, remaining, target) {
+        if (target === 0) {
+            results.push(current);
+            return;
+        }
+        if (target < 0 || remaining.length === 0) return;
+        findSum([...current, remaining[0]], remaining.slice(1), target - remaining[0].points);
+        findSum(current, remaining.slice(1), target);
+    }
+    findSum([], cards, target);
+    return results;
+}
+
 function showOptions(card, options, playerIndex, cardElement) {
     const optionsContainer = document.createElement('div');
     optionsContainer.classList.add('options-container');
 
     options.forEach(option => {
-        const optionElement = createCardElement(option);
+        const optionElement = document.createElement('div');
+        option.forEach(c => optionElement.appendChild(createCardElement(c)));
+        optionElement.classList.add('option');
         optionElement.onclick = () => {
-            collectCard(card, option, playerIndex, cardElement, optionElement);
+            collectCards(card, option, playerIndex, cardElement);
         };
         optionsContainer.appendChild(optionElement);
     });
@@ -114,18 +134,20 @@ function showOptions(card, options, playerIndex, cardElement) {
     document.body.appendChild(optionsContainer);
 }
 
-function collectCard(card, centerCard, playerIndex, cardElement, optionElement) {
+function collectCards(card, selectedCards, playerIndex, cardElement) {
     players[playerIndex] = players[playerIndex].filter(c => c !== card);
-    centerCards = centerCards.filter(c => c !== centerCard);
+    centerCards = centerCards.filter(c => !selectedCards.includes(c));
 
     cardElement.remove();
-    optionElement.remove();
+    selectedCards.forEach(c => document.querySelector(`#center-cards .card[data-value="${c.value}"][data-suit="${c.suit}"]`).remove());
 
-    const collectedCard = createCardElement(centerCard);
-    collectedCard.classList.add('collected');
-    document.querySelector(`.player:nth-child(${playerIndex + 1}) .hand`).appendChild(collectedCard);
+    const collectedStack = document.createElement('div');
+    collectedStack.classList.add('collected-stack');
+    collectedStack.appendChild(createCardElement(card));
+    selectedCards.forEach(c => collectedStack.appendChild(createCardElement(c)));
+    document.querySelector(`.player:nth-child(${playerIndex + 1}) .hand`).appendChild(collectedStack);
 
-    scores[playerIndex] += card.points + centerCard.points;
+    scores[playerIndex] += card.points + selectedCards.reduce((acc, c) => acc + c.points, 0);
 
     endTurn();
 }
