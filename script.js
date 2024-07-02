@@ -1,3 +1,5 @@
+// game.js
+
 const suits = ['♠', '♥', '♦', '♣'];
 const values = ['A', '2', '3', '4', '5', '6', '7', 'Q', 'J', 'K'];
 let players = [];
@@ -14,17 +16,6 @@ function startGame(numPlayers) {
 
     players = Array.from({ length: numPlayers }, () => []);
     scores = Array(numPlayers).fill(0);
-
-    // Display the correct number of player sections
-    for (let i = 1; i <= 4; i++) {
-        const playerElement = document.getElementById(`player${i}`);
-        if (i <= numPlayers) {
-            playerElement.style.display = 'block';
-        } else {
-            playerElement.style.display = 'none';
-        }
-    }
-
     dealCenterCards();
     dealPlayerCards();
 }
@@ -83,20 +74,16 @@ function createCardElement(card) {
 function updateHands() {
     const playerElements = document.querySelectorAll('.player .hand');
     playerElements.forEach((hand, index) => {
-        if (players[index]) {
-            hand.innerHTML = '';
-            players[index].forEach(card => {
-                const cardElement = createCardElement(card);
-                cardElement.onclick = () => {
-                    if (currentPlayer === index) {
-                        playCard(cardElement, card, index);
-                    }
-                };
-                hand.appendChild(cardElement);
-            });
-        } else {
-            console.error(`No player data found for index ${index}`);
-        }
+        hand.innerHTML = '';
+        players[index].forEach(card => {
+            const cardElement = createCardElement(card);
+            cardElement.onclick = () => {
+                if (currentPlayer === index) {
+                    playCard(cardElement, card, index);
+                }
+            };
+            hand.appendChild(cardElement);
+        });
     });
 }
 
@@ -105,7 +92,7 @@ function playCard(cardElement, card, playerIndex) {
     const sumOptions = getSumOptions(card.points, centerCards);
 
     if (matchingCards.length > 0) {
-        showOptions(card, [matchingCards], playerIndex, cardElement);
+        showOptions(card, matchingCards, playerIndex, cardElement);
     } else if (sumOptions.length > 0) {
         showOptions(card, sumOptions, playerIndex, cardElement);
     } else {
@@ -135,17 +122,13 @@ function showOptions(card, options, playerIndex, cardElement) {
     optionsContainer.classList.add('options-container');
 
     options.forEach(option => {
-        if (Array.isArray(option)) {
-            const optionElement = document.createElement('div');
-            option.forEach(c => optionElement.appendChild(createCardElement(c)));
-            optionElement.classList.add('option');
-            optionElement.onclick = () => {
-                collectCards(card, option, playerIndex, cardElement);
-            };
-            optionsContainer.appendChild(optionElement);
-        } else {
-            console.error('Option is not an array:', option);
-        }
+        const optionElement = document.createElement('div');
+        option.forEach(c => optionElement.appendChild(createCardElement(c)));
+        optionElement.classList.add('option');
+        optionElement.onclick = () => {
+            collectCards(card, option, playerIndex, cardElement);
+        };
+        optionsContainer.appendChild(optionElement);
     });
 
     document.body.appendChild(optionsContainer);
@@ -156,10 +139,7 @@ function collectCards(card, selectedCards, playerIndex, cardElement) {
     centerCards = centerCards.filter(c => !selectedCards.includes(c));
 
     cardElement.remove();
-    selectedCards.forEach(c => {
-        const cardElementToRemove = document.querySelector(`#center-cards .card .value:contains("${c.value}")`);
-        if (cardElementToRemove) cardElementToRemove.parentNode.remove();
-    });
+    selectedCards.forEach(c => document.querySelector(`#center-cards .card[data-value="${c.value}"][data-suit="${c.suit}"]`).remove());
 
     const collectedStack = document.createElement('div');
     collectedStack.classList.add('collected-stack');
@@ -173,8 +153,7 @@ function collectCards(card, selectedCards, playerIndex, cardElement) {
 }
 
 function endTurn() {
-    const optionsContainer = document.querySelector('.options-container');
-    if (optionsContainer) optionsContainer.remove();
+    document.querySelector('.options-container')?.remove();
     currentPlayer = (currentPlayer + 1) % players.length;
     if (players.every(player => player.length === 0)) {
         endRound();
