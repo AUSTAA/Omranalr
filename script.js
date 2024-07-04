@@ -91,10 +91,12 @@ function playCard(cardElement, card, playerIndex) {
     const matchingCards = centerCards.filter(centerCard => card.points === centerCard.points);
     const sumOptions = getSumOptions(card.points, centerCards);
 
-    if (matchingCards.length > 0) {
-        showOptions(card, matchingCards, playerIndex, cardElement);
-    } else if (sumOptions.length > 0) {
-        showOptions(card, sumOptions, playerIndex, cardElement);
+    if (matchingCards.length > 0 || sumOptions.length > 0) {
+        if (matchingCards.length > 0) {
+            collectCard(card, matchingCards[0], playerIndex, cardElement);
+        } else {
+            collectCard(card, sumOptions[0], playerIndex, cardElement);
+        }
     } else {
         centerCards.push(card);
         document.getElementById('center-cards').appendChild(cardElement);
@@ -117,24 +119,11 @@ function getSumOptions(target, cards) {
     return results;
 }
 
-function showOptions(card, options, playerIndex, cardElement) {
-    const optionsContainer = document.createElement('div');
-    optionsContainer.classList.add('options-container');
+function collectCard(card, selectedCards, playerIndex, cardElement) {
+    if (!Array.isArray(selectedCards)) {
+        selectedCards = [selectedCards];
+    }
 
-    options.forEach(option => {
-        const optionElement = document.createElement('div');
-        option.forEach(c => optionElement.appendChild(createCardElement(c)));
-        optionElement.classList.add('option');
-        optionElement.onclick = () => {
-            collectCards(card, option, playerIndex, cardElement);
-        };
-        optionsContainer.appendChild(optionElement);
-    });
-
-    document.body.appendChild(optionsContainer);
-}
-
-function collectCards(card, selectedCards, playerIndex, cardElement) {
     players[playerIndex] = players[playerIndex].filter(c => c !== card);
     centerCards = centerCards.filter(c => !selectedCards.includes(c));
 
