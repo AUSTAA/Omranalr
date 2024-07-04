@@ -97,17 +97,6 @@ function updateHands() {
     }
 }
 
-function playCard(cardElement, card, playerIndex) {
-    const options = centerCards.filter(centerCard =>
-        card.points + centerCard.points === 7 || card.points === centerCard.points
-    );
-
-    if (options.length > 0) {
-        showOptions(card, options, playerIndex, cardElement);
-    } else {
-        collectCard(card, null, playerIndex, cardElement, null);
-    }
-}
 
 function showOptions(card, options, playerIndex, cardElement) {
     const optionsContainer = document.createElement('div');
