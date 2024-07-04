@@ -71,9 +71,17 @@ function createCardElement(card) {
 
 function updateHands() {
     const playerElements = document.querySelectorAll('.player .hand');
+    if (!playerElements) {
+        console.error("Player elements not found.");
+        return;
+    }
     if (playerElements.length > 0) {
         playerElements.forEach((hand, index) => {
             hand.innerHTML = '';
+            if (!players[index]) {
+                console.error(`Player index ${index} not found.`);
+                return;
+            }
             players[index].forEach(card => {
                 const cardElement = createCardElement(card);
                 cardElement.onclick = () => {
@@ -84,6 +92,8 @@ function updateHands() {
                 hand.appendChild(cardElement);
             });
         });
+    } else {
+        console.error("No player elements found.");
     }
 }
 
