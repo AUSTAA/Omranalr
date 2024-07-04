@@ -105,9 +105,7 @@ function playCard(cardElement, card, playerIndex) {
     if (options.length > 0) {
         showOptions(card, options, playerIndex, cardElement);
     } else {
-        centerCards.push(card);
-        document.getElementById('center-cards').appendChild(cardElement);
-        endTurn();
+        collectCard(card, null, playerIndex, cardElement, null);
     }
 }
 
@@ -126,33 +124,15 @@ function showOptions(card, options, playerIndex, cardElement) {
     document.body.appendChild(optionsContainer);
 }
 
-function collectCard(card, centerCard, playerIndex, cardElement, optionElement) {
-    players[playerIndex] = players[playerIndex].filter(c => c !== card);
-    centerCards = centerCards.filter(c => c !== centerCard);
+function playCard(cardElement, card, playerIndex) {
+    const options = centerCards.filter(centerCard =>
+        card.points + centerCard.points === 7 || card.points === centerCard.points
+    );
 
-    if (cardElement) {
-        cardElement.remove();
-    }
-    if (optionElement) {
-        optionElement.remove();
-    }
-
-    const collectedCard = createCardElement(centerCard);
-    collectedCard.classList.add('collected');
-    document.querySelector(`.player:nth-child(${playerIndex + 1}) .hand`).appendChild(collectedCard);
-
-    scores[playerIndex] += card.points + centerCard.points;
-
-    endTurn();
-}
-
-function endTurn() {
-    document.querySelector('.options-container')?.remove();
-    currentPlayer = (currentPlayer + 1) % players.length;
-    if (players.every(player => player.length === 0)) {
-        endRound();
+    if (options.length > 0) {
+        showOptions(card, options, playerIndex, cardElement);
     } else {
-        updateHands();
+        collectCard(card, null, playerIndex, cardElement, null);
     }
 }
 
