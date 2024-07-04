@@ -154,3 +154,20 @@ body {
     padding: 10px;
     border-radius: 10px;
 }
+
+.collected {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    width: 50px;
+    height: 80px;
+    border: 1px solid #000;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 5px;
+    font-size: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
