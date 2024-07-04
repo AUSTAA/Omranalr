@@ -14,25 +14,22 @@
             <button onclick="startGame(6)">3 ضد 3</button>
         </div>
         <div id="game" style="display: none;">
-            <div class="players">
-                <div class="player">
-                    <div class="hand"></div>
-                </div>
-                <div class="player">
-                    <div class="hand"></div>
-                </div>
-                <div class="player">
-                    <div class="hand"></div>
-                </div>
-                <div class="player">
-                    <div class="hand"></div>
-                </div>
-                <!-- يمكنك إضافة المزيد من اللاعبين هنا إذا لزم الأمر -->
+            <div class="player top">
+                <div class="hand"></div>
+            </div>
+            <div class="player bottom">
+                <div class="hand"></div>
+            </div>
+            <div class="player left">
+                <div class="hand"></div>
+            </div>
+            <div class="player right">
+                <div class="hand"></div>
             </div>
             <div class="center" id="center-cards"></div>
             <button id="deal-button" onclick="dealCards()">توزيع الأوراق</button>
         </div>
     </div>
-    <script src="script.js"></script>
+    <script src="game.js"></script>
 </body>
 </html>
