@@ -1,5 +1,3 @@
-// game.js
-
 const suits = ['♠', '♥', '♦', '♣'];
 const values = ['A', '2', '3', '4', '5', '6', '7', 'Q', 'J', 'K'];
 let players = [];
@@ -73,30 +71,29 @@ function createCardElement(card) {
 
 function updateHands() {
     const playerElements = document.querySelectorAll('.player .hand');
-    playerElements.forEach((hand, index) => {
-        hand.innerHTML = '';
-        players[index].forEach(card => {
-            const cardElement = createCardElement(card);
-            cardElement.onclick = () => {
-                if (currentPlayer === index) {
-                    playCard(cardElement, card, index);
-                }
-            };
-            hand.appendChild(cardElement);
+    if (playerElements.length > 0) {
+        playerElements.forEach((hand, index) => {
+            hand.innerHTML = '';
+            players[index].forEach(card => {
+                const cardElement = createCardElement(card);
+                cardElement.onclick = () => {
+                    if (currentPlayer === index) {
+                        playCard(cardElement, card, index);
+                    }
+                };
+                hand.appendChild(cardElement);
+            });
         });
-    });
+    }
 }
 
 function playCard(cardElement, card, playerIndex) {
-    const matchingCards = centerCards.filter(centerCard => card.points === centerCard.points);
-    const sumOptions = getSumOptions(card.points, centerCards);
+    const options = centerCards.filter(centerCard =>
+        card.points + centerCard.points === 7 || card.points === centerCard.points
+    );
 
-    if (matchingCards.length > 0 || sumOptions.length > 0) {
-        if (matchingCards.length > 0) {
-            collectCard(card, matchingCards[0], playerIndex, cardElement);
-        } else {
-            collectCard(card, sumOptions[0], playerIndex, cardElement);
-        }
+    if (options.length > 0) {
+        showOptions(card, options, playerIndex, cardElement);
     } else {
         centerCards.push(card);
         document.getElementById('center-cards').appendChild(cardElement);
@@ -104,39 +101,37 @@ function playCard(cardElement, card, playerIndex) {
     }
 }
 
-function getSumOptions(target, cards) {
-    let results = [];
-    function findSum(current, remaining, target) {
-        if (target === 0) {
-            results.push(current);
-            return;
-        }
-        if (target < 0 || remaining.length === 0) return;
-        findSum([...current, remaining[0]], remaining.slice(1), target - remaining[0].points);
-        findSum(current, remaining.slice(1), target);
-    }
-    findSum([], cards, target);
-    return results;
+function showOptions(card, options, playerIndex, cardElement) {
+    const optionsContainer = document.createElement('div');
+    optionsContainer.classList.add('options-container');
+
+    options.forEach(option => {
+        const optionElement = createCardElement(option);
+        optionElement.onclick = () => {
+            collectCard(card, option, playerIndex, cardElement, optionElement);
+        };
+        optionsContainer.appendChild(optionElement);
+    });
+
+    document.body.appendChild(optionsContainer);
 }
 
-function collectCard(card, selectedCards, playerIndex, cardElement) {
-    if (!Array.isArray(selectedCards)) {
-        selectedCards = [selectedCards];
+function collectCard(card, centerCard, playerIndex, cardElement, optionElement) {
+    players[playerIndex] = players[playerIndex].filter(c => c !== card);
+    centerCards = centerCards.filter(c => c !== centerCard);
+
+    if (cardElement) {
+        cardElement.remove();
+    }
+    if (optionElement) {
+        optionElement.remove();
     }
 
-    players[playerIndex] = players[playerIndex].filter(c => c !== card);
-    centerCards = centerCards.filter(c => !selectedCards.includes(c));
+    const collectedCard = createCardElement(centerCard);
+    collectedCard.classList.add('collected');
+    document.querySelector(`.player:nth-child(${playerIndex + 1}) .hand`).appendChild(collectedCard);
 
-    cardElement.remove();
-    selectedCards.forEach(c => document.querySelector(`#center-cards .card[data-value="${c.value}"][data-suit="${c.suit}"]`).remove());
-
-    const collectedStack = document.createElement('div');
-    collectedStack.classList.add('collected-stack');
-    collectedStack.appendChild(createCardElement(card));
-    selectedCards.forEach(c => collectedStack.appendChild(createCardElement(c)));
-    document.querySelector(`.player:nth-child(${playerIndex + 1}) .hand`).appendChild(collectedStack);
-
-    scores[playerIndex] += card.points + selectedCards.reduce((acc, c) => acc + c.points, 0);
+    scores[playerIndex] += card.points + centerCard.points;
 
     endTurn();
 }
