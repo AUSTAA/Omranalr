@@ -1,5 +1,3 @@
-// game.js
-
 const suits = ['♠', '♥', '♦', '♣'];
 const values = ['A', '2', '3', '4', '5', '6', '7', 'Q', 'J', 'K'];
 let players = [];
@@ -75,15 +73,17 @@ function updateHands() {
     const playerElements = document.querySelectorAll('.player .hand');
     playerElements.forEach((hand, index) => {
         hand.innerHTML = '';
-        players[index].forEach(card => {
-            const cardElement = createCardElement(card);
-            cardElement.onclick = () => {
-                if (currentPlayer === index) {
-                    playCard(cardElement, card, index);
-                }
-            };
-            hand.appendChild(cardElement);
-        });
+        if (players[index]) {
+            players[index].forEach(card => {
+                const cardElement = createCardElement(card);
+                cardElement.onclick = () => {
+                    if (currentPlayer === index) {
+                        playCard(cardElement, card, index);
+                    }
+                };
+                hand.appendChild(cardElement);
+            });
+        }
     });
 }
 
