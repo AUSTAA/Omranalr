@@ -120,6 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             // If no matching cards, put the played card in the middle
             middleCards.push(card);
+            displayCards('middle-cards-container', middleCards);
         }
 
         // Switch turn to the other player
@@ -160,15 +161,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 result.push(...currentCombination);
                 return;
             }
-            if (currentSum > targetValue || remainingCards.length=== 0) return;
+            if (currentSum > targetValue || remainingCards.length === 0) return;
 
-        for (let i = 0; i < remainingCards.length; i++) {
-            findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
+            for (let i = 0; i < remainingCards.length; i++) {
+                findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
+            }
         }
+
+        findCombination([], cards, 0);
+        return result;
     }
-
-    findCombination([], cards, 0);
-    return result;
-}
-
 });
