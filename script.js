@@ -1,152 +1,133 @@
-const suits = ['♠', '♥', '♦', '♣'];
-const values = ['A', '2', '3', '4', '5', '6', '7', 'Q', 'J', 'K'];
-let players = [];
-let centerCards = [];
-let currentPlayer = 0;
-let scores = [];
+document.addEventListener('DOMContentLoaded', () => {
+    const suits = ['hearts', 'spades', 'diamonds', 'clubs'];
+    const values = ['A', '2', '3', '4', '5', '6', '7', 'Q', 'J', 'K'];
+    let deck = createDeck();
+    deck = shuffleDeck(deck);
 
-function startGame(numPlayers) {
-    const game = document.getElementById('game');
-    const playerSelection = document.getElementById('player-selection');
+    const player1Hand = [];
+    const player2Hand = [];
+    const middleCards = [];
 
-    playerSelection.style.display = 'none';
-    game.style.display = 'flex';
-
-    players = Array.from({ length: numPlayers }, () => []);
-    scores = Array(numPlayers).fill(0);
-    dealCenterCards();
-    dealPlayerCards();
-}
-
-function dealCenterCards() {
-    centerCards = [];
-    const center = document.getElementById('center-cards');
-    center.innerHTML = '';
+    // Initialize hands and middle cards
+    for (let i = 0; i < 3; i++) {
+        player1Hand.push(deck.pop());
+        player2Hand.push(deck.pop());
+    }
     for (let i = 0; i < 4; i++) {
-        const card = drawCard();
-        centerCards.push(card);
-        center.appendChild(createCardElement(card));
+        middleCards.push(deck.pop());
     }
-}
 
-function dealPlayerCards() {
-    players.forEach(player => {
-        for (let i = 0; i < 3; i++) {
-            const card = drawCard();
-            player.push(card);
+    // Display cards
+    displayCards('player1-cards', player1Hand);
+    displayCards('player2-cards', player2Hand);
+    displayCards('middle-cards-container', middleCards);
+
+    // Event listeners for playing cards
+    document.getElementById('player1-cards').addEventListener('click', event => playCard(event, player1Hand, middleCards));
+    document.getElementById('player2-cards').addEventListener('click', event => playCard(event, player2Hand, middleCards));
+
+    function createDeck() {
+        const deck = [];
+        for (let suit of suits) {
+            for (let value of values) {
+                deck.push({ value, suit });
+            }
         }
-    });
-    updateHands();
-}
-
-function drawCard() {
-    const suit = suits[Math.floor(Math.random() * suits.length)];
-    const value = values[Math.floor(Math.random() * values.length)];
-    const points = getCardPoints(value);
-    return { suit, value, points };
-}
-
-function getCardPoints(value) {
-    switch (value) {
-        case 'A': return 1;
-        case '2': return 2;
-        case '3': return 3;
-        case '4': return 4;
-        case '5': return 5;
-        case '6': return 6;
-        case '7': return 7;
-        case 'Q': return 8;
-        case 'J': return 9;
-        case 'K': return 10;
-        default: return 0;
+        return deck;
     }
-}
 
-function createCardElement(card) {
-    const cardElement = document.createElement('div');
-    cardElement.classList.add('card');
-    cardElement.innerHTML = `<div class="value">${card.value}</div><div class="suit">${card.suit}</div>`;
-    return cardElement;
-}
-
-function updateHands() {
-    const playerElements = document.querySelectorAll('.player .hand');
-    if (!playerElements) {
-        console.error("Player elements not found.");
-        return;
+    function shuffleDeck(deck) {
+        for (let i = deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+        return deck;
     }
-    if (playerElements.length > 0) {
-        playerElements.forEach((hand, index) => {
-            hand.innerHTML = '';
-            if (!players[index]) {
-                console.error(`Player index ${index} not found.`);
+
+    function displayCards(elementId, cards) {
+        const container = document.getElementById(elementId);
+        container.innerHTML = '';
+        cards.forEach(card => {
+            const cardElement = document.createElement('div');
+            cardElement.className = `card ${card.suit}`;
+            cardElement.textContent = card.value;
+            container.appendChild(cardElement);
+        });
+    }
+
+    function playCard(event, playerHand, middleCards) {
+        const cardElement = event.target;
+        if (!cardElement.classList.contains('card')) return;
+
+        const cardValue = cardElement.textContent;
+        const cardSuit = cardElement.classList[1];
+        const card = { value: cardValue, suit: cardSuit };
+
+        // Find and remove the card from the player's hand
+        const cardIndex = playerHand.findIndex(c => c.value === card.value && c.suit === card.suit);
+        if (cardIndex === -1) return;
+        playerHand.splice(cardIndex, 1);
+
+        // Find matching or summing cards in the middle
+        let matchingCards = middleCards.filter(c => c.value === card.value);
+        if (matchingCards.length === 0) {
+            const cardValueInt = cardValueToInt(card.value);
+            matchingCards = findSummingCards(middleCards, cardValueInt);
+        }
+
+        if (matchingCards.length > 0) {
+            // Remove matching cards from the middle and add them to the player's collected cards
+            matchingCards.forEach(mc => {
+                const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
+                if (index > -1) middleCards.splice(index, 1);
+            });
+
+            // Add the played card to the player's collected cards
+            playerHand.push(card);
+
+            // Display updated middle cards
+            displayCards('middle-cards-container', middleCards);
+        } else {
+            // If no matching cards, put the played card in the middle
+            middleCards.push(card);
+        }
+
+        // Display updated hands
+        displayCards('player1-cards', player1Hand);
+        displayCards('player2-cards', player2Hand);
+    }
+
+    function cardValueToInt(value) {
+        switch (value) {
+            case 'A': return 1;
+            case '2': return 2;
+            case '3': return 3;
+            case '4': return 4;
+            case '5': return 5;
+            case '6': return 6;
+            case '7': return 7;
+            case 'Q': return 8;
+            case 'J': return 9;
+            case 'K': return 10;
+            default: return 0;
+        }
+    }
+
+    function findSummingCards(cards, targetValue) {
+        const result = [];
+        function findCombination(currentCombination, remainingCards, currentSum) {
+            if (currentSum === targetValue) {
+                result.push(...currentCombination);
                 return;
             }
-            players[index].forEach(card => {
-                const cardElement = createCardElement(card);
-                cardElement.onclick = () => {
-                    if (currentPlayer === index) {
-                        playCard(cardElement, card, index);
-                    }
-                };
-                hand.appendChild(cardElement);
-            });
-        });
-    } else {
-        console.error("No player elements found.");
+            if (currentSum > targetValue || remainingCards.length === 0) return;
+
+            for (let i = 0; i < remainingCards.length; i++) {
+                findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
+            }
+        }
+
+        findCombination([], cards, 0);
+        return result;
     }
-}
-
-
-function showOptions(card, options, playerIndex, cardElement) {
-    const optionsContainer = document.createElement('div');
-    optionsContainer.classList.add('options-container');
-
-    options.forEach(option => {
-        const optionElement = createCardElement(option);
-        optionElement.onclick = () => {
-            collectCard(card, option, playerIndex, cardElement, optionElement);
-        };
-        optionsContainer.appendChild(optionElement);
-    });
-
-    document.body.appendChild(optionsContainer);
-}
-
-function playCard(cardElement, card, playerIndex) {
-    const options = centerCards.filter(centerCard =>
-        card.points + centerCard.points === 7 || card.points === centerCard.points
-    );
-
-    if (options.length > 0) {
-        showOptions(card, options, playerIndex, cardElement);
-    } else {
-        collectCard(card, null, playerIndex, cardElement, null);
-    }
-}
-
-function endRound() {
-    const minScore = Math.min(...scores);
-    const dealerIndex = scores.indexOf(minScore);
-    currentPlayer = dealerIndex;
-    document.getElementById('deal-button').style.display = 'block';
-}
-
-function dealCards() {
-    if (players.every(player => player.length === 0)) {
-        dealCenterCards();
-        dealPlayerCards();
-        document.getElementById('deal-button').style.display = 'none';
-    }
-}
-
-// تسجيل Service Worker
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-        .then(registration => {
-            console.log('Service Worker registered with scope:', registration.scope);
-        })
-        .catch(error => {
-            console.log('Service Worker registration failed:', error);
-        });
-}
+});
