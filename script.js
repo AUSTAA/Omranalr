@@ -25,6 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
     displayCards('player1-cards', player1Hand);
     displayCards('player2-cards', player2Hand);
     displayCards('middle-cards-container', middleCards);
+    displayCollectedCards('player1-collected', player1Collected);
+    displayCollectedCards('player2-collected', player2Collected);
 
     // Event listeners for playing cards
     document.getElementById('player1-cards').addEventListener('click', event => {
@@ -84,6 +86,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function displayCollectedCards(elementId, cards) {
+        const container = document.getElementById(elementId);
+        container.innerHTML = '';
+        cards.forEach(() => {
+            const cardElement = document.createElement('div');
+            cardElement.className = 'card collected-card';
+            container.appendChild(cardElement);
+        });
+    }
+
     function playCard(event, playerHand, playerCollected, middleCards) {
         const cardElement = event.target.closest('.card');
         if (!cardElement) return;
@@ -115,13 +127,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // Add the played card to the player's collected cards
             playerCollected.push(card);
 
-            // Display updated middle cards
-            displayCards('middle-cards-container', middleCards);
+            // Display updated collected cards
+            displayCollectedCards(`player${currentPlayer}-collected`, playerCollected);
         } else {
             // If no matching cards, put the played card in the middle
             middleCards.push(card);
-            displayCards('middle-cards-container', middleCards);
         }
+
+        // Display updated middle cards
+        displayCards('middle-cards-container', middleCards);
 
         // Switch turn to the other player
         currentPlayer = currentPlayer === 1 ? 2 : 1;
@@ -144,31 +158,32 @@ document.addEventListener('DOMContentLoaded', () => {
             case '2': return 2;
             case '3': return 3;
             case '4': return 4;
-            case '5': return 5;
-            case '6': return 6;
-            case '7': return 7;
-            case 'Q': return 8;
-            case 'J': return 9;
-            case 'K': return 10;
-            default: return 0;
+case ‘5’: return 5;
+case ‘6’: return 6;
+case ‘7’: return 7;
+case ‘Q’: return 8;
+case ‘J’: return 9;
+case ‘K’: return 10;
+default: return 0;
+}
+}
+
+function findSummingCards(cards, targetValue) {
+    const result = [];
+    function findCombination(currentCombination, remainingCards, currentSum) {
+        if (currentSum === targetValue) {
+            result.push(...currentCombination);
+            return;
+        }
+        if (currentSum > targetValue || remainingCards.length === 0) return;
+
+        for (let i = 0; i < remainingCards.length; i++) {
+            findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
         }
     }
 
-    function findSummingCards(cards, targetValue) {
-        const result = [];
-        function findCombination(currentCombination, remainingCards, currentSum) {
-            if (currentSum === targetValue) {
-                result.push(...currentCombination);
-                return;
-            }
-            if (currentSum > targetValue || remainingCards.length === 0) return;
+    findCombination([], cards, 0);
+    return result;
+}
 
-            for (let i = 0; i < remainingCards.length; i++) {
-                findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
-            }
-        }
-
-        findCombination([], cards, 0);
-        return result;
-    }
 });
