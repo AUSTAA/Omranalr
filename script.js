@@ -7,15 +7,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const player1Hand = [];
     const player2Hand = [];
     const middleCards = [];
+    const player1Collected = [];
+    const player2Collected = [];
+
+    let currentPlayer = 1;
 
     // Initialize hands and middle cards
-    for (let i = 0; i < 3; i++) {
-        player1Hand.push(deck.pop());
-        player2Hand.push(deck.pop());
-    }
-    for (let i = 0; i < 4; i++) {
-        middleCards.push(deck.pop());
-    }
+    dealInitialCards();
 
     // Display cards
     displayCards('player1-cards', player1Hand);
@@ -23,8 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
     displayCards('middle-cards-container', middleCards);
 
     // Event listeners for playing cards
-    document.getElementById('player1-cards').addEventListener('click', event => playCard(event, player1Hand, middleCards));
-    document.getElementById('player2-cards').addEventListener('click', event => playCard(event, player2Hand, middleCards));
+    document.getElementById('player1-cards').addEventListener('click', event => {
+        if (currentPlayer === 1) playCard(event, player1Hand, player1Collected, middleCards);
+    });
+    document.getElementById('player2-cards').addEventListener('click', event => {
+        if (currentPlayer === 2) playCard(event, player2Hand, player2Collected, middleCards);
+    });
 
     function createDeck() {
         const deck = [];
@@ -44,6 +46,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return deck;
     }
 
+    function dealInitialCards() {
+        for (let i = 0; i < 3; i++) {
+            player1Hand.push(deck.pop());
+            player2Hand.push(deck.pop());
+        }
+        for (let i = 0; i < 4; i++) {
+            middleCards.push(deck.pop());
+        }
+    }
+
+    function dealNewCards() {
+        for (let i = 0; i < 3; i++) {
+            if (deck.length > 0) player1Hand.push(deck.pop());
+            if (deck.length > 0) player2Hand.push(deck.pop());
+        }
+    }
+
     function displayCards(elementId, cards) {
         const container = document.getElementById(elementId);
         container.innerHTML = '';
@@ -55,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function playCard(event, playerHand, middleCards) {
+    function playCard(event, playerHand, playerCollected, middleCards) {
         const cardElement = event.target;
         if (!cardElement.classList.contains('card')) return;
 
@@ -83,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             // Add the played card to the player's collected cards
-            playerHand.push(card);
+            playerCollected.push(card);
 
             // Display updated middle cards
             displayCards('middle-cards-container', middleCards);
@@ -92,9 +111,19 @@ document.addEventListener('DOMContentLoaded', () => {
             middleCards.push(card);
         }
 
+        // Switch turn to the other player
+        currentPlayer = currentPlayer === 1 ? 2 : 1;
+
         // Display updated hands
         displayCards('player1-cards', player1Hand);
         displayCards('player2-cards', player2Hand);
+
+        // Deal new cards if both players are out of cards
+        if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length > 0) {
+            dealNewCards();
+            displayCards('player1-cards', player1Hand);
+            displayCards('player2-cards', player2Hand);
+        }
     }
 
     function cardValueToInt(value) {
