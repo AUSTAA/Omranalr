@@ -1,5 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     const suits = ['hearts', 'spades', 'diamonds', 'clubs'];
+    const suitSymbols = {
+        hearts: '♥',
+        spades: '♠',
+        diamonds: '♦',
+        clubs: '♣'
+    };
     const values = ['A', '2', '3', '4', '5', '6', '7', 'Q', 'J', 'K'];
     let deck = createDeck();
     deck = shuffleDeck(deck);
@@ -69,16 +75,20 @@ document.addEventListener('DOMContentLoaded', () => {
         cards.forEach(card => {
             const cardElement = document.createElement('div');
             cardElement.className = `card ${card.suit}`;
-            cardElement.textContent = card.value;
+            cardElement.innerHTML = `
+                <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
+                <div class="symbol">${suitSymbols[card.suit]}</div>
+                <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
+            `;
             container.appendChild(cardElement);
         });
     }
 
     function playCard(event, playerHand, playerCollected, middleCards) {
-        const cardElement = event.target;
-        if (!cardElement.classList.contains('card')) return;
+        const cardElement = event.target.closest('.card');
+        if (!cardElement) return;
 
-        const cardValue = cardElement.textContent;
+        const cardValue = cardElement.querySelector('.top-left').textContent[0];
         const cardSuit = cardElement.classList[1];
         const card = { value: cardValue, suit: cardSuit };
 
@@ -150,13 +160,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             if (currentSum > targetValue || remainingCards.length === 0) return;
-
-            for (let i = 0; i < remainingCards.length; i++) {
-                findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
-            }
+                    for (let i = 0; i < remainingCards.length; i++) {
+            findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
         }
-
-        findCombination([], cards, 0);
-        return result;
     }
-});
+
+    findCombination([], cards, 0);
+    return result;
+}
+    });
