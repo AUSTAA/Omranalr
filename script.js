@@ -109,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             matchingCards.forEach(mc => {
                 const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
                 if (index > -1) middleCards.splice(index, 1);
+                playerCollected.push(mc); // Add middle card to collected cards
             });
 
             // Add the played card to the player's collected cards
@@ -159,8 +160,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 result.push(...currentCombination);
                 return;
             }
-            if (currentSum > targetValue || remainingCards.length === 0) return;
-                    for (let i = 0; i < remainingCards.length; i++) {
+            if (currentSum > targetValue || remainingCards.length=== 0) return;
+
+        for (let i = 0; i < remainingCards.length; i++) {
             findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
         }
     }
@@ -168,4 +170,5 @@ document.addEventListener('DOMContentLoaded', () => {
     findCombination([], cards, 0);
     return result;
 }
-    });
+
+});
