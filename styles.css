@@ -1,173 +1,61 @@
 body {
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
+    font-family: Arial, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background: url('background.jpg') no-repeat center center fixed;
-    background-size: cover;
+    margin: 0;
+    background-color: #2e8b57;
 }
 
-#game-container {
-    position: relative;
-    width: 80%;
-    height: 80%;
-    text-align: center;
-    background-color: rgba(255, 255, 255, 0.8);
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    height: 100%;
+    width: 60%;
 }
 
-#player-selection {
+.player-hand, .middle-cards {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-#player-selection button {
-    margin: 10px;
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-}
-
-#player-selection button:hover {
-    background-color: #0056b3;
-}
-
-#game {
-    position: relative;
-    width: 100%;
-    height: 100%;
+.cards {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    align-items: center;
-}
-
-.player {
-    position: absolute;
-    text-align: center;
-    margin: 10px;
-}
-
-.top {
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-.bottom {
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-.left {
-    top: 50%;
-    left: 10px;
-    transform: translateY(-50%);
-}
-
-.right {
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-}
-
-.center {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.hand {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: nowrap;
     margin-top: 10px;
 }
 
 .card {
     width: 50px;
-    height: 80px;
-    border: 1px solid #000;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    height: 70px;
     margin: 5px;
-    font-size: 20px;
-    background-color: #fff;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s;
-    cursor: pointer;
-}
-
-.card:hover {
-    transform: scale(1.1);
-}
-
-#deal-button {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #007BFF;
-    color: white;
-    border: none;
+    background-color: white;
     border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
     cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-}
-
-#deal-button:hover {
-    background-color: #0056b3;
-}
-
-.options-container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: 10px;
-    border-radius: 10px;
-}
-
-.collected {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    width: 50px;
-    height: 80px;
     border: 1px solid #000;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 5px;
-    font-size: 20px;
-    background-color: #fff;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.card.spades {
+    color: black;
+}
+
+.card.hearts {
+    color: red;
+}
+
+.card.diamonds {
+    color: red;
+}
+
+.card.clubs {
+    color: black;
 }
