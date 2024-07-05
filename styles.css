@@ -37,25 +37,38 @@ body {
     background-color: white;
     border-radius: 5px;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     font-size: 18px;
     cursor: pointer;
     border: 1px solid #000;
+    position: relative;
 }
 
-.card.spades {
-    color: black;
+.card .top-left,
+.card .bottom-right {
+    position: absolute;
+    font-size: 12px;
 }
 
-.card.hearts {
+.card .top-left {
+    top: 2px;
+    left: 2px;
+}
+
+.card .bottom-right {
+    bottom: 2px;
+    right: 2px;
+    transform: rotate(180deg);
+}
+
+.card.hearts .symbol,
+.card.diamonds .symbol {
     color: red;
 }
 
-.card.diamonds {
-    color: red;
-}
-
-.card.clubs {
+.card.spades .symbol,
+.card.clubs .symbol {
     color: black;
 }
