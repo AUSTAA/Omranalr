@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Deal new cards if both players are out of cards
         if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length > 0) {
             dealNewCards();
-            displayCards('player1-cards', player1Hand);
+            displayCards(''player1-cards', player1Hand);
             displayCards('player2-cards', player2Hand);
         }
     }
@@ -164,29 +164,27 @@ document.addEventListener('DOMContentLoaded', () => {
             case '6': return 6;
             case '7': return 7;
             case 'Q': return 8;
-            case ‘J’: return 9;
-            case ‘J’: return 9;
-            case ‘K’: return 10;
-           default: return 0;
-}
-}
-
-function findSummingCards(cards, targetValue) {
-    const result = [];
-    function findCombination(currentCombination, remainingCards, currentSum) {
-        if (currentSum === targetValue) {
-            result.push(...currentCombination);
-            return;
-        }
-        if (currentSum > targetValue || remainingCards.length === 0) return;
-
-        for (let i = 0; i < remainingCards.length; i++) {
-            findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
+            case 'J': return 9;
+            case 'K': return 10;
+            default: return 0;
         }
     }
 
-    findCombination([], cards, 0);
-    return result;
-}
+    function findSummingCards(cards, targetValue) {
+        const result = [];
+        function findCombination(currentCombination, remainingCards, currentSum) {
+            if (currentSum === targetValue) {
+                result.push(...currentCombination);
+                return;
+            }
+            if (currentSum > targetValue || remainingCards.length === 0) return;
 
+            for (let i = 0; i < remainingCards.length; i++) {
+                findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
+            }
+        }
+
+        findCombination([], cards, 0);
+        return result;
+    }
 });
