@@ -9,14 +9,13 @@ body {
 
 #game-container {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    width: 80%;
+    gap: 20px;
 }
 
 .cards-container, .collected-cards {
     display: flex;
-    flex-wrap: wrap;
     gap: 10px;
 }
 
@@ -62,7 +61,10 @@ body {
 }
 
 .collected-card {
+    width: 60px;
+    height: 90px;
     background-color: #2e86de;
     border: 1px solid #2e86de;
     cursor: default;
+    position: absolute;
 }
