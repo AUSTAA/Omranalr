@@ -163,12 +163,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // If the deck is empty and the middle is empty, give remaining cards to the last player to take
-        if (deck.length === 0  middleCards.length === 0 && lastPlayerToTake !== null) {
-            const lastPlayerCollected = lastPlayerToTake === 1 ? player1Collected : player2Collected;
-            playerRevealed.push(card);
-            displayCollectedCards(`player${lastPlayerToTake}-collected`, lastPlayerCollected);
-        }
-    }
+if (deck.length === 0 && middleCards.length === 0 && lastPlayerToTake !== null) {
+    const lastPlayerCollected = lastPlayerToTake === 1 ? player1Collected : player2Collected;
+    playerRevealed.push(card);
+    displayCollectedCards(`player${lastPlayerToTake}-collected`, lastPlayerCollected);
+}
 
     function cardValueToInt(value) {
         switch (value) {
