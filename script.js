@@ -15,8 +15,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const middleCards = [];
     const player1Collected = [];
     const player2Collected = [];
+    const player1Revealed = [];
+    const player2Revealed = [];
 
     let currentPlayer = 1;
+    let lastPlayerToTake = null;
 
     // Initialize hands and middle cards
     dealInitialCards();
@@ -30,10 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event listeners for playing cards
     document.getElementById('player1-cards').addEventListener('click', event => {
-        if (currentPlayer === 1) playCard(event, player1Hand, player1Collected, middleCards);
+        if (currentPlayer === 1) playCard(event, player1Hand, player1Collected, player1Revealed, middleCards);
     });
     document.getElementById('player2-cards').addEventListener('click', event => {
-        if (currentPlayer === 2) playCard(event, player2Hand, player2Collected, middleCards);
+        if (currentPlayer === 2) playCard(event, player2Hand, player2Collected, player2Revealed, middleCards);
     });
 
     function createDeck() {
@@ -98,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function playCard(event, playerHand, playerCollected, middleCards) {
+    function playCard(event, playerHand, playerCollected, playerRevealed, middleCards) {
         const cardElement = event.target.closest('.card');
         if (!cardElement) return;
 
@@ -119,8 +122,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (matchingCards.length > 0) {
+            // Allow the player to choose the matching set or card
+            const chosenCards = chooseCards(matchingCards, card);
+
             // Remove matching cards from the middle and add them to the player's collected cards
-            matchingCards.forEach(mc => {
+            chosenCards.forEach(mc => {
                 const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
                 if (index > -1) middleCards.splice(index, 1);
                 playerCollected.push(mc); // Add middle card to collected cards
@@ -128,6 +134,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Add the played card to the player's collected cards
             playerCollected.push(card);
+
+            // Update the last player to take cards
+            lastPlayerToTake = currentPlayer;
 
             // Display updated collected cards
             displayCollectedCards(`player${currentPlayer}-collected`, playerCollected);
@@ -152,39 +161,53 @@ document.addEventListener('DOMContentLoaded', () => {
             displayCards('player1-cards', player1Hand);
             displayCards('player2-cards', player2Hand);
         }
-    }
 
-    function cardValueToInt(value) {
-        switch (value) {
-            case 'A': return 1;
-            case '2': return 2;
-            case '3': return 3;
-            case '4': return 4;
-            case '5': return 5;
-            case '6': return 6;
-            case '7': return 7;
-            case 'Q': return 8;
-            case 'J': return 9;
-            case 'K': return 10;
-            default: return 0;
+        // If the deck is empty and the middle is empty, give remaining cards to the last player to take
+        if (deck.length === 0 &&middleCards.length === 0 && lastPlayerToTake !== null) {
+const lastPlayerCollected = lastPlayerToTake === 1 ? player1Collected : player2Collected;
+playerRevealed.push(card);
+displayCollectedCards(player${lastPlayerToTake}-collected, lastPlayerCollected);
+}
+}
+
+function cardValueToInt(value) {
+    switch (value) {
+        case 'A': return 1;
+        case '2': return 2;
+        case '3': return 3;
+        case '4': return 4;
+        case '5': return 5;
+        case '6': return 6;
+        case '7': return 7;
+        case 'Q': return 8;
+        case 'J': return 9;
+        case 'K': return 10;
+        default: return 0;
+    }
+}
+
+function findSummingCards(cards, targetValue) {
+    const result = [];
+    function findCombination(currentCombination, remainingCards, currentSum) {
+        if (currentSum === targetValue) {
+            result.push(...currentCombination);
+            return;
+        }
+        if (currentSum > targetValue || remainingCards.length === 0) return;
+
+        for (let i = 0; i < remainingCards.length; i++) {
+            findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
         }
     }
 
-    function findSummingCards(cards, targetValue) {
-        const result = [];
-        function findCombination(currentCombination, remainingCards, currentSum) {
-            if (currentSum === targetValue) {
-                result.push(...currentCombination);
-                return;
-            }
-            if (currentSum > targetValue || remainingCards.length === 0) return;
+    findCombination([], cards, 0);
+    return result;
+}
 
-            for (let i = 0; i < remainingCards.length; i++) {
-                findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
-            }
-        }
+function chooseCards(matchingCards, playedCard) {
+    // For simplicity, returning the first set found
+    // In a real game, you would prompt the player to choose
+    return matchingCards.slice(0, 1);
+}
 
-        findCombination([], cards, 0);
-        return result;
-    }
 });
