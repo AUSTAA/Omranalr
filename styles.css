@@ -14,11 +14,12 @@ body {
     gap: 20px;
 }
 
-.cards-container, .collected-cards {
+.cards-container {
     display: flex;
-    gap: 10px;
-    position: relative;
+    justify-content: center;
+    gap: 20px; /* مسافة بين اللاعب والأوراق في الوسط */
 }
+
 
 .card {
     width: 60px;
@@ -68,4 +69,24 @@ body {
     border: 1px solid #2e86de;
     cursor: default;
     position: absolute;
+}
+
+.collected-container {
+    position: relative;
+    width: 100px; /* تعديل العرض بما يناسب */
+    height: 140px; /* تعديل الطول بما يناسب */
+    margin-right: 20px; /* الأوراق المقلوبة تكون على يمين اللاعب */
+}
+
+.revealed-container {
+    position: relative;
+    width: 100px;
+    height: 140px;
+    margin-left: 20px; /* الورقة المكشوفة تكون على يسار الأوراق المقلوبة */
+}
+
+.middle-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* مسافة بين الأوراق في الوسط */
 }
