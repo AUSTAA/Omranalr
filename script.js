@@ -89,9 +89,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayCollectedCards(elementId, cards) {
         const container = document.getElementById(elementId);
         container.innerHTML = '';
-        cards.forEach(() => {
+        cards.forEach((card, index) => {
             const cardElement = document.createElement('div');
             cardElement.className = 'card collected-card';
+            cardElement.style.top = `${index * 2}px`;
+            cardElement.style.left = `${index * 2}px`;
             container.appendChild(cardElement);
         });
     }
@@ -162,11 +164,11 @@ document.addEventListener('DOMContentLoaded', () => {
             case '6': return 6;
             case '7': return 7;
             case 'Q': return 8;
-            case 'J': return 9;
-            case 'K': return 10;
-            default: return 0;
-        }
-   }
+           case ‘J’: return 9;
+case ‘K’: return 10;
+default: return 0;
+}
+}
 
 function findSummingCards(cards, targetValue) {
     const result = [];
