@@ -16,9 +16,12 @@ body {
 
 .cards-container {
     display: flex;
-    justify-content: center;
-    gap: 20px; /* مسافة بين اللاعب والأوراق في الوسط */
+    justify-content: space-between; /* توزيع العناصر بالتساوي */
+    align-items: center;
+    width: 100%;
+    max-width: 800px; /* لضبط عرض الحاوية */
 }
+
 
 
 .card {
