@@ -164,9 +164,10 @@ document.addEventListener('DOMContentLoaded', () => {
             case '6': return 6;
             case '7': return 7;
             case 'Q': return 8;
-           case ‘J’: return 9;
-case ‘K’: return 10;
-default: return 0;
+            case ‘J’: return 9;
+            case ‘J’: return 9;
+            case ‘K’: return 10;
+           default: return 0;
 }
 }
 
