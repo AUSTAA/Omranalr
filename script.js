@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Deal new cards if both players are out of cards
         if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length > 0) {
             dealNewCards();
-            displayCards(''player1-cards', player1Hand);
+            displayCards('player1-cards', player1Hand);
             displayCards('player2-cards', player2Hand);
         }
     }
