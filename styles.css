@@ -107,4 +107,5 @@ body {
     display: flex;
     justify-content: center;
     gap: 20px; /* مسافة بين الأوراق في الوسط */
+    align-items: center; /* توسيط عمودي */
 }
