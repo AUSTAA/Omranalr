@@ -161,13 +161,14 @@ document.addEventListener('DOMContentLoaded', () => {
             displayCards('player1-cards', player1Hand);
             displayCards('player2-cards', player2Hand);
         }
-        }
+
         // If the deck is empty and the middle is empty, give remaining cards to the last player to take
-if (deck.length === 0 && middleCards.length === 0 && lastPlayerToTake !== null) {
-    const lastPlayerCollected = lastPlayerToTake === 1 ? player1Collected : player2Collected;
-    playerRevealed.push(card);
-    displayCollectedCards(`player${lastPlayerToTake}-collected`, lastPlayerCollected);
-}
+        if (deck.length === 0 && middleCards.length === 0 && lastPlayerToTake !== null) {
+            const lastPlayerCollected = lastPlayerToTake === 1 ? player1Collected : player2Collected;
+            playerRevealed.push(card);
+            displayCollectedCards(`player${lastPlayerToTake}-collected`, lastPlayerCollected);
+        }
+    }
 
     function cardValueToInt(value) {
         switch (value) {
@@ -208,5 +209,4 @@ if (deck.length === 0 && middleCards.length === 0 && lastPlayerToTake !== null) 
         // In a real game, you would prompt the player to choose
         return matchingCards.slice(0, 1);
     }
-
 });
