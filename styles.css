@@ -17,6 +17,7 @@ body {
 .cards-container, .collected-cards {
     display: flex;
     gap: 10px;
+    position: relative;
 }
 
 .card {
