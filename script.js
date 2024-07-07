@@ -143,6 +143,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Display updated collected cards
             displayCollectedCards(`player${currentPlayer}-collected`, playerCollected);
+
+            // Display "شكبـّة" if no cards left in the middle
+            if (middleCards.length === 0) {
+                alert("شكبـّة!");
+            }
         } else {
             // If no matching or summing cards, put the played card in the middle
             middleCards.push(card);
@@ -164,6 +169,20 @@ document.addEventListener('DOMContentLoaded', () => {
             displayCards('player1-cards', player1Hand);
             displayCards('player2-cards', player2Hand);
         }
+
+        // If no more cards in the deck and hands, give the remaining middle cards to the last player to take cards
+        if (deck.length === 0 && player1Hand.length === 0 && player2Hand.length === 0) {
+            if (lastPlayerToTake === 1) {
+                player1Collected.push(...middleCards);
+                middleCards.length = 0; // Clear middle cards
+            } else if (lastPlayerToTake === 2) {
+                player2Collected.push(...middleCards);
+                middleCards.length = 0; // Clear middle cards
+            }
+            displayCollectedCards('player1-collected', player1Collected);
+            displayCollectedCards('player2-collected', player2Collected);
+            displayCards('middle-cards-container', middleCards);
+        }
     }
 
     function cardValueToInt(value) {
@@ -182,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-        function findSummingCards(cards, targetValue) {
+    function findSummingCards(cards, targetValue) {
         const result = [];
         function findCombination(currentCombination, remainingCards, currentSum) {
             if (currentSum === targetValue) {
@@ -197,17 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         findCombination([], cards, 0);
-        return result.length > 0 ? result[0] : [];  // Return the first valid combination found
-    }
-
-    function chooseCards(matchingCards, playedCard) {
-        // Return all matching cards if there are any
-        if (matchingCards.length > 0) {
-            return matchingCards;
-        }
-
-        // Otherwise, return the first valid set of summing cards found
-        const summingCards = findSummingCards(middleCards, cardValueToInt(playedCard.value));
-        return summingCards;
-    }
+        return result.length > 0 ? result[0] : [];
+        // Return the first valid combination found
+}
 });
