@@ -116,10 +116,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Find matching cards in the middle
         const matchingCards = middleCards.filter(c => c.value === card.value);
+        const cardValueInt = cardValueToInt(card.value);
 
+        let chosenCards = [];
         if (matchingCards.length > 0) {
-            // Allow the player to take all matching cards
-            matchingCards.forEach(mc => {
+            // If there are matching cards, choose them
+            chosenCards = matchingCards;
+        } else {
+            // Otherwise, find summing cards
+            chosenCards = findSummingCards(middleCards, cardValueInt);
+        }
+
+        if (chosenCards.length > 0) {
+            // Allow the player to take all matching or summing cards
+            chosenCards.forEach(mc => {
                 const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
                 if (index > -1) middleCards.splice(index, 1);
                 playerCollected.push(mc); // Add middle card to collected cards
@@ -134,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Display updated collected cards
             displayCollectedCards(`player${currentPlayer}-collected`, playerCollected);
         } else {
-            // If no matching cards, put the played card in the middle
+            // If no matching or summing cards, put the played card in the middle
             middleCards.push(card);
         }
 
@@ -172,11 +182,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function findSummingCards(cards, targetValue) {
+        function findSummingCards(cards, targetValue) {
         const result = [];
         function findCombination(currentCombination, remainingCards, currentSum) {
             if (currentSum === targetValue) {
-                result.push(...currentCombination);
+                result.push([...currentCombination]);
                 return;
             }
             if (currentSum > targetValue || remainingCards.length === 0) return;
@@ -187,12 +197,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         findCombination([], cards, 0);
-        return result;
+        return result.length > 0 ? result[0] : [];  // Return the first valid combination found
     }
 
     function chooseCards(matchingCards, playedCard) {
-        // For simplicity, returning the first set found
-        // In a real game, you would prompt the player to choose
-        return matchingCards.slice(0, 1);
+        // Return all matching cards if there are any
+        if (matchingCards.length > 0) {
+            return matchingCards;
+        }
+
+        // Otherwise, return the first valid set of summing cards found
+        const summingCards = findSummingCards(middleCards, cardValueToInt(playedCard.value));
+        return summingCards;
     }
 });
