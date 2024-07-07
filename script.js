@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', () => {
     const suits = ['hearts', 'spades', 'diamonds', 'clubs'];
     const suitSymbols = {
