@@ -28,14 +28,14 @@ body {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    align-items: flex-end; /* الأوراق المقلوبة والمكشوفة على يمين اللاعب */
+    align-items: center; /* الأوراق المقلوبة والمكشوفة تكون في الوسط */
 }
 
-.middle-area {
+.middle-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 20px;
+    gap: 20px; /* مسافة بين الأوراق في الوسط */
     width: 100%;
     margin: 40px 0; /* زيادة المسافة بين الأوراق الوسطية واللاعبين */
 }
@@ -106,11 +106,4 @@ body {
     position: relative;
     width: 100px;
     height: 140px;
-}
-
-.middle-container {
-    display: flex;
-    justify-content: center;
-    gap: 20px; /* مسافة بين الأوراق في الوسط */
-    align-items: center; /* توسيط عمودي */
 }
