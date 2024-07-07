@@ -164,50 +164,52 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // If the deck is empty and the middle is empty, give remaining cards to the last player to take
-        if (deck.length === 0 && middleCards.length === 0 && lastPlayerToTake !== null) {
-            const lastPlayerCollected = lastPlayerToTake === 1 ? player1Collected : player2Collected;
-            playerRevealed.push(card);
-            displayCollectedCards(`player${lastPlayerToTake}-collected`, lastPlayerCollected);
+        if (deck.length === 0 &&
+            middleCards.length === 0 && lastPlayerToTake !== null) {
+const lastPlayerCollected = lastPlayerToTake === 1 ? player1Collected : player2Collected;
+playerRevealed.push(card);
+displayCollectedCards(player${lastPlayerToTake}-collected, lastPlayerCollected);
+}
+}
+
+function cardValueToInt(value) {
+    switch (value) {
+        case 'A': return 1;
+        case '2': return 2;
+        case '3': return 3;
+        case '4': return 4;
+        case '5': return 5;
+        case '6': return 6;
+        case '7': return 7;
+        case 'Q': return 8;
+        case 'J': return 9;
+        case 'K': return 10;
+        default: return 0;
+    }
+}
+
+function findSummingCards(cards, targetValue) {
+    const result = [];
+    function findCombination(currentCombination, remainingCards, currentSum) {
+        if (currentSum === targetValue) {
+            result.push(...currentCombination);
+            return;
+        }
+        if (currentSum > targetValue || remainingCards.length === 0) return;
+
+        for (let i = 0; i < remainingCards.length; i++) {
+            findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
         }
     }
 
-    function cardValueToInt(value) {
-        switch (value) {
-            case 'A': return 1;
-            case '2': return 2;
-            case '3': return 3;
-            case '4': return 4;
-            case '5': return 5;
-            case '6': return 6;
-            case '7': return 7;
-            case 'Q': return 8;
-            case 'J': return 9;
-            case 'K': return 10;
-            default: return 0;
-        }
-    }
+    findCombination([], cards, 0);
+    return result;
+}
 
-    function findSummingCards(cards, targetValue) {
-        const result = [];
-        function findCombination(currentCombination, remainingCards, currentSum) {
-            if (currentSum === targetValue) {
-                result.push(...currentCombination);
-                return;
-            }
-            if (currentSum > targetValue || remainingCards.length === 0) return;
+function chooseCards(matchingCards, playedCard) {
+    // For simplicity, returning the first set found
+    // In a real game, you would prompt the player to choose
+    return matchingCards.slice(0, 1);
+}
 
-            for (let i = 0; i < remainingCards.length; i++) {
-                findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
-            }
-        }
-
-        findCombination([], cards, 0);
-        return result;
-    }
-
-    function chooseCards(matchingCards, playedCard) {
-        // For simplicity, returning the first set found
-        // In a real game, you would prompt the player to choose
-        return matchingCards.slice(0, 1);
-    }
 });
