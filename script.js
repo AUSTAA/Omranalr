@@ -102,41 +102,41 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playCard(event, playerHand, playerCollected, playerRevealed, middleCards) {
-    const cardElement = event.target.closest('.card');
-    if (!cardElement) return;
+        const cardElement = event.target.closest('.card');
+        if (!cardElement) return;
 
-    const cardValue = cardElement.querySelector('.top-left').textContent[0];
-    const cardSuit = cardElement.classList[1];
-    const card = { value: cardValue, suit: cardSuit };
+        const cardValue = cardElement.querySelector('.top-left').textContent[0];
+        const cardSuit = cardElement.classList[1];
+        const card = { value: cardValue, suit: cardSuit };
 
-    // Find and remove the card from the player's hand
-    const cardIndex = playerHand.findIndex(c => c.value === card.value && c.suit === card.suit);
-    if (cardIndex === -1) return;
-    playerHand.splice(cardIndex, 1);
+        // Find and remove the card from the player's hand
+        const cardIndex = playerHand.findIndex(c => c.value === card.value && c.suit === card.suit);
+        if (cardIndex === -1) return;
+        playerHand.splice(cardIndex, 1);
 
-    // Find matching or summing cards in the middle
-    let matchingCards = middleCards.filter(c => c.value === card.value);
-    if (matchingCards.length === 0) {
-        const cardValueInt = cardValueToInt(card.value);
-        matchingCards = findSummingCards(middleCards, cardValueInt);
-    }
+        // Find matching or summing cards in the middle
+        let matchingCards = middleCards.filter(c => c.value === card.value);
+        if (matchingCards.length === 0) {
+            const cardValueInt = cardValueToInt(card.value);
+            matchingCards = findSummingCards(middleCards, cardValueInt);
+        }
 
-    if (matchingCards.length > 0) {
-        // Allow the player to choose the matching set or card
-        const chosenCards = chooseCards(matchingCards, card);
+        if (matchingCards.length > 0) {
+            // Allow the player to choose the matching set or card
+            const chosenCards = chooseCards(matchingCards, card);
 
-        // Remove matching cards from the middle and add them to the player's collected cards
-        chosenCards.forEach(mc => {
-            const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
-            if (index > -1) middleCards.splice(index, 1);
-            playerCollected.push(mc); // Add middle card to collected cards
-        });
+            // Remove matching cards from the middle and add them to the player's collected cards
+            chosenCards.forEach(mc => {
+                const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
+                if (index > -1) middleCards.splice(index, 1);
+                playerCollected.push(mc); // Add middle card to collected cards
+            });
 
-        // Add the played card to the player's collected cards
-        playerCollected.push(card);
+            // Add the played card to the player's collected cards
+            playerCollected.push(card);
 
-        // Update the last player to take cards
-        lastPlayerToTake = currentPlayer;
+            // Update the last player to take cards
+            lastPlayerToTake= currentPlayer;
 
         // Display updated collected cards
         displayCollectedCards(`player${currentPlayer}-collected`, playerCollected);
@@ -170,43 +170,44 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 }
 
-    function cardValueToInt(value) {
-        switch (value) {
-            case 'A': return 1;
-            case '2': return 2;
-            case '3': return 3;
-            case '4': return 4;
-            case '5': return 5;
-            case '6': return 6;
-            case '7': return 7;
-            case 'Q': return 8;
-            case 'J': return 9;
-            case 'K': return 10;
-            default: return 0;
+function cardValueToInt(value) {
+    switch (value) {
+        case 'A': return 1;
+        case '2': return 2;
+        case '3': return 3;
+        case '4': return 4;
+        case '5': return 5;
+        case '6': return 6;
+        case '7': return 7;
+        case 'Q': return 8;
+        case 'J': return 9;
+        case 'K': return 10;
+        default: return 0;
+    }
+}
+
+function findSummingCards(cards, targetValue) {
+    const result = [];
+    function findCombination(currentCombination, remainingCards, currentSum) {
+        if (currentSum === targetValue) {
+            result.push([...currentCombination]);
+            return;
+        }
+        if (currentSum > targetValue || remainingCards.length === 0) return;
+
+        for (let i = 0; i < remainingCards.length; i++) {
+            findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
         }
     }
 
-    function findSummingCards(cards, targetValue) {
-        const result = [];
-        function findCombination(currentCombination, remainingCards, currentSum) {
-            if (currentSum === targetValue) {
-                result.push(...currentCombination);
-                return;
-            }
-            if (currentSum > targetValue || remainingCards.length === 0) return;
+    findCombination([], cards, 0);
+    return result;
+}
 
-            for (let i = 0; i < remainingCards.length; i++) {
-                findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
-            }
-        }
+function chooseCards(matchingCards, playedCard) {
+    // For simplicity, returning the first set found
+    // In a real game, you would prompt the player to choose
+    return matchingCards[0];
+}
 
-        findCombination([], cards, 0);
-        return result;
-    }
-
-    function chooseCards(matchingCards, playedCard) {
-        // For simplicity, returning the first set found
-        // In a real game, you would prompt the player to choose
-        return matchingCards.slice(0, 1);
-    }
 });
