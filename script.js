@@ -101,6 +101,40 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function animateCardToPlayer(cardElement, playerCollectedContainer, isRevealed = false) {
+        const cardClone = cardElement.cloneNode(true);
+        cardClone.style.position = 'absolute';
+        cardClone.style.zIndex = 1000;
+        document.body.appendChild(cardClone);
+
+        const rect = cardElement.getBoundingClientRect();
+        cardClone.style.left = `${rect.left}px`;
+        cardClone.style.top = `${rect.top}px`;
+
+        const targetRect = playerCollectedContainer.getBoundingClientRect();
+        const targetLeft = targetRect.left + (targetRect.width / 2) - (cardClone.offsetWidth / 2);
+        const targetTop = targetRect.top + (targetRect.height / 2) - (cardClone.offsetHeight / 2);
+
+        cardClone.style.transition = 'all 0.5s ease-in-out';
+        cardClone.style.left = `${targetLeft}px`;
+        cardClone.style.top = `${targetTop}px`;
+
+        setTimeout(() => {
+            document.body.removeChild(cardClone);
+            if (isRevealed) {
+                cardElement.classList.add('revealed');
+                playerCollectedContainer.appendChild(cardElement);
+            } else {
+                playerCollectedContainer.appendChild(cardElement);
+            }
+        }, 500);
+    }
+
+    function showTakenCards(cards) {
+        const message = `Player took ${cards.length} card(s): ${cards.map(card => card.innerText).join(', ')}`;
+        alert(message);
+    }
+
     function playCard(event, playerHand, playerCollected, playerRevealed, middleCards) {
         const cardElement = event.target.closest('.card');
         if (!cardElement) return;
@@ -109,12 +143,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const cardSuit = cardElement.classList[1];
         const card = { value: cardValue, suit: cardSuit };
 
-        // Find and remove the card from the player's hand
         const cardIndex = playerHand.findIndex(c => c.value === card.value && c.suit === card.suit);
         if (cardIndex === -1) return;
         playerHand.splice(cardIndex, 1);
 
-        // Find matching or summing cards in the middle
         let matchingCards = middleCards.filter(c => c.value === card.value);
         if (matchingCards.length === 0) {
             const cardValueInt = cardValueToInt(card.value);
@@ -122,47 +154,39 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (matchingCards.length > 0) {
-            // Allow the player to choose the matching set or card
             const chosenCards = chooseCards(matchingCards, card);
 
-            // Remove matching cards from the middle and add them to the player's collected cards
             chosenCards.forEach(mc => {
                 const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
                 if (index > -1) middleCards.splice(index, 1);
-                playerCollected.push(mc); // Add middle card to collected cards
+                playerCollected.push(mc);
             });
 
-            // Add the played card to the player's collected cards
             playerCollected.push(card);
-
-            // Update the last player to take cards
+            showTakenCards([card, ...chosenCards]);
+            chosenCards.forEach(mc => animateCardToPlayer(document.querySelector(`.middle-container .${mc.suit}`), document.getElementById(`player${currentPlayer}-collected`)));
+            animateCardToPlayer(cardElement, document.getElementById(`player${currentPlayer}-collected`));
             lastPlayerToTake = currentPlayer;
 
-            // Display updated collected cards
             displayCollectedCards(`player${currentPlayer}-collected`, playerCollected);
         } else {
-            // If no matching cards, put the played card in the middle
             middleCards.push(card);
+            animateCardToPlayer(cardElement, document.getElementById('middle-cards-container'));
         }
 
-        // Display updated middle cards
         displayCards('middle-cards-container', middleCards);
 
-        // Switch turn to the other player
         currentPlayer = currentPlayer === 1 ? 2 : 1;
 
-        // Display updated hands
         displayCards('player1-cards', player1Hand);
         displayCards('player2-cards', player2Hand);
 
-        // Deal new cards if both players are out of cards
         if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length > 0) {
             dealNewCards();
             displayCards('player1-cards', player1Hand);
             displayCards('player2-cards', player2Hand);
         }
 
-        // If the deck is empty and the middle is empty, give remaining cards to the last player to take
         if (deck.length === 0 && middleCards.length === 0 && lastPlayerToTake !== null) {
             const lastPlayerCollected = lastPlayerToTake === 1 ? player1Collected : player2Collected;
             playerRevealed.push(card);
@@ -196,7 +220,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentSum > targetValue || remainingCards.length === 0) return;
 
             for (let i = 0; i < remainingCards.length; i++) {
-                findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
+
+                            findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
             }
         }
 
