@@ -115,18 +115,12 @@ document.addEventListener('DOMContentLoaded', () => {
         playerHand.splice(cardIndex, 1);
 
         // Find matching or summing cards in the middle
-        let matchingCards = middleCards.filter(c => c.value === card.value);
-        if (matchingCards.length === 0) {
-            const cardValueInt = cardValueToInt(card.value);
-            matchingCards = findSummingCards(middleCards, cardValueInt);
-        }
+        const cardValueInt = cardValueToInt(card.value);
+        const matchingCards = findSummingCards(middleCards, cardValueInt);
 
         if (matchingCards.length > 0) {
-            // Allow the player to choose the matching set or card
-            const chosenCards = chooseCards(matchingCards, card);
-
             // Remove matching cards from the middle and add them to the player's collected cards
-            chosenCards.forEach(mc => {
+            matchingCards.forEach(mc => {
                 const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
                 if (index > -1) middleCards.splice(index, 1);
                 playerCollected.push(mc); // Add middle card to collected cards
@@ -136,58 +130,51 @@ document.addEventListener('DOMContentLoaded', () => {
             playerCollected.push(card);
 
             // Update the last player to take cards
-            lastPlayerToTake= currentPlayer;
+            lastPlayerToTake = currentPlayer;
 
-        // Display updated collected cards
-        displayCollectedCards(`player${currentPlayer}-collected`, playerCollected);
-    } else {
-        // If no matching cards, put the played card in the middle
-        middleCards.push(card);
-    }
+            // Display updated collected cards
+            displayCollectedCards(`player${currentPlayer}-collected`, playerCollected);
+        } else {
+            // If no matching cards, put the played card in the middle
+            middleCards.push(card);
+        }
 
-    // Display updated middle cards
-    displayCards('middle-cards-container', middleCards);
+        // Display updated middle cards
+        displayCards('middle-cards-container', middleCards);
 
-    // Switch turn to the other player
-    currentPlayer = currentPlayer === 1 ? 2 : 1;
+        // Switch turn to the other player
+        currentPlayer = currentPlayer === 1 ? 2 : 1;
 
-    // Display updated hands
-    displayCards('player1-cards', player1Hand);
-    displayCards('player2-cards', player2Hand);
-
-    // Deal new cards if both players are out of cards
-    if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length > 0) {
-        dealNewCards();
+        // Display updated hands
         displayCards('player1-cards', player1Hand);
         displayCards('player2-cards', player2Hand);
+
+        // Deal new cards if both players are out of cards
+        if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length > 0) {
+            dealNewCards();
+            displayCards('player1-cards', player1Hand);
+            displayCards('player2-cards', player2Hand);
+        }
     }
 
-    // If the deck is empty and the middle is empty, give remaining cards to the last player to take
-    if (deck.length === 0 && middleCards.length === 0 && lastPlayerToTake !== null) {
-        const lastPlayerCollected = lastPlayerToTake === 1 ? player1Collected : player2Collected;
-        playerRevealed.push(card);
-        displayCollectedCards(`player${lastPlayerToTake}-collected`, lastPlayerCollected);
+    function cardValueToInt(value) {
+        switch (value) {
+            case 'A': return 1;
+            case '2': return 2;
+            case '3': return 3;
+            case '4': return 4;
+            case '5': return 5;
+            case '6': return 6;
+            case '7': return 7;
+            case 'Q': return 8;
+            case 'J': return 9;
+            case 'K': return 10;
+            default: return 0;
+        }
     }
-}
 
-function cardValueToInt(value) {
-    switch (value) {
-        case 'A': return 1;
-        case '2': return 2;
-        case '3': return 3;
-        case '4': return 4;
-        case '5': return 5;
-        case '6': return 6;
-        case '7': return 7;
-        case 'Q': return 8;
-        case 'J': return 9;
-        case 'K': return 10;
-        default: return 0;
-    }
-}
-
-function findSummingCards(cards, targetValue) {
-    const result = [];
+    function findSummingCards(cards, targetValue) {
+        const result = [];
     function findCombination(currentCombination, remainingCards, currentSum) {
         if (currentSum === targetValue) {
             result.push([...currentCombination]);
