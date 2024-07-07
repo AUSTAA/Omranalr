@@ -114,12 +114,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cardIndex === -1) return;
         playerHand.splice(cardIndex, 1);
 
-        // Find matching or summing cards in the middle
-        const cardValueInt = cardValueToInt(card.value);
-        const matchingCards = findSummingCards(middleCards, cardValueInt);
+        // Find matching cards in the middle
+        const matchingCards = middleCards.filter(c => c.value === card.value);
 
         if (matchingCards.length > 0) {
-            // Remove matching cards from the middle and add them to the player's collected cards
+            // Allow the player to take all matching cards
             matchingCards.forEach(mc => {
                 const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
                 if (index > -1) middleCards.splice(index, 1);
@@ -175,26 +174,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function findSummingCards(cards, targetValue) {
         const result = [];
-    function findCombination(currentCombination, remainingCards, currentSum) {
-        if (currentSum === targetValue) {
-            result.push([...currentCombination]);
-            return;
-        }
-        if (currentSum > targetValue || remainingCards.length === 0) return;
+        function findCombination(currentCombination, remainingCards, currentSum) {
+            if (currentSum === targetValue) {
+                result.push(...currentCombination);
+                return;
+            }
+            if (currentSum > targetValue || remainingCards.length === 0) return;
 
-        for (let i = 0; i < remainingCards.length; i++) {
-            findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
+            for (let i = 0; i < remainingCards.length; i++) {
+                findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
+            }
         }
+
+        findCombination([], cards, 0);
+        return result;
     }
 
-    findCombination([], cards, 0);
-    return result;
-}
-
-function chooseCards(matchingCards, playedCard) {
-    // For simplicity, returning the first set found
-    // In a real game, you would prompt the player to choose
-    return matchingCards[0];
-}
-
+    function chooseCards(matchingCards, playedCard) {
+        // For simplicity, returning the first set found
+        // In a real game, you would prompt the player to choose
+        return matchingCards.slice(0, 1);
+    }
 });
