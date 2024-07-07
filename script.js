@@ -102,73 +102,73 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playCard(event, playerHand, playerCollected, playerRevealed, middleCards) {
-        const cardElement = event.target.closest('.card');
-        if (!cardElement) return;
+    const cardElement = event.target.closest('.card');
+    if (!cardElement) return;
 
-        const cardValue = cardElement.querySelector('.top-left').textContent[0];
-        const cardSuit = cardElement.classList[1];
-        const card = { value: cardValue, suit: cardSuit };
+    const cardValue = cardElement.querySelector('.top-left').textContent[0];
+    const cardSuit = cardElement.classList[1];
+    const card = { value: cardValue, suit: cardSuit };
 
-        // Find and remove the card from the player's hand
-        const cardIndex = playerHand.findIndex(c => c.value === card.value && c.suit === card.suit);
-        if (cardIndex === -1) return;
-        playerHand.splice(cardIndex, 1);
+    // Find and remove the card from the player's hand
+    const cardIndex = playerHand.findIndex(c => c.value === card.value && c.suit === card.suit);
+    if (cardIndex === -1) return;
+    playerHand.splice(cardIndex, 1);
 
-        // Find matching or summing cards in the middle
-        let matchingCards = middleCards.filter(c => c.value === card.value);
-        if (matchingCards.length === 0) {
-            const cardValueInt = cardValueToInt(card.value);
-            matchingCards = findSummingCards(middleCards, cardValueInt);
-        }
+    // Find matching or summing cards in the middle
+    let matchingCards = middleCards.filter(c => c.value === card.value);
+    if (matchingCards.length === 0) {
+        const cardValueInt = cardValueToInt(card.value);
+        matchingCards = findSummingCards(middleCards, cardValueInt);
+    }
 
-        if (matchingCards.length > 0) {
-            // Allow the player to choose the matching set or card
-            const chosenCards = chooseCards(matchingCards, card);
+    if (matchingCards.length > 0) {
+        // Allow the player to choose the matching set or card
+        const chosenCards = chooseCards(matchingCards, card);
 
-            // Remove matching cards from the middle and add them to the player's collected cards
-            chosenCards.forEach(mc => {
-                const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
-                if (index > -1) middleCards.splice(index, 1);
-                playerCollected.push(mc); // Add middle card to collected cards
-            });
+        // Remove matching cards from the middle and add them to the player's collected cards
+        chosenCards.forEach(mc => {
+            const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
+            if (index > -1) middleCards.splice(index, 1);
+            playerCollected.push(mc); // Add middle card to collected cards
+        });
 
-            // Add the played card to the player's collected cards
-            playerCollected.push(card);
+        // Add the played card to the player's collected cards
+        playerCollected.push(card);
 
-            // Update the last player to take cards
-            lastPlayerToTake = currentPlayer;
+        // Update the last player to take cards
+        lastPlayerToTake = currentPlayer;
 
-            // Display updated collected cards
-            displayCollectedCards(`player${currentPlayer}-collected`, playerCollected);
-        } else {
-            // If no matching cards, put the played card in the middle
-            middleCards.push(card);
-        }
+        // Display updated collected cards
+        displayCollectedCards(`player${currentPlayer}-collected`, playerCollected);
+    } else {
+        // If no matching cards, put the played card in the middle
+        middleCards.push(card);
+    }
 
-        // Display updated middle cards
-        displayCards('middle-cards-container', middleCards);
+    // Display updated middle cards
+    displayCards('middle-cards-container', middleCards);
 
-        // Switch turn to the other player
-        currentPlayer = currentPlayer === 1 ? 2 : 1;
+    // Switch turn to the other player
+    currentPlayer = currentPlayer === 1 ? 2 : 1;
 
-        // Display updated hands
+    // Display updated hands
+    displayCards('player1-cards', player1Hand);
+    displayCards('player2-cards', player2Hand);
+
+    // Deal new cards if both players are out of cards
+    if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length > 0) {
+        dealNewCards();
         displayCards('player1-cards', player1Hand);
         displayCards('player2-cards', player2Hand);
-
-        // Deal new cards if both players are out of cards
-        if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length > 0) {
-            dealNewCards();
-            displayCards('player1-cards', player1Hand);
-            displayCards('player2-cards', player2Hand);
-        }
-
-        // If the deck is empty and the middle is empty, give remaining cards to the last player to take
-        if (deck.length === 0 && middleCards.length === 0 && lastPlayerToTake !== null) {
-            const lastPlayerCollected = lastPlayerToTake === 1 ? player1Collected : player2Collected;
-            playerRevealed.push(card);
-            displayCollectedCards(`player${lastPlayerToTake}-collected`, lastPlayerCollected);
-        }
     }
+
+    // If the deck is empty and the middle is empty, give remaining cards to the last player to take
+    if (deck.length === 0 && middleCards.length === 0 && lastPlayerToTake !== null) {
+        const lastPlayerCollected = lastPlayerToTake === 1 ? player1Collected : player2Collected;
+        playerRevealed.push(card);
+        displayCollectedCards(`player${lastPlayerToTake}-collected`, lastPlayerCollected);
+    }
+}
 
     function cardValueToInt(value) {
         switch (value) {
