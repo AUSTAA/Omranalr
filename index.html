@@ -4,30 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Card Game</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css"> <!-- رابط لملف CSS الخارجي -->
 </head>
 <body>
     <div id="game-container">
         <!-- Player 1 -->
-        <div id="player1-area" class="player-area">
-            <div id="player1-collected" class="collected-container"></div>
-            <div id="player1-revealed" class="revealed-container"></div>
+        <div class="player-area">
             <div id="player1-cards" class="cards-container"></div>
+            <div class="side-containers">
+                <div id="player1-collected" class="collected-container"></div>
+                <div id="player1-revealed" class="revealed-container"></div>
+            </div>
         </div>
 
         <!-- Middle Cards -->
-        <div id="middle-area" class="middle-area">
-            <div id="middle-cards-container" class="middle-container"></div>
-        </div>
+        <div id="middle-cards-container" class="middle-container"></div>
 
         <!-- Player 2 -->
-        <div id="player2-area" class="player-area">
-            <div id="player2-collected" class="collected-container"></div>
-            <div id="player2-revealed" class="revealed-container"></div>
+        <div class="player-area">
             <div id="player2-cards" class="cards-container"></div>
+            <div class="side-containers">
+                <div id="player2-collected" class="collected-container"></div>
+                <div id="player2-revealed" class="revealed-container"></div>
+            </div>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js"></script> <!-- رابط لملف JavaScript الخارجي -->
 </body>
 </html>
