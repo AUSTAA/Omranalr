@@ -24,6 +24,13 @@ body {
     width: 100%;
 }
 
+.side-containers {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-end; /* الأوراق المقلوبة والمكشوفة على يمين اللاعب */
+}
+
 .middle-area {
     display: flex;
     justify-content: center;
@@ -93,14 +100,12 @@ body {
     position: relative;
     width: 100px;
     height: 140px;
-    margin-right: 20px; /* الأوراق المقلوبة تكون على يمين اللاعب */
 }
 
 .revealed-container {
     position: relative;
     width: 100px;
     height: 140px;
-    margin-left: 20px; /* الورقة المكشوفة تكون على يسار الأوراق المقلوبة */
 }
 
 .middle-container {
