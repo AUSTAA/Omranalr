@@ -142,6 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chosenCards = findSummingCards(middleCards, cardValueInt);
     }
 
+    let isShkeba = false;
     if (chosenCards.length > 0) {
         // Allow the player to take all matching or summing cards
         chosenCards.forEach(mc => {
@@ -153,17 +154,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add the played card to the player's collected cards
         playerCollected.push(card);
 
-        // Update the last player to take cards
-        lastPlayerToTake = currentPlayer;
+        // Check if the player took the last card(s) from the middle
+        if (middleCards.length === 0) {
+            isShkeba = true;
+            playerRevealed.push(card);  // Add the played card to revealed cards
+            lastPlayerToTake = currentPlayer;
+        }
 
         // Display updated collected cards
         displayCollectedCards(`player${currentPlayer}-collected`, playerCollected, playerRevealed);
-
-        // Add the played card to revealed cards with half revealed
-        playerRevealed.push(card);
-        
-        // Show "شكبـّة" message
-        alert('شكبـّة');
     } else {
         // If no matching or summing cards, put the played card in the middle
         middleCards.push(card);
@@ -184,6 +183,11 @@ document.addEventListener('DOMContentLoaded', () => {
         dealNewCards();
         displayCards('player1-cards', player1Hand);
         displayCards('player2-cards', player2Hand);
+    }
+
+    // Show "شكبـّة" message if it is a shkeba
+    if (isShkeba) {
+        alert('شكبـّة');
     }
 }
 
