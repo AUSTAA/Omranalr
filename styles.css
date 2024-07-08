@@ -5,6 +5,7 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
+    overflow: hidden; /* منع التمرير */
 }
 
 #game-container {
@@ -14,11 +15,12 @@ body {
     gap: 40px; /* زيادة المسافة بين اللاعبين والأوراق في الوسط */
     width: 100%;
     max-width: 1200px;
+    height: 100%; /* ملء الارتفاع بالكامل */
 }
 
 .player-area {
     display: flex;
-    justify-content: space-between;
+    justify-content: center; /* الوسط بدل الجانب الأيسر */
     align-items: center;
     gap: 20px;
     width: 100%;
@@ -42,7 +44,7 @@ body {
 
 .cards-container {
     display: flex;
-    justify-content: center;
+    justify-content: center; /* الوسط بدل الجانب الأيسر */
     gap: 10px; /* مسافة بين الأوراق في يد اللاعب */
 }
 
