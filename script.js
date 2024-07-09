@@ -107,20 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
             cardElement.innerHTML = `
                 <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
                 <div class="symbol">${suitSymbols[card.suit]}</div>
-                             <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
-            `;
-            cardElement.style.top = `${index * 2}px`;
-            cardElement.style.left = `${index * 2}px`;
-            container.appendChild(cardElement);
-        });
-
-        // Display revealed cards (partial)
-        revealedCards.forEach((card, index) => {
-            const cardElement = document.createElement('div');
-            cardElement.className = `card ${card.suit} revealed-card`;
-            cardElement.innerHTML = `
-                <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
-                <div class="symbol">${suitSymbols[card.suit]}</div>
                 <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
             `;
             cardElement.style.top = `${index * 15}px`; // تكديس الأوراق المكشوفة جزئياً
@@ -233,9 +219,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             if (currentSum > targetValue || remainingCards.length === 0) return;
-
-            for (let i = 0; i < remainingCards.length; i++) {
-                findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
+                            for (let i = 0; i < remainingCards.length; i++) {
+                    findCombination(
+                        [...currentCombination, remainingCards[i]],
+                        remainingCards.slice(i + 1),
+                        currentSum + cardValueToInt(remainingCards[i].value)
+                    );
+                }
             }
         }
 
@@ -243,21 +233,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return result.length > 0 ? result[0] : [];
     }
 
-    function findSummingCards(cards, targetValue) {
-        const result = [];
-        function findCombination(currentCombination, remainingCards, currentSum) {
-            if (currentSum === targetValue) {
-                result.push([...currentCombination]);
-                return;
-            }
-            if (currentSum > targetValue || remainingCards.length === 0) return;
+    // Add the element for shkeba count
+    const player1ShkebaCountElement = document.createElement('div');
+    player1ShkebaCountElement.id = 'player1-shkeba-count';
+    document.getElementById('player1-collected').appendChild(player1ShkebaCountElement);
 
-            for (let i = 0; i < remainingCards.length; i++) {
-                findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
-            }
-        }
-
-        findCombination([], cards, 0);
-        return result.length > 0 ? result[0] : [];
-    }
+    const player2ShkebaCountElement = document.createElement('div');
+    player2ShkebaCountElement.id = 'player2-shkeba-count';
+    document.getElementById('player2-collected').appendChild(player2ShkebaCountElement);
 });
