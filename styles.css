@@ -18,7 +18,7 @@ body {
 
 .player-area {
     display: flex;
-    justify-content: center; /* الأوراق في المنتصف */
+    justify-content: center;
     align-items: center;
     gap: 20px;
     width: 100%;
@@ -96,13 +96,25 @@ body {
     position: absolute;
 }
 
-.revealed-card {
+.revealed-container {
+    position: relative;
     width: 60px;
     height: 90px;
-    background-color: #fff;
-    border: 1px solid #000;
+}
+
+.revealed-card {
     position: absolute;
     top: 0;
     left: 0;
-    transform: translateY(-50%); /* Half revealed */
+    width: 60px;
+    height: 45px; /* نصف ارتفاع الورقة */
+    background-color: rgba(0, 0, 0, 0.5); /* لون نصف شفاف */
+    overflow: hidden;
+}
+
+.shkeba-count {
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 10px;
+    color: red;
 }
