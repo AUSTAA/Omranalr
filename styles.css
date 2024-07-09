@@ -5,7 +5,6 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    overflow: hidden; /* منع التمرير */
 }
 
 #game-container {
@@ -15,12 +14,11 @@ body {
     gap: 40px; /* زيادة المسافة بين اللاعبين والأوراق في الوسط */
     width: 100%;
     max-width: 1200px;
-    height: 100%; /* ملء الارتفاع بالكامل */
 }
 
 .player-area {
     display: flex;
-    justify-content: center; /* الوسط بدل الجانب الأيسر */
+    justify-content: center; /* الأوراق في المنتصف */
     align-items: center;
     gap: 20px;
     width: 100%;
@@ -44,7 +42,7 @@ body {
 
 .cards-container {
     display: flex;
-    justify-content: center; /* الوسط بدل الجانب الأيسر */
+    justify-content: center;
     gap: 10px; /* مسافة بين الأوراق في يد اللاعب */
 }
 
@@ -98,14 +96,13 @@ body {
     position: absolute;
 }
 
-.collected-container {
-    position: relative;
-    width: 100px;
-    height: 140px;
-}
-
-.revealed-container {
-    position: relative;
-    width: 100px;
-    height: 140px;
+.revealed-card {
+    width: 60px;
+    height: 90px;
+    background-color: #fff;
+    border: 1px solid #000;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translateY(-50%); /* Half revealed */
 }
