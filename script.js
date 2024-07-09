@@ -109,9 +109,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="symbol">${suitSymbols[card.suit]}</div>
                 <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
             `;
-            cardElement.style.top = `${index * 2}px`;
-            cardElement.style.left = `${index * 2}px`;
+            cardElement.style.top = `${index * 10}px`; // Adjust overlap position
+            cardElement.style.left = '0px'; // Same position to overlap
             cardElement.style.opacity = '0.5'; // Make it partially visible
+            cardElement.style.transform = 'translateY(-50%)'; // Reveal half of the card
             container.appendChild(cardElement);
         });
     }
@@ -217,12 +218,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentSum > targetValue || remainingCards.length === 0) return;
 
             for (let i = 0; i < remainingCards.length; i++) {
-                findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
-            }
-        }
-
-        findCombination([], cards, 0);
-        return result.length > 0 ? result[0] : [];
-// Return the first valid combination found
+                findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), 
+                                currentSum + cardValueToInt(remainingCards[i].value));
 }
+}
+
+    findCombination([], cards, 0);
+    return result.length > 0 ? result[0] : [];
+    // Return the first valid combination found
+}
+
 });
