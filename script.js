@@ -28,15 +28,15 @@ document.addEventListener('DOMContentLoaded', () => {
     displayCards('player1-cards', player1Hand);
     displayCards('player2-cards', player2Hand);
     displayCards('middle-cards-container', middleCards);
-    displayCollectedCards('player1-collected', player1Collected, player1Revealed);
-    displayCollectedCards('player2-collected', player2Collected, player2Revealed);
+    displayCollectedCards('player1-collected', player1Collected, player1Revealed, 'player1-shkeba-count');
+    displayCollectedCards('player2-collected', player2Collected, player2Revealed, 'player2-shkeba-count');
 
     // Event listeners for playing cards
     document.getElementById('player1-cards').addEventListener('click', event => {
-        if (currentPlayer === 1) playCard(event, player1Hand, player1Collected, player1Revealed, middleCards);
+        if (currentPlayer === 1) playCard(event, player1Hand, player1Collected, player1Revealed, middleCards, 'player1-shkeba-count');
     });
     document.getElementById('player2-cards').addEventListener('click', event => {
-        if (currentPlayer === 2) playCard(event, player2Hand, player2Collected, player2Revealed, middleCards);
+        if (currentPlayer === 2) playCard(event, player2Hand, player2Collected, player2Revealed, middleCards, 'player2-shkeba-count');
     });
 
     function createDeck() {
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function displayCollectedCards(elementId, cards, revealedCards) {
+    function displayCollectedCards(elementId, cards, revealedCards, shkebaCountId) {
         const container = document.getElementById(elementId);
         container.innerHTML = '';
         cards.forEach((card, index) => {
@@ -101,144 +101,47 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Display revealed cards (partial)
+        const revealedContainer = document.querySelector(`#${elementId} ~ .revealed-container .revealed-card`);
+        revealedContainer.innerHTML = '';
         revealedCards.forEach((card, index) => {
-            const cardElement = document.createElement('div');
-            cardElement.className = `card ${card.suit} revealed-card`;
-            cardElement.innerHTML = `
-                <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
-                <div class="symbol">${suitSymbols[card.suit]}</div>
-                <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
-            `;
-            cardElement.style.top = `${index * 15}px`; // تكديس الأوراق المكشوفة جزئياً
-            cardElement.style.zIndex = index; // لتكديس الأوراق فوق بعضها
-            cardElement.style.opacity = '0.5'; // لجعلها مكشوفة جزئياً
-            container.appendChild(cardElement);
+            if (index === revealedCards.length - 1) { // آخر ورقة مكشوفة جزئياً
+                revealedContainer.className = `card ${card.suit} revealed-card`;
+                revealedContainer.innerHTML = `
+                    <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
+                    <div class="symbol">${suitSymbols[card.suit]}</div>
+                    <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
+                `;
+            }
         });
 
-        // Update shkeba count
-        const countElement = document.getElementById(`${elementId.replace('collected', 'shkeba-count')}`);
-        countElement.textContent = revealedCards.length;
+        // تحديث عداد الشكبة
+        const shkebaCountElement = document.getElementById(shkebaCountId);
+        shkebaCountElement.innerText = cards.length;
     }
 
-    function playCard(event, playerHand, playerCollected, playerRevealed, middleCards) {
+    function playCard(event, hand, collected, revealed, middleCards, shkebaCountId) {
         const cardElement = event.target.closest('.card');
         if (!cardElement) return;
 
-        const cardValue = cardElement.querySelector('.top-left').textContent[0];
-        const cardSuit = cardElement.classList[1];
-        const card = { value: cardValue, suit: cardSuit };
+        const cardIndex = Array.from(cardElement.parentElement.children).indexOf(cardElement);
+        const playedCard = hand.splice(cardIndex, 1)[0];
 
-        // Find and remove the card from the player's hand
-        const cardIndex = playerHand.findIndex(c => c.value === card.value && c.suit === card.suit);
-        if (cardIndex === -1) return;
-        playerHand.splice(cardIndex, 1);
-
-        // Find matching cards in the middle
-        const matchingCards = middleCards.filter(c => c.value === card.value);
-        const cardValueInt = cardValueToInt(card.value);
-
-        let chosenCards = [];
-        if (matchingCards.length > 0) {
-            // If there are matching cards, choose them
-            chosenCards = matchingCards;
-        } else {
-            // Otherwise, find summing cards
-            chosenCards = findSummingCards(middleCards, cardValueInt);
+        // تحقق من إمكانية أخذ أوراق من الوسط
+        const matchingIndex = middleCards.findIndex(card => card.value === playedCard.value);
+        if (matchingIndex !== -1) {
+            collected.push(...middleCards.splice(matchingIndex, 1));
+            lastPlayerToTake = currentPlayer;
         }
 
-        let isShkeba = false;
-        if (chosenCards.length > 0) {
-            // Allow the player to take all matching or summing cards
-            chosenCards.forEach(mc => {
-                const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
-                if (index > -1) middleCards.splice(index, 1);
-                playerCollected.push(mc); // Add middle card to collected cards
-            });
+        // أضف البطاقة التي تم لعبها إلى الوسط
+        middleCards.push(playedCard);
 
-            // Add the played card to the player's collected cards
-            playerCollected.push(card);
-
-            // Check if the player took the last card(s) from the middle
-            if (middleCards.length === 0) {
-                isShkeba = true;
-                playerRevealed.push(card);  // Add the played card to revealed cards
-                lastPlayerToTake = currentPlayer;
-            }
-
-            // Display updated collected cards
-            displayCollectedCards(`player${currentPlayer}-collected`, playerCollected, playerRevealed);
-        } else {
-            // If no matching or summing cards, put the played card in the middle
-            middleCards.push(card);
-        }
-
-        // Display updated middle cards
-        displayCards('middle-cards-container', middleCards);
-
-        // Switch turn to the other player
+        // تغيير الدور إلى اللاعب الآخر
         currentPlayer = currentPlayer === 1 ? 2 : 1;
 
-        // Display updated hands
+        // تحديث العرض
         displayCards('player1-cards', player1Hand);
         displayCards('player2-cards', player2Hand);
-
-        // Deal new cards if both players are out of cards
-        if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length > 0) {
-            dealNewCards();
-            displayCards('player1-cards', player1Hand);
-            displayCards('player2-cards', player2Hand);
-        }
-
-        // Show "شكبـّة" message if it is a shkeba
-        if (isShkeba) {
-            alert('شكبـّة');
-        }
-    }
-
-    function cardValueToInt(value) {
-        switch (value) {
-            case 'A': return 1;
-            case '2': return 2;
-            case '3': return 3;
-            case '4': return 4;
-            case '5': return 5;
-            case '6': return 6;
-            case '7': return 7;
-            case 'Q': return 8;
-            case 'J': return 9;
-            case 'K': return 10;
-            default: return 0;
-        }
-    }
-
-    function findSummingCards(cards, targetValue) {
-        const result = [];
-        function findCombination(currentCombination, remainingCards, currentSum) {
-            if (currentSum === targetValue) {
-                result.push([...currentCombination]);
-                return;
-            }
-            if (currentSum > targetValue || remainingCards.length === 0) return;
-                            for (let i = 0; i < remainingCards.length; i++) {
-                    findCombination(
-                        [...currentCombination, remainingCards[i]],
-                        remainingCards.slice(i + 1),
-                        currentSum + cardValueToInt(remainingCards[i].value)
-                    );
-                }
-            }
-        }
-
-        findCombination([], cards, 0);
-        return result.length > 0 ? result[0] : [];
-    }
-
-    // Add the element for shkeba count
-    const player1ShkebaCountElement = document.createElement('div');
-    player1ShkebaCountElement.id = 'player1-shkeba-count';
-    document.getElementById('player1-collected').appendChild(player1ShkebaCountElement);
-
-    const player2ShkebaCountElement = document.createElement('div');
-    player2ShkebaCountElement.id = 'player2-shkeba-count';
-    document.getElementById('player2-collected').appendChild(player2ShkebaCountElement);
-});
+        displayCards('middle-cards-container', middleCards);
+        displayCollectedCards('player1-collected', player1Collected, player1Revealed, 'player1-shkeba-count');
+        displayCollectedCards
