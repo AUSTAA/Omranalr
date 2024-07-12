@@ -196,6 +196,47 @@ document.addEventListener('DOMContentLoaded', () => {
         // Check for end of round
         if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length === 0) {
             endRound();
+            // Find matching cards in the middle
+const matchingCards = middleCards.filter(c => c.value === card.value);
+const cardValueInt = cardValueToInt(card.value);
+
+let chosenCards = [];
+if (matchingCards.length > 0) {
+    // If there are matching cards, choose them
+    chosenCards = matchingCards;
+} else {
+    // Otherwise, find summing cards
+    chosenCards = findSummingCards(middleCards, cardValueInt);
+}
+
+let isShkeba = false;
+if (chosenCards.length > 0) {
+    // Allow the player to take all matching or summing cards
+    chosenCards.forEach(mc => {
+        const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
+        if (index > -1) middleCards.splice(index, 1);
+        playerCollected.push(mc); // Add middle card to collected cards
+    });
+
+    // Add the played card to the player's collected cards
+    playerCollected.push(card);
+
+    // Check if the player took the last card(s) from the middle
+    if (middleCards.length === 0) {
+        isShkeba = true;
+        playerRevealed.push(card);  // Add the played card to revealed cards
+        lastPlayerToTake = currentPlayer;
+    }
+
+    // Display updated collected cards
+    displayCollectedCards(`player${currentPlayer}-collected`, playerCollected, playerRevealed);
+} else {
+    // If no matching or summing cards, put the played card in the middle
+    middleCards.push(card);
+}
+
+// Display updated middle cards
+displayCards('middle-cards-container', middleCards);
         }
     }
 
@@ -226,12 +267,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
             for (let i = 0; i < remainingCards.length; i++) {
                 findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
+                function findSummingCards(cards, targetValue) {
+    const result = [];
+    function findCombination(currentCombination, remainingCards, currentSum) {
+        if (currentSum === targetValue) {
+            result.push([...currentCombination]);
+            return;
+        }
+        if (currentSum > targetValue || remainingCards.length === 0) return;
+
+        for (let i = 0; i < remainingCards.length; i++) {
+            findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
+        }
+    }
+
+    findCombination([], cards, 0);
+    return result.length > 0 ? result[0] : [];
+}
             }
         }
 
         findCombination([], cards, 0);
         return result.length > 0 ? result[0] : [];
     }
+    function showSelectedCards(cards) {
+    const container = document.getElementById('selected-cards-container');
+    container.innerHTML = '';
+    cards.forEach(card => {
+        const cardElement = document.createElement('div');
+        cardElement.className = `card ${card.suit}`;
+        cardElement.innerHTML = `
+            <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
+            <div class="symbol">${suitSymbols[card.suit]}</div>
+            <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
+        `;
+        container.appendChild(cardElement);
+    });
+}
 
     function endRound() {
         calculateScores();
