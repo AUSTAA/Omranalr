@@ -120,34 +120,80 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playCard(event, playerHand, playerCollected, playerRevealed, middleCards) {
-        const cardElement = event.target.closest('.card');
-        if (!cardElement) return;
+    const cardElement = event.target.closest('.card');
+    if (!cardElement) return;
 
-        const cardValue = cardElement.querySelector('.top-left').textContent[0];
-        const cardSuit = cardElement.classList[1];
-        const card = { value: cardValue, suit: cardSuit };
+    const cardValue = cardElement.querySelector('.top-left').textContent[0];
+    const cardSuit = cardElement.classList[1];
+    const card = { value: cardValue, suit: cardSuit };
 
-        // Find and remove the card from the player's hand
-        const cardIndex = playerHand.findIndex(c => c.value === card.value && c.suit === card.suit);
-        if (cardIndex === -1) return;
-        playerHand.splice(cardIndex, 1);
+    // Find and remove the card from the player's hand
+    const cardIndex = playerHand.findIndex(c => c.value === card.value && c.suit === card.suit);
+    if (cardIndex === -1) return;
+    playerHand.splice(cardIndex, 1);
 
-        // Find matching cards in the middle
-        const matchingCards = middleCards.filter(c => c.value === card.value);
-        const cardValueInt = cardValueToInt(card.value);
+    // Find matching cards in the middle
+    const matchingCards = middleCards.filter(c => c.value === card.value);
+    const cardValueInt = cardValueToInt(card.value);
 
-        let chosenCards = [];
-        if (matchingCards.length > 0) {
-            // If there are matching cards, choose them
-            chosenCards = matchingCards;
+    let chosenCards = [];
+    if (matchingCards.length > 0) {
+        // If there are matching cards, choose them
+        chosenCards = matchingCards;
+    } else {
+        // Otherwise, find summing cards
+        chosenCards = findSummingCards(middleCards, cardValueInt);
+    }
+
+    let isShkeba = false;
+    if (chosenCards.length > 0) {
+        if (chosenCards.length > 1) {
+            // Allow player to choose which cards to take if multiple options are available
+            chooseCardsToCollect(chosenCards, (selectedCards) => {
+                selectedCards.forEach(mc => {
+                    const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
+                    if (index > -1) middleCards.splice(index, 1);
+                    playerCollected.push(mc); // Add middle card to collected cards
+                });
+
+                // Add the played card to the player's collected cards
+                playerCollected.push(card);
+
+                // Check if the player took the last card(s) from the middle
+                if (middleCards.length === 0) {
+                    isShkeba = true;
+                    playerRevealed.push(card);  // Add the played card to revealed cards
+                    lastPlayerToTake = currentPlayer;
+                }
+
+                // Display updated collected cards
+                displayCollectedCards(`player${currentPlayer}-collected`, playerCollected, playerRevealed);
+
+                // Switch turn to the other player
+                currentPlayer = currentPlayer === 1 ? 2 : 1;
+
+                // Display updated hands
+                displayCards('player1-cards', player1Hand);
+                displayCards('player2-cards', player2Hand);
+
+                // Deal new cards if both players are out of cards
+                if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length > 0) {
+                    dealNewCards();
+                    displayCards('player1-cards', player1Hand);
+                    displayCards('player2-cards', player2Hand);
+                }
+
+                // Show "شكبـّة" message if it is a shkeba
+                if (isShkeba) {
+                    alert('شكبـّة');
+                }
+
+                // Check for end of round
+                if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length === 0) {
+                    endRound();
+                }
+            });
         } else {
-            // Otherwise, find summing cards
-            chosenCards = findSummingCards(middleCards, cardValueInt);
-        }
-
-        let isShkeba = false;
-        if (chosenCards.length > 0) {
-            // Allow the player to take all matching or summing cards
             chosenCards.forEach(mc => {
                 const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
                 if (index > -1) middleCards.splice(index, 1);
@@ -166,28 +212,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Display updated collected cards
             displayCollectedCards(`player${currentPlayer}-collected`, playerCollected, playerRevealed);
-        } else {
-            // If no matching or summing cards, put the played card in the middle
-            middleCards.push(card);
+
+            // Switch turn to the other player
+            currentPlayer = currentPlayer === 1 ? 2 : 1;
+
+            // Display updated hands
+            displayCards('player1-cards', player1Hand);
+            displayCards('player2-cards', player2Hand);
+
+            // Deal new cards if both players are out of cards
+            if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length > 0) {
+                dealNewCards();
+                displayCards('player1-cards', player1Hand);
+                displayCards('player2-cards', player2Hand);
+            }
+
+            // Show "شكبـّة" message if it is a shkeba
+            if (isShkeba) {
+                alert('شكبـّة');
+            }
+
+            // Check for end of round
+            if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length === 0) {
+                endRound();
+            }
         }
-
-        // Display updated middle cards
-        displayCards('middle-cards-container', middleCards);
-
+    } else {
+        // If no matching or summing cards, put the played card in the middle
+        middleCards.push(card);
         // Switch turn to the other player
         currentPlayer = currentPlayer === 1 ? 2 : 1;
+        
+        // Display updated middle cards
+        displayCards('middle-cards-container', middleCards);
 
         // Display updated hands
         displayCards('player1-cards', player1Hand);
         displayCards('player2-cards', player2Hand);
-
-        // Deal new cards if both players are out of cards
-        if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length > 0) {
-            dealNewCards();
-            displayCards('player1-cards', player1Hand);
-            displayCards('player2-cards', player2Hand);
-        }
-
+    }
+}
         // Show "شكبـّة" message if it is a shkeba
         if (isShkeba) {
             alert('شكبـّة');
@@ -196,6 +259,39 @@ document.addEventListener('DOMContentLoaded', () => {
         // Check for end of round
         if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length === 0) {
             endRound();
+            function showCollectedCards(cards) {
+    const container = document.getElementById('selected-cards-container');
+    container.innerHTML = '';
+    cards.forEach(card => {
+        const cardElement = document.createElement('div');
+        cardElement.className = `card ${card.suit}`;
+        cardElement.innerHTML = `
+            <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
+            <div class="symbol">${suitSymbols[card.suit]}</div>
+            <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
+        `;
+        container.appendChild(cardElement);
+    });
+}
+           function clearTemporaryCollectedCards() {
+    const container = document.getElementById('selected-cards-container');
+    container.innerHTML = '';
+} 
+            function chooseCardsToCollect(availableCards, callback) {
+    // هنا يمكنك تطبيق واجهة اختيار الأوراق المتاحة
+    // على سبيل المثال، عرض البطاقات المتاحة في واجهة جديدة وانتظار اختيار اللاعب
+    // بعد اختيار اللاعب، اتصل بالدالة callback مع البطاقات المختارة
+    // مثال توضيحي:
+    showCollectedCards(availableCards);
+
+    document.getElementById('confirm-selection').addEventListener('click', () => {
+        // فرضًا أن البطاقات المختارة تم حفظها في متغير selectedCards
+        const selectedCards = getSelectedCardsFromUI(); // هذه الدالة يجب أن تعيد البطاقات المختارة من الواجهة
+        callback(selectedCards);
+        clearTemporaryCollectedCards();
+    });
+}
+            
             // Find matching cards in the middle
 const matchingCards = middleCards.filter(c => c.value === card.value);
 const cardValueInt = cardValueToInt(card.value);
