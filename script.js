@@ -138,8 +138,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let chosenCards = [];
     if (matchingCards.length > 0) {
-        // If there are matching cards, choose them
-        chosenCards = matchingCards;
+        // Prioritize Diamond cards
+        chosenCards = matchingCards.filter(c => c.suit === 'diamonds');
+        if (chosenCards.length === 0) {
+            // If no Diamond cards, choose the first matching card
+            chosenCards = [matchingCards[0]];
+        }
     } else {
         // Otherwise, find summing cards
         chosenCards = findSummingCards(middleCards, cardValueInt);
@@ -319,21 +323,18 @@ function highlightChoices(choices) {
     }
 
     function findSummingCards(cards, targetValue) {
-        const result = [];
-        function findCombination(currentCombination, remainingCards, currentSum) {
-            if (currentSum === targetValue) {
-                result.push([...currentCombination]);
-                return;
-            }
-            if (currentSum > targetValue || remainingCards.length === 0) return;
-
-            for (let i = 0; i < remainingCards.length; i++) {
-                findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
-            }
+    // Logic to find cards whose values sum up to the targetValue
+    let result = [];
+    const cardValues = cards.map(c => cardValueToInt(c.value));
+    
+    for (let i = 0; i < cards.length; i++) {
+        if (cardValues[i] === targetValue) {
+            result.push(cards[i]);
         }
-        findCombination([], cards, 0);
-        return result;
     }
+    
+    return result;
+}
 
     function endRound() {
         // Calculate final scores
