@@ -120,45 +120,107 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playCard(event, playerHand, playerCollected, playerRevealed, middleCards) {
-        const cardElement = event.target.closest('.card');
-        if (!cardElement) return;
+    const cardElement = event.target.closest('.card');
+    if (!cardElement) return;
 
-        const cardValue = cardElement.querySelector('.top-left').textContent[0];
-        const cardSuit = cardElement.classList[1];
-        const card = { value: cardValue, suit: cardSuit };
+    const cardValue = cardElement.querySelector('.top-left').textContent[0];
+    const cardSuit = cardElement.classList[1];
+    const card = { value: cardValue, suit: cardSuit };
 
-        // Find and remove the card from the player's hand
-        const cardIndex = playerHand.findIndex(c => c.value === card.value && c.suit === card.suit);
-        if (cardIndex === -1) return;
-        playerHand.splice(cardIndex, 1);
+    // Find and remove the card from the player's hand
+    const cardIndex = playerHand.findIndex(c => c.value === card.value && c.suit === card.suit);
+    if (cardIndex === -1) return;
+    playerHand.splice(cardIndex, 1);
 
-        // Find matching cards in the middle
-        const matchingCards = middleCards.filter(c => c.value === card.value);
-        const cardValueInt = cardValueToInt(card.value);
+    // Find matching cards in the middle
+    const matchingCards = middleCards.filter(c => c.value === card.value);
+    const cardValueInt = cardValueToInt(card.value);
 
-        let chosenCards = [];
-        if (matchingCards.length > 0) {
-            // If there are matching cards, choose them
-            chosenCards = matchingCards;
-        } else {
-            // Otherwise, find summing cards
-            chosenCards = findSummingCards(middleCards, cardValueInt);
-        }
+    let chosenCards = [];
+    if (matchingCards.length > 0) {
+        // If there are matching cards, choose them
+        chosenCards = matchingCards;
+    } else {
+        // Otherwise, find summing cards
+        chosenCards = findSummingCards(middleCards, cardValueInt);
+    }
 
-        if (chosenCards.length > 0 && chosenCards[0].length > 1) {
-            // If there are multiple sets of cards that sum to the card value, let the player choose
-            showChoices(chosenCards, chosenSet => {
-                collectCards(playerCollected, playerRevealed, chosenSet, card);
+    let isShkeba = false;
+    if (chosenCards.length > 0) {
+        // Highlight the possible choices
+        highlightChoices(chosenCards);
+
+        // Wait for player to select one of the highlighted cards
+        document.getElementById('middle-cards-container').addEventListener('click', function chooseCard(event) {
+            const selectedCardElement = event.target.closest('.card.choice-highlight');
+            if (!selectedCardElement) return;
+
+            const selectedCardValue = selectedCardElement.querySelector('.top-left').textContent[0];
+            const selectedCardSuit = selectedCardElement.classList[1];
+            const selectedCard = { value: selectedCardValue, suit: selectedCardSuit };
+
+            // Remove highlighted class from all choices
+            document.querySelectorAll('.choice-highlight').forEach(card => {
+                card.classList.remove('choice-highlight');
             });
-        } else if (chosenCards.length > 0) {
-            // Otherwise, just collect the cards
-            collectCards(playerCollected, playerRevealed, chosenCards[0], card);
-        } else {
-            // If no matching or summing cards, put the played card in the middle
-            middleCards.push(card);
+
+            // Find and remove the selected card from the middle cards
+            const index = middleCards.findIndex(c => c.value === selectedCard.value && c.suit === selectedCard.suit);
+            if (index > -1) middleCards.splice(index, 1);
+            playerCollected.push(selectedCard);
+
+            // Remove the event listener to prevent further triggers
+            document.getElementById('middle-cards-container').removeEventListener('click', chooseCard);
+
+            // Add the played card to the player's collected cards
+            playerCollected.push(card);
+
+            // Check if the player took the last card(s) from the middle
+            if (middleCards.length === 0) {
+                isShkeba = true;
+                playerRevealed.push(card);  // Add the played card to revealed cards
+                lastPlayerToTake = currentPlayer;
+            }
+
+            // Display updated collected cards
+            displayCollectedCards(`player${currentPlayer}-collected`, playerCollected, playerRevealed);
+
+            // Display updated middle cards
             displayCards('middle-cards-container', middleCards);
-            switchTurn();
-        }
+
+            // Switch turn to the other player
+            currentPlayer = currentPlayer === 1 ? 2 : 1;
+
+            // Display updated hands
+            displayCards('player1-cards', player1Hand);
+            displayCards('player2-cards', player2Hand);
+
+            // Deal new cards if both players are out of cards
+            if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length > 0) {
+                dealNewCards();
+                displayCards('player1-cards', player1Hand);
+                displayCards('player2-cards', player2Hand);
+            }
+
+            // Show "شكبـّة" message if it is a shkeba
+            if (isShkeba) {
+                alert('شكبـّة');
+            }
+
+            // Check for end of round
+            if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length === 0) {
+                endRound();
+            }
+        });
+    } else {
+        // If no matching or summing cards, put the played card in the middle
+        middleCards.push(card);
+
+        // Display updated middle cards
+        displayCards('middle-cards-container', middleCards);
+
+        // Switch turn to the other player
+        currentPlayer = currentPlayer === 1 ? 2 : 1;
 
         // Display updated hands
         displayCards('player1-cards', player1Hand);
@@ -176,6 +238,16 @@ document.addEventListener('DOMContentLoaded', () => {
             endRound();
         }
     }
+}
+
+function highlightChoices(choices) {
+    choices.forEach(choice => {
+        const choiceElement = document.querySelector(`.card.${choice.suit}[data-value="${choice.value}"]`);
+        if (choiceElement) {
+            choiceElement.classList.add('choice-highlight');
+        }
+    });
+}
 
     function showChoices(choices, callback) {
         const choicesContainer = document.createElement('div');
