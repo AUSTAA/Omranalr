@@ -312,7 +312,7 @@ function resetGame() {
 
     dealInitialCards();
 
-    // Display updated cards
+      // Display updated cards
     displayCards('player1-cards', player1Hand);
     displayCards('player2-cards', player2Hand);
     displayCards('middle-cards-container', middleCards);
@@ -320,3 +320,5 @@ function resetGame() {
     displayCollectedCards('player2-collected', player2Collected, player2Revealed);
     updateScores();
 }
+
+});
