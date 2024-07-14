@@ -150,3 +150,7 @@ body {
     flex-direction: column;
     gap: 10px;
 }
+.choice-highlight {
+    border: 3px solid yellow;
+    transform: scale(1.1);
+}
