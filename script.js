@@ -83,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cards.forEach(card => {
             const cardElement = document.createElement('div');
             cardElement.className = `card ${card.suit}`;
+            cardElement.dataset.value = card.value; // Store value for easier access
             cardElement.innerHTML = `
                 <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
                 <div class="symbol">${suitSymbols[card.suit]}</div>
@@ -120,321 +121,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playCard(event, playerHand, playerCollected, playerRevealed, middleCards) {
-    const cardElement = event.target.closest('.card');
-    if (!cardElement) return;
-
-    const cardValue = cardElement.querySelector('.top-left').textContent[0];
-    const cardSuit = cardElement.classList[1];
-    const card = { value: cardValue, suit: cardSuit };
-
-    // Find and remove the card from the player's hand
-    const cardIndex = playerHand.findIndex(c => c.value === card.value && c.suit === card.suit);
-    if (cardIndex === -1) return;
-    playerHand.splice(cardIndex, 1);
-
-    // Find matching cards in the middle
-    const matchingCards = middleCards.filter(c => c.value === card.value);
-    const cardValueInt = cardValueToInt(card.value);
-
-    let chosenCards = [];
-    if (matchingCards.length > 0) {
-        // Prioritize Diamond cards
-        chosenCards = matchingCards.filter(c => c.suit === 'diamonds');
-        if (chosenCards.length === 0) {
-            // If no Diamond cards, choose the first matching card
-            chosenCards = [matchingCards[0]];
-        }
-    } else {
-        // Otherwise, find summing cards
-        chosenCards = findSummingCards(middleCards, cardValueInt);
-    }
-
-    let isShkeba = false;
-    if (chosenCards.length > 0) {
-        // Highlight the possible choices
-        highlightChoices(chosenCards);
-
-        // Wait for player to select one of the highlighted cards
-        document.getElementById('middle-cards-container').addEventListener('click', function chooseCard(event) {
-            const selectedCardElement = event.target.closest('.card.choice-highlight');
-            if (!selectedCardElement) return;
-
-            const selectedCardValue = selectedCardElement.querySelector('.top-left').textContent[0];
-            const selectedCardSuit = selectedCardElement.classList[1];
-            const selectedCard = { value: selectedCardValue, suit: selectedCardSuit };
-
-            // Remove highlighted class from all choices
-            document.querySelectorAll('.choice-highlight').forEach(card => {
-                card.classList.remove('choice-highlight');
-            });
-
-            // Find and remove the selected card from the middle cards
-            const index = middleCards.findIndex(c => c.value === selectedCard.value && c.suit === selectedCard.suit);
-            if (index > -1) middleCards.splice(index, 1);
-            playerCollected.push(selectedCard);
-
-            // Remove the event listener to prevent further triggers
-            document.getElementById('middle-cards-container').removeEventListener('click', chooseCard);
-
-            // Add the played card to the player's collected cards
-            playerCollected.push(card);
-
-            // Check if the player took the last card(s) from the middle
-            if (middleCards.length === 0) {
-                isShkeba = true;
-                playerRevealed.push(card);  // Add the played card to revealed cards
-                lastPlayerToTake = currentPlayer;
-            }
-
-            // Display updated collected cards
-            displayCollectedCards(`player${currentPlayer}-collected`, playerCollected, playerRevealed);
-
-            // Display updated middle cards
-            displayCards('middle-cards-container', middleCards);
-
-            // Switch turn to the other player
-            currentPlayer = currentPlayer === 1 ? 2 : 1;
-
-            // Display updated hands
-            displayCards('player1-cards', player1Hand);
-            displayCards('player2-cards', player2Hand);
-
-            // Deal new cards if both players are out of cards
-            if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length > 0) {
-                dealNewCards();
-                displayCards('player1-cards', player1Hand);
-                displayCards('player2-cards', player2Hand);
-            }
-
-            // Show "شكبـّة" message if it is a shkeba
-            if (isShkeba) {
-                alert('شكبـّة');
-            }
-
-            // Check for end of round
-            if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length === 0) {
-                endRound();
-            }
-        });
-    } else {
-        // If no matching or summing cards, put the played card in the middle
-        middleCards.push(card);
-
-        // Display updated middle cards
-        displayCards('middle-cards-container', middleCards);
-
-        // Switch turn to the other player
-        currentPlayer = currentPlayer === 1 ? 2 : 1;
-
-        // Display updated hands
-        displayCards('player1-cards', player1Hand);
-        displayCards('player2-cards', player2Hand);
-
-        // Deal new cards if both players are out of cards
-        if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length > 0) {
-            dealNewCards();
-            displayCards('player1-cards', player1Hand);
-            displayCards('player2-cards', player2Hand);
-        }
-
-        // Check for end of round
-        if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length === 0) {
-            endRound();
-        }
-    }
-}
-
-function highlightChoices(choices) {
-    choices.forEach(choice => {
-        const choiceElement = document.querySelector(`.card.${choice.suit}[data-value="${choice.value}"]`);
-        if (choiceElement) {
-            choiceElement.classList.add('choice-highlight');
-        }
-    });
-}
-
-    function showChoices(choices, callback) {
-        const choicesContainer = document.createElement('div');
-        choicesContainer.className = 'choices-container';
-
-        choices.forEach((choice, index) => {
-            const choiceButton = document.createElement('button');
-            choiceButton.textContent = `Option ${index + 1}`;
-            choiceButton.addEventListener('click', () => {
-                document.body.removeChild(choicesContainer);
-                callback(choice);
-            });
-            choicesContainer.appendChild(choiceButton);
-        });
-
-        document.body.appendChild(choicesContainer);
-    }
-
-    function collectCards(playerCollected, playerRevealed, chosenCards, playedCard) {
-        chosenCards.forEach(mc => {
-            const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
-            if (index > -1) middleCards.splice(index, 1);
-            playerCollected.push(mc); // Add middle card to collected cards
-        });
-
-        // Add the played card to the player's collected cards
-        playerCollected.push(playedCard);
-
-             // Check if the player took the last card(s) from the middle
-        let isShkeba = false;
-        if (middleCards.length === 0) {
-            isShkeba = true;
-            playerRevealed.push(playedCard);  // Add the played card to revealed cards
-            lastPlayerToTake = currentPlayer;
-        }
-
-        // Display updated collected cards
-        displayCollectedCards(`player${currentPlayer}-collected`, playerCollected, playerRevealed);
-        displayCards('middle-cards-container', middleCards);
-
-        // Show "شكبـّة" message if it is a shkeba
-        if (isShkeba) {
-            alert('شكبـّة');
-        }
-
-        // Switch turn to the other player
-        switchTurn();
-    }
-
-    function switchTurn() {
-        currentPlayer = currentPlayer === 1 ? 2 : 1;
-        updateScores();
-    }
-
-    function cardValueToInt(value) {
-        switch (value) {
-            case 'A': return 1;
-            case '2': return 2;
-            case '3': return 3;
-            case '4': return 4;
-            case '5': return 5;
-            case '6': return 6;
-            case '7': return 7;
-            case 'Q': return 8;
-            case 'J': return 9;
-            case 'K': return 10;
-            default: return 0;
-        }
-    }
-
-    function findSummingCards(cards, targetValue) {
-    // Logic to find cards whose values sum up to the targetValue
-    let result = [];
-    const cardValues = cards.map(c => cardValueToInt(c.value));
-    
-    for (let i = 0; i < cards.length; i++) {
-        if (cardValues[i] === targetValue) {
-            result.push(cards[i]);
-        }
-    }
-    
-    return result;
-}
-
-    function endRound() {
-        // Calculate final scores
-        if (lastPlayerToTake === 1) {
-            player1Collected.push(...middleCards);
-        } else if (lastPlayerToTake === 2) {
-            player2Collected.push(...middleCards);
-        }
-
-        const player1CardsValue = calculateCardsValue(player1Collected);
-        const player2CardsValue = calculateCardsValue(player2Collected);
-
-        player1Score += player1CardsValue;
-        player2Score += player2CardsValue;
-
-        // Display scores and end round message
-        updateScores();
-        displayEndRoundMessage();
-
-        // Reset game for next round
-        resetGame();
-    }
-
-    function calculateCardsValue(cards) {
-        let value = 0;
-        cards.forEach(card => {
-            value += cardValueToInt(card.value);
-        });
-        return value;
-    }
-
-    function updateScores() {
-        document.getElementById('player1-score').textContent = `Score: ${player1Score}`;
-        document.getElementById('player2-score').textContent = `Score: ${player2Score}`;
-    }
-
-    function displayEndRoundMessage() {
-        const messageElement = document.createElement('div');
-        messageElement.className = 'round-message';
-        if (player1Score > player2Score) {
-            messageElement.textContent = 'Player 1 wins this round!';
-        } else if (player2Score > player1Score) {
-            messageElement.textContent = 'Player 2 wins this round!';
-        } else {
-            messageElement.textContent = 'It\'s a tie!';
-        }
-        document.body.appendChild(messageElement);
-        setTimeout(() => {
-            document.body.removeChild(messageElement);
-        }, 3000);
-    }
-
-    
-    function resetGame() {
-        deck = createDeck();
-        deck = shuffleDeck(deck);
-        player1Hand.length = 0;
-        player2Hand.length = 0;
-        middleCards.length = 0;
-        player1Collected.length = 0;
-        player2Collected.length = 0;
-        player1Revealed.length = 0;
-        player2Revealed.length = 0;
-        currentPlayer = 1;
-        lastPlayerToTake = null;
-
-        // Deal initial cards
-        dealInitialCards();
-
-        // Display cards
-        displayCards('player1-cards', player1Hand);
-        displayCards('player2-cards', player2Hand);
-        displayCards('middle-cards-container', middleCards);
-        displayCollectedCards('player1-collected', player1Collected, player1Revealed);
-        displayCollectedCards('player2-collected', player2Collected, player2Revealed);
-        updateScores();
-    }
-
-    function showChoices(choices, callback) {
-        const choicesContainer = document.createElement('div');
-        choicesContainer.className = 'choices-container';
-
-        choices.forEach((choice, index) => {
-            const choiceButton = document.createElement('button');
-            choiceButton.textContent = `Choice ${index + 1}`;
-            choiceButton.addEventListener('click', () => {
-                callback(choice);
-                document.body.removeChild(choicesContainer);
-            });
-            choicesContainer.appendChild(choiceButton);
-        });
-
-        document.body.appendChild(choicesContainer);
-    }
-
-    function playCard(event, playerHand, playerCollected, playerRevealed, middleCards) {
         const cardElement = event.target.closest('.card');
         if (!cardElement) return;
 
-        const cardValue = cardElement.querySelector('.top-left').textContent[0];
+        const cardValue = cardElement.dataset.value;
         const cardSuit = cardElement.classList[1];
         const playedCard = { value: cardValue, suit: cardSuit };
 
@@ -455,12 +145,12 @@ function highlightChoices(choices) {
             const summingCards = findSummingCards(middleCards, cardValueInt);
 
             if (summingCards.length > 1) {
-                // If multiple options, show choices to the player
-                showChoices(summingCards, chosenCards => {
+                // If multiple options, highlight choices for the player
+                highlightChoices(summingCards, chosenCards => {
                     collectCards([playedCard, ...chosenCards], playerCollected, playerRevealed, middleCards);
                 });
             } else if (summingCards.length === 1) {
-                collectCards([playedCard, ...summingCards[0]], playerCollected, playerRevealed, middleCards);
+                collectCards([playedCard, summingCards[0]], playerCollected, playerRevealed, middleCards);
             } else {
                 // If no matching or summing cards, put the played card in the middle
                 middleCards.push(playedCard);
@@ -484,6 +174,21 @@ function highlightChoices(choices) {
         if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length === 0) {
             endRound();
         }
+    }
+
+    function highlightChoices(choices, callback) {
+        choices.forEach(choice => {
+            const choiceElement = document.querySelector(`.card.${choice.suit}[data-value="${choice.value}"]`);
+            if (choiceElement) {
+                choiceElement.classList.add('choice-highlight');
+                choiceElement.addEventListener('click', () => {
+                    callback(choice);
+                    document.querySelectorAll('.choice-highlight').forEach(card => {
+                        card.classList.remove('choice-highlight');
+                    });
+                });
+            }
+        });
     }
 
     function collectCards(cards, playerCollected, playerRevealed, middleCards) {
@@ -518,4 +223,100 @@ function highlightChoices(choices) {
         // Switch turn to the other player
         switchTurn();
     }
-});
+
+    function switchTurn() {    currentPlayer = (currentPlayer === 1) ? 2 : 1;
+    document.getElementById('current-player').innerText = `Player ${currentPlayer}'s turn`;
+}
+
+function cardValueToInt(value) {
+    switch (value) {
+        case 'A': return 1;
+        case 'J': return 11;
+        case 'Q': return 12;
+        case 'K': return 13;
+        default: return parseInt(value);
+    }
+}
+
+function findSummingCards(cards, targetValue) {
+    const result = [];
+    function findSubset(subset, startIndex) {
+        const sum = subset.reduce((acc, card) => acc + cardValueToInt(card.value), 0);
+        if (sum === targetValue) result.push([...subset]);
+        if (sum >= targetValue || startIndex >= cards.length) return;
+
+        for (let i = startIndex; i < cards.length; i++) {
+            subset.push(cards[i]);
+            findSubset(subset, i + 1);
+            subset.pop();
+        }
+    }
+    findSubset([], 0);
+    return result;
+}
+
+function updateScores() {
+    player1Score = calculateScore(player1Collected, player1Revealed);
+    player2Score = calculateScore(player2Collected, player2Revealed);
+
+    document.getElementById('player1-score').innerText = `Player 1: ${player1Score}`;
+    document.getElementById('player2-score').innerText = `Player 2: ${player2Score}`;
+}
+
+function calculateScore(collectedCards, revealedCards) {
+    let score = 0;
+    collectedCards.forEach(card => {
+        if (card.value === 'A') score += 1;
+        else if (card.value === 'J') score += 1;
+        else if (card.value === 'Q') score += 2;
+        else if (card.value === 'K') score += 3;
+        else if (card.suit === 'spades' && card.value === '10') score += 3;
+    });
+    score += revealedCards.length * 5;
+    return score;
+}
+
+function endRound() {
+    if (lastPlayerToTake !== null) {
+        const remainingMiddleCards = [...middleCards];
+        if (lastPlayerToTake === 1) {
+            player1Collected.push(...remainingMiddleCards);
+        } else {
+            player2Collected.push(...remainingMiddleCards);
+        }
+    }
+
+    updateScores();
+
+    // Show end of round message and scores
+    alert(`End of round! Scores:\nPlayer 1: ${player1Score}\nPlayer 2: ${player2Score}`);
+
+    // Reset the game for a new round
+    resetGame();
+}
+
+function resetGame() {
+    deck = createDeck();
+    deck = shuffleDeck(deck);
+
+    player1Hand.length = 0;
+    player2Hand.length = 0;
+    middleCards.length = 0;
+    player1Collected.length = 0;
+    player2Collected.length = 0;
+    player1Revealed.length = 0;
+    player2Revealed.length = 0;
+
+    currentPlayer = 1;
+    lastPlayerToTake = null;
+
+    dealInitialCards();
+
+    // Display updated cards
+    displayCards('player1-cards', player1Hand);
+    displayCards('player2-cards', player2Hand);
+    displayCards('middle-cards-container', middleCards);
+    displayCollectedCards('player1-collected', player1Collected, player1Revealed);
+    displayCollectedCards('player2-collected', player2Collected, player2Revealed);
+    updateScores();
+}
