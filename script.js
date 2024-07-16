@@ -119,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    
     function playCard(event, playerHand, playerCollected, playerRevealed, middleCards) {
         const cardElement = event.target.closest('.card');
         if (!cardElement) return;
@@ -146,12 +147,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let isShkeba = false;
+        let takenCardsMessage = `Player ${currentPlayer} played ${card.value} of ${card.suit} and took: `;
         if (chosenCards.length > 0) {
             // Allow the player to take all matching or summing cards
             chosenCards.forEach(mc => {
                 const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
                 if (index > -1) middleCards.splice(index, 1);
                 playerCollected.push(mc); // Add middle card to collected cards
+                takenCardsMessage += `${mc.value} of ${mc.suit}, `;
             });
 
             // Add the played card to the player's collected cards
@@ -169,6 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             // If no matching or summing cards, put the played card in the middle
             middleCards.push(card);
+            takenCardsMessage = `Player ${currentPlayer} played ${card.value} of ${card.suit} but took no cards.`;
         }
 
         // Display updated middle cards
@@ -193,11 +197,15 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('شكبـّة');
         }
 
+        // Display what cards the player took
+        alert(takenCardsMessage);
+
         // Check for end of round
         if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length === 0) {
             endRound();
         }
     }
+
 
     function cardValueToInt(value) {
         switch (value) {
