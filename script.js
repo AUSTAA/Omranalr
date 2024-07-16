@@ -147,19 +147,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (chosenCards.length > 0) {
             highlightCards(chosenCards);
-            let selectedSet = false;
-            chosenCards.forEach(set => {
-                set.forEach(card => {
-                    card.element.addEventListener('click', () => {
-                        if (!selectedSet) {
-                            selectedSet = true;
-                            collectCards(set, playerCollected, card);
-                            displayCollectedCards(`player${currentPlayer}-collected`, playerCollected, playerRevealed);
-                            finalizeMove(card, playerHand, middleCards);
-                        }
-                    });
-                });
-            });
+            setTimeout(() => {
+                collectCards(chosenCards, playerCollected, card);
+                unhighlightCards(middleCards);
+                displayCollectedCards(`player${currentPlayer}-collected`, playerCollected, playerRevealed);
+                finalizeMove(card, playerHand, middleCards);
+            }, 1000); // Delay to show highlight effect before moving cards
         } else {
             // If no matching or summing cards, put the played card in the middle
             middleCards.push(card);
@@ -168,18 +161,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function highlightCards(cards) {
-        cards.forEach(set => {
-            set.forEach(card => {
-                card.element.classList.add('highlight');
-            });
+        cards.forEach(card => {
+            card.element.classList.add('highlight');
         });
     }
 
     function unhighlightCards(cards) {
-        cards.forEach(set => {
-            set.forEach(card => {
-                card.element.classList.remove('highlight');
-            });
+        cards.forEach(card => {
+            card.element.classList.remove('highlight');
+            card.element.classList.add('faded');
         });
     }
 
@@ -195,7 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function finalizeMove(card, playerHand, middleCards) {
-        unhighlightCards(middleCards);
         displayCards('middle-cards-container', middleCards);
         currentPlayer = currentPlayer === 1 ? 2 : 1;
         displayCards('player1-cards', player1Hand);
@@ -225,8 +214,8 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'Q': return 8;
             case 'J': return 9;
             case 'K': return 10;
-        default: return parseInt(value, 10);
-    }
+            default:return parseInt(value, 10);
+}
 }
 
 function findSummingCards(cards, targetValue) {
