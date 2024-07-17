@@ -145,58 +145,55 @@ document.addEventListener('DOMContentLoaded', () => {
             chosenCards = findSummingCards(middleCards, cardValueInt);
         }
 
+        let isShkeba = false;
         if (chosenCards.length > 0) {
-            highlightCards(chosenCards);
-            setTimeout(() => {
-                collectCards(chosenCards, playerCollected, card);
-                unhighlightCards(middleCards);
-                displayCollectedCards(`player${currentPlayer}-collected`, playerCollected, playerRevealed);
-                finalizeMove(card, playerHand, middleCards);
-            }, 1000); // Delay to show highlight effect before moving cards
+            // Allow the player to take all matching or summing cards
+            chosenCards.forEach(mc => {
+                const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
+                if (index > -1) middleCards.splice(index, 1);
+                playerCollected.push(mc); // Add middle card to collected cards
+            });
+
+            // Add the played card to the player's collected cards
+            playerCollected.push(card);
+
+            // Check if the player took the last card(s) from the middle
+            if (middleCards.length === 0) {
+                isShkeba = true;
+                playerRevealed.push(card);  // Add the played card to revealed cards
+                lastPlayerToTake = currentPlayer;
+            }
+
+            // Display updated collected cards
+            displayCollectedCards(`player${currentPlayer}-collected`, playerCollected, playerRevealed);
         } else {
             // If no matching or summing cards, put the played card in the middle
             middleCards.push(card);
-            finalizeMove(card, playerHand, middleCards);
         }
-    }
 
-    function highlightCards(cards) {
-        cards.forEach(card => {
-            card.element.classList.add('highlight');
-        });
-    }
-
-    function unhighlightCards(cards) {
-        cards.forEach(card => {
-            card.element.classList.remove('highlight');
-            card.element.classList.add('faded');
-        });
-    }
-
-    function collectCards(cards, playerCollected, playedCard) {
-        cards.forEach(card => {
-            const index = middleCards.findIndex(c => c.value === card.value && c.suit === card.suit);
-            if (index > -1) middleCards.splice(index, 1);
-            playerCollected.push(card); // Add middle card to collected cards
-        });
-
-        // Add the played card to the player's collected cards
-        playerCollected.push(playedCard);
-    }
-
-    function finalizeMove(card, playerHand, middleCards) {
+        // Display updated middle cards
         displayCards('middle-cards-container', middleCards);
+
+        // Switch turn to the other player
         currentPlayer = currentPlayer === 1 ? 2 : 1;
+
+        // Display updated hands
         displayCards('player1-cards', player1Hand);
         displayCards('player2-cards', player2Hand);
+
+        // Deal new cards if both players are out of cards
         if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length > 0) {
             dealNewCards();
             displayCards('player1-cards', player1Hand);
             displayCards('player2-cards', player2Hand);
         }
-        if (middleCards.length === 0) {
+
+        // Show "شكبـّة" message if it is a shkeba
+        if (isShkeba) {
             alert('شكبـّة');
         }
+
+        // Check for end of round
         if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length === 0) {
             endRound();
         }
@@ -214,50 +211,164 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'Q': return 8;
             case 'J': return 9;
             case 'K': return 10;
-            default:return parseInt(value, 10);
-}
+            default: return 0;
+        }
+    }
+
+    function findSummingCards(cards, targetValue) {
+        const result = [];
+        function findCombination(currentCombination, remainingCards, currentSum) {
+            if (currentSum === targetValue) {
+                result.push([...currentCombination]);
+                return;
+            }
+            if (currentSum > targetValue || remainingCards.length === 0) return;
+
+            for (let i = 0; i < remainingCards.length; i++) {
+                findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
+            }
+        }
+
+        findCombination([], cards, 0);
+        return result.length > 0 ? result[0] : [];
+    }
+
+    function endRound() {
+        calculateScores();
+        updateScores();
+
+        if (player1Score >= 61 || player2Score >= 61) {
+            if (player1Score === player2Score) {
+                // Both players reached the same score
+                alert("Both players have reached 61 points! Continuing to 71 points...");
+            } else {
+                declareWinner();
+                return;
+            }
+        }
+
+        if (player1Score >= 71 || player2Score >= 71) {
+            if (player1Score === player2Score) {
+                alert("Both players have reached 71 points! Continuing to 81 points...");
+            } else {
+                declareWinner();
+                return;
+            }
+        }
+
+        // Reset for a new round
+        deck = createDeck();
+        deck = shuffleDeck(deck);
+        player1Hand.length = 0;
+        player2Hand.length = 0;
+        middleCards.length = 0;
+        player1Collected.length = 0;
+        player2Collected.length = 0;
+        player1Revealed.length = 0;
+        player2Revealed.length = 0;
+        dealInitialCards();
+
+        displayCards('player1-cards', player1Hand);
+        displayCards('player2-cards', player2Hand);
+        displayCards('middle-cards-container', middleCards);
+        displayCollectedCards('player1-collected', player1Collected, player1Revealed);
+        displayCollectedCards('player2-collected', player2Collected, player2Revealed);
+
+        document.getElementById('round-message').style.display = 'block';
+        setTimeout(() => {
+            document.getElementById('round-message').style.display = 'none';
+        }, 2000);
+    }
+
+    function calculateScores() {
+        let player1Points = 0;
+        let player2Points = 0;
+
+        player1Points += player1Collected.length > player2Collected.length ? 1 : 0;
+        player2Points += player2Collected.length > player1Collected.length ? 1 : 0;
+
+        const player1Diamonds = player1Collected.filter(card => card.suit === 'diamonds').length;
+        const player2Diamonds = player2Collected.filter(card => card.suit === 'diamonds').length;
+
+        player1Points += player1Diamonds > player2Diamonds ? 1 : 0;
+        player2Points += player2Diamonds > player1Diamonds ? 1 : 0;
+
+        if (player1Collected.some(card => card.value === '7' && card.suit === 'diamonds')) player1Points += 1;
+        if (player2Collected.some(card => card.value === '7' && card.suit === 'diamonds')) player2Points += 1;
+
+        if (player1Collected.filter(card => card.value === '7').length >= 3) player1Points += 1;
+        if (player2Collected.filter(card => card.value === '7').length >= 3) player2Points += 1;
+
+        if (player1Collected.filter(card => card.value === '7').length >= 2 && player1Collected.filter(card => card.value === '6').length >= 3) player1Points += 1;
+        if (player2Collected.filter(card => card.value === '7').length >= 2 && player2Collected.filter(card => card.value === '6').length >= 3) player2Points += 1;
+
+        if (player1Diamonds >= 8) {
+player1Points += 10;
+player2Points = 0;
 }
 
-function findSummingCards(cards, targetValue) {
-    const result = [];
-    const subset = (arr, sum, index = 0, current = []) => {
-        if (sum === 0) {
-            result.push(current);
-            return;
-        }
-        if (index >= arr.length || sum < 0) return;
-        subset(arr, sum - cardValueToInt(arr[index].value), index + 1, [...current, arr[index]]);
-        subset(arr, sum, index + 1, current);
-    };
-    subset(cards, targetValue);
-    return result;
+    if (player2Diamonds >= 8) {
+        player2Points += 10;
+        player1Points = 0;
+    }
+
+    if (player1Diamonds >= 9 && player2Diamonds === 1) {
+        player1Points += player1Points;
+        player2Points = 0;
+    }
+
+    if (player2Diamonds >= 9 && player1Diamonds === 1) {
+        player2Points += player2Points;
+        player1Points = 0;
+    }
+
+    if (player1Diamonds === 10) {
+        player1Points += player1Points;
+        alert("Player 1 wins with a perfect 10 diamonds!");
+        player2Points = 0;
+        player1Score += player1Points;
+        player2Score += player2Points;
+        declareWinner();
+        return;
+    }
+
+    if (player2Diamonds === 10) {
+        player2Points += player2Points;
+        alert("Player 2 wins with a perfect 10 diamonds!");
+        player1Points = 0;
+        player1Score += player1Points;
+        player2Score += player2Points;
+        declareWinner();
+        return;
+    }
+
+    player1Collected.forEach(card => {
+        if (card.value === '7') player1Points += 7;
+    });
+
+    player2Collected.forEach(card => {
+        if (card.value === '7') player2Points += 7;
+    });
+
+    player1Score += player1Points;
+    player2Score += player2Points;
 }
 
 function updateScores() {
-    player1Score = calculateScore(player1Collected);
-    player2Score = calculateScore(player2Collected);
-
-    document.getElementById('player1-score').textContent = `Player 1 Score: ${player1Score}`;
-    document.getElementById('player2-score').textContent = `Player 2 Score: ${player2Score}`;
+    document.getElementById('player1-score').textContent = `Score: ${player1Score}`;
+    document.getElementById('player2-score').textContent = `Score: ${player2Score}`;
 }
 
-function calculateScore(collectedCards) {
-    const cardValues = collectedCards.map(card => card.value);
-    const jackOfDiamonds = collectedCards.find(card => card.value === 'J' && card.suit === 'diamonds');
-    const sevenOfHearts = collectedCards.find(card => card.value === '7' && card.suit === 'hearts');
-    const tenOfDiamonds = collectedCards.find(card => card.value === '10' && card.suit === 'diamonds');
-
-    let score = 0;
-    score += (jackOfDiamonds ? 1 : 0) + (sevenOfHearts ? 1 : 0) + (tenOfDiamonds ? 1 : 0);
-    return score;
+function declareWinner() {
+    const winner = player1Score > player2Score ? 'Player 1' : 'Player 2';
+    alert(`${winner} wins the game with ${Math.max(player1Score, player2Score)} points!`);
+    resetGame();
 }
 
-function endRound() {
-    updateScores();
-    const message = player1Score > player2Score ? 'Player 1 wins the round!' :
-        player2Score > player1Score ? 'Player 2 wins the round!' :
-            'The round is a tie!';
-    alert(message);
+function resetGame() {
+    player1Score = 0;
+    player2Score = 0;
+    endRound();
 }
 
 });
