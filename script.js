@@ -166,6 +166,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Display updated collected cards
             displayCollectedCards(`player${currentPlayer}-collected`, playerCollected, playerRevealed);
+
+            // Highlight collected cards
+            highlightCollectedCards(playerCollected, middleCards);
         } else {
             // If no matching or summing cards, put the played card in the middle
             middleCards.push(card);
@@ -222,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 result.push([...currentCombination]);
                 return;
             }
-            if (currentSum > targetValue || remainingCards.length === 0) return;
+                        if (currentSum > targetValue || remainingCards.length === 0) return;
 
             for (let i = 0; i < remainingCards.length; i++) {
                 findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
@@ -231,6 +234,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
         findCombination([], cards, 0);
         return result.length > 0 ? result[0] : [];
+    }
+
+    function highlightCollectedCards(collectedCards, middleCards) {
+        // Remove highlight from all cards
+        document.querySelectorAll('.card').forEach(card => {
+            card.classList.remove('highlight');
+            card.classList.remove('faded');
+        });
+
+        // Highlight collected cards
+        collectedCards.forEach(card => {
+            const cardElement = document.querySelector(`.card.${card.suit}[data-value="${card.value}"]`);
+            if (cardElement) {
+                cardElement.classList.add('highlight');
+            }
+        });
+
+        // Fade middle cards
+        middleCards.forEach(card => {
+            const cardElement = document.querySelector(`.card.${card.suit}[data-value="${card.value}"]`);
+            if (cardElement) {
+                cardElement.classList.add('faded');
+            }
+        });
     }
 
     function endRound() {
@@ -303,72 +330,71 @@ document.addEventListener('DOMContentLoaded', () => {
         if (player2Collected.filter(card => card.value === '7').length >= 2 && player2Collected.filter(card => card.value === '6').length >= 3) player2Points += 1;
 
         if (player1Diamonds >= 8) {
-player1Points += 10;
-player2Points = 0;
-}
+            player1Points += 10;
+            player2Points = 0;
+        }
 
-    if (player2Diamonds >= 8) {
-        player2Points += 10;
-        player1Points = 0;
-    }
+        if (player2Diamonds >= 8) {
+            player2Points += 10;
+            player1Points = 0;
+        }
 
-    if (player1Diamonds >= 9 && player2Diamonds === 1) {
-        player1Points += player1Points;
-        player2Points = 0;
-    }
+        if (player1Diamonds >= 9 && player2Diamonds === 1) {
+            player1Points += player1Points;
+            player2Points = 0;
+        }
 
-    if (player2Diamonds >= 9 && player1Diamonds === 1) {
-        player2Points += player2Points;
-        player1Points = 0;
-    }
+        if (player2Diamonds >= 9 && player1Diamonds === 1) {
+            player2Points += player2Points;
+            player1Points = 0;
+        }
 
-    if (player1Diamonds === 10) {
-        player1Points += player1Points;
-        alert("Player 1 wins with a perfect 10 diamonds!");
-        player2Points = 0;
+        if (player1Diamonds === 10) {
+            player1Points += player1Points;
+            alert("Player 1 wins with a perfect 10 diamonds!");
+            player2Points = 0;
+            player1Score += player1Points;
+            player2Score += player2Points;
+            declareWinner();
+            return;
+        }
+
+        if (player2Diamonds === 10) {
+            player2Points += player2Points;
+            alert("Player 2 wins with a perfect 10 diamonds!");
+            player1Points = 0;
+            player1Score += player1Points;
+            player2Score += player2Points;
+            declareWinner();
+            return;
+        }
+
+        player1Collected.forEach(card => {
+            if (card.value === '7') player1Points += 7;
+        });
+
+        player2Collected.forEach(card => {
+            if (card.value === '7') player2Points += 7;
+        });
+
         player1Score += player1Points;
         player2Score += player2Points;
-        declareWinner();
-        return;
     }
 
-    if (player2Diamonds === 10) {
-        player2Points += player2Points;
-        alert("Player 2 wins with a perfect 10 diamonds!");
-        player1Points = 0;
-        player1Score += player1Points;
-        player2Score += player2Points;
-        declareWinner();
-        return;
+    function updateScores() {
+        document.getElementById('player1-score').textContent = `Score: ${player1Score}`;
+        document.getElementById('player2-score').textContent = `Score: ${player2Score}`;
     }
 
-    player1Collected.forEach(card => {
-        if (card.value === '7') player1Points += 7;
-    });
+    function declareWinner() {
+        const winner = player1Score > player2Score ? 'Player 1' : 'Player 2';
+        alert(`${winner} wins the game with ${Math.max(player1Score, player2Score)} points!`);
+        resetGame();
+    }
 
-    player2Collected.forEach(card => {
-        if (card.value === '7') player2Points += 7;
-    });
-
-    player1Score += player1Points;
-    player2Score += player2Points;
-}
-
-function updateScores() {
-    document.getElementById('player1-score').textContent = `Score: ${player1Score}`;
-    document.getElementById('player2-score').textContent = `Score: ${player2Score}`;
-}
-
-function declareWinner() {
-    const winner = player1Score > player2Score ? 'Player 1' : 'Player 2';
-    alert(`${winner} wins the game with ${Math.max(player1Score, player2Score)} points!`);
-    resetGame();
-}
-
-function resetGame() {
-    player1Score = 0;
-    player2Score = 0;
-    endRound();
-}
-
+    function resetGame() {
+        player1Score = 0;
+        player2Score = 0;
+        endRound();
+    }
 });
