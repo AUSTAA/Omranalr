@@ -20,8 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentPlayer = 1;
     let lastPlayerToTake = null;
-    let player1Score = 0;
-    let player2Score = 0;
 
     // Initialize hands and middle cards
     dealInitialCards();
@@ -30,9 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
     displayCards('player1-cards', player1Hand);
     displayCards('player2-cards', player2Hand);
     displayCards('middle-cards-container', middleCards);
-    displayCollectedCards('player1-collected', player1Collected, player1Revealed);
-    displayCollectedCards('player2-collected', player2Collected, player2Revealed);
-    updateScores();
+    displayCollectedCards('player1-collected', player1Collected);
+    displayCollectedCards('player2-collected', player2Collected);
 
     // Event listeners for playing cards
     document.getElementById('player1-cards').addEventListener('click', event => {
@@ -92,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function displayCollectedCards(elementId, cards, revealedCards) {
+    function displayCollectedCards(elementId, cards) {
         const container = document.getElementById(elementId);
         container.innerHTML = '';
         cards.forEach((card, index) => {
@@ -100,21 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
             cardElement.className = 'card collected-card';
             cardElement.style.top = `${index * 2}px`;
             cardElement.style.left = `${index * 2}px`;
-            container.appendChild(cardElement);
-        });
-
-        // Display revealed cards (partial)
-        revealedCards.forEach((card, index) => {
-            const cardElement = document.createElement('div');
-            cardElement.className = `card ${card.suit} revealed-card`;
-            cardElement.innerHTML = `
-                <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
-                <div class="symbol">${suitSymbols[card.suit]}</div>
-                <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
-            `;
-            cardElement.style.top = `${index * 2}px`;
-            cardElement.style.left = `${index * 2}px`;
-            cardElement.style.opacity = '0.5'; // Make it partially visible
             container.appendChild(cardElement);
         });
     }
@@ -145,7 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
             chosenCards = findSummingCards(middleCards, cardValueInt);
         }
 
-        let isShkeba = false;
         if (chosenCards.length > 0) {
             // Allow the player to take all matching or summing cards
             chosenCards.forEach(mc => {
@@ -157,15 +138,16 @@ document.addEventListener('DOMContentLoaded', () => {
             // Add the played card to the player's collected cards
             playerCollected.push(card);
 
-            // Check if the player took the last card(s) from the middle
-            if (middleCards.length === 0) {
-                isShkeba = true;
-                playerRevealed.push(card);  // Add the played card to revealed cards
-                lastPlayerToTake = currentPlayer;
-            }
+            // Update the last player to take cards
+            lastPlayerToTake = currentPlayer;
 
             // Display updated collected cards
-            displayCollectedCards(`player${currentPlayer}-collected`, playerCollected, playerRevealed);
+            displayCollectedCards(`player${currentPlayer}-collected`, playerCollected);
+
+            // Display "شكبـّة" if no cards left in the middle
+            if (middleCards.length === 0) {
+                alert("شكبـّة!");
+            }
         } else {
             // If no matching or summing cards, put the played card in the middle
             middleCards.push(card);
@@ -188,14 +170,18 @@ document.addEventListener('DOMContentLoaded', () => {
             displayCards('player2-cards', player2Hand);
         }
 
-        // Show "شكبـّة" message if it is a shkeba
-        if (isShkeba) {
-            alert('شكبـّة');
-        }
-
-        // Check for end of round
-        if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length === 0) {
-            endRound();
+        // If no more cards in the deck and hands, give the remaining middle cards to the last player to take cards
+        if (deck.length === 0 && player1Hand.length === 0 && player2Hand.length === 0) {
+            if (lastPlayerToTake === 1) {
+                player1Collected.push(...middleCards);
+                middleCards.length = 0; // Clear middle cards
+            } else if (lastPlayerToTake === 2) {
+                player2Collected.push(...middleCards);
+                middleCards.length = 0; // Clear middle cards
+            }
+            displayCollectedCards('player1-collected', player1Collected);
+            displayCollectedCards('player2-collected', player2Collected);
+            displayCards('middle-cards-container', middleCards);
         }
     }
 
@@ -231,144 +217,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         findCombination([], cards, 0);
         return result.length > 0 ? result[0] : [];
-    }
-
-    function endRound() {
-        calculateScores();
-        updateScores();
-
-        if (player1Score >= 61 || player2Score >= 61) {
-            if (player1Score === player2Score) {
-                // Both players reached the same score
-                alert("Both players have reached 61 points! Continuing to 71 points...");
-            } else {
-                declareWinner();
-                return;
-            }
-        }
-
-        if (player1Score >= 71 || player2Score >= 71) {
-            if (player1Score === player2Score) {
-                alert("Both players have reached 71 points! Continuing to 81 points...");
-            } else {
-                declareWinner();
-                return;
-            }
-        }
-
-        // Reset for a new round
-        deck = createDeck();
-        deck = shuffleDeck(deck);
-        player1Hand.length = 0;
-        player2Hand.length = 0;
-        middleCards.length = 0;
-        player1Collected.length = 0;
-        player2Collected.length = 0;
-        player1Revealed.length = 0;
-        player2Revealed.length = 0;
-        dealInitialCards();
-
-        displayCards('player1-cards', player1Hand);
-        displayCards('player2-cards', player2Hand);
-        displayCards('middle-cards-container', middleCards);
-        displayCollectedCards('player1-collected', player1Collected, player1Revealed);
-        displayCollectedCards('player2-collected', player2Collected, player2Revealed);
-
-        document.getElementById('round-message').style.display = 'block';
-        setTimeout(() => {
-            document.getElementById('round-message').style.display = 'none';
-        }, 2000);
-    }
-
-    function calculateScores() {
-        let player1Points = 0;
-        let player2Points = 0;
-
-        player1Points += player1Collected.length > player2Collected.length ? 1 : 0;
-        player2Points += player2Collected.length > player1Collected.length ? 1 : 0;
-
-        const player1Diamonds = player1Collected.filter(card => card.suit === 'diamonds').length;
-        const player2Diamonds = player2Collected.filter(card => card.suit === 'diamonds').length;
-
-        player1Points += player1Diamonds > player2Diamonds ? 1 : 0;
-        player2Points += player2Diamonds > player1Diamonds ? 1 : 0;
-
-        if (player1Collected.some(card => card.value === '7' && card.suit === 'diamonds')) player1Points += 1;
-        if (player2Collected.some(card => card.value === '7' && card.suit === 'diamonds')) player2Points += 1;
-
-        if (player1Collected.filter(card => card.value === '7').length >= 3) player1Points += 1;
-        if (player2Collected.filter(card => card.value === '7').length >= 3) player2Points += 1;
-
-        if (player1Collected.filter(card => card.value === '7').length >= 2 && player1Collected.filter(card => card.value === '6').length >= 3) player1Points += 1;
-        if (player2Collected.filter(card => card.value === '7').length >= 2 && player2Collected.filter(card => card.value === '6').length >= 3) player2Points += 1;
-
-        if (player1Diamonds >= 8) {
-player1Points += 10;
-player2Points = 0;
+        // Return the first valid combination found
 }
-
-    if (player2Diamonds >= 8) {
-        player2Points += 10;
-        player1Points = 0;
-    }
-
-    if (player1Diamonds >= 9 && player2Diamonds === 1) {
-        player1Points += player1Points;
-        player2Points = 0;
-    }
-
-    if (player2Diamonds >= 9 && player1Diamonds === 1) {
-        player2Points += player2Points;
-        player1Points = 0;
-    }
-
-    if (player1Diamonds === 10) {
-        player1Points += player1Points;
-        alert("Player 1 wins with a perfect 10 diamonds!");
-        player2Points = 0;
-        player1Score += player1Points;
-        player2Score += player2Points;
-        declareWinner();
-        return;
-    }
-
-    if (player2Diamonds === 10) {
-        player2Points += player2Points;
-        alert("Player 2 wins with a perfect 10 diamonds!");
-        player1Points = 0;
-        player1Score += player1Points;
-        player2Score += player2Points;
-        declareWinner();
-        return;
-    }
-
-    player1Collected.forEach(card => {
-        if (card.value === '7') player1Points += 7;
-    });
-
-    player2Collected.forEach(card => {
-        if (card.value === '7') player2Points += 7;
-    });
-
-    player1Score += player1Points;
-    player2Score += player2Points;
-}
-
-function updateScores() {
-    document.getElementById('player1-score').textContent = `Score: ${player1Score}`;
-    document.getElementById('player2-score').textContent = `Score: ${player2Score}`;
-}
-
-function declareWinner() {
-    const winner = player1Score > player2Score ? 'Player 1' : 'Player 2';
-    alert(`${winner} wins the game with ${Math.max(player1Score, player2Score)} points!`);
-    resetGame();
-}
-
-function resetGame() {
-    player1Score = 0;
-    player2Score = 0;
-    endRound();
-}
-
 });
