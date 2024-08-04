@@ -75,19 +75,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayCards(elementId, cards) {
-        const container = document.getElementById(elementId);
-        container.innerHTML = '';
-        cards.forEach(card => {
-            const cardElement = document.createElement('div');
-            cardElement.className = `card ${card.suit}`;
-            cardElement.innerHTML = `
-                <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
-                <div class="symbol">${suitSymbols[card.suit]}</div>
-                <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
-            `;
-            container.appendChild(cardElement);
-        });
-    }
+    const container = document.getElementById(elementId);
+    container.innerHTML = '';
+    cards.forEach(card => {
+        const cardElement = document.createElement('div');
+        cardElement.className = `card ${card.suit}`;
+        cardElement.setAttribute('data-value', card.value); // إضافة data-value
+        cardElement.innerHTML = `
+            <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
+            <div class="symbol">${suitSymbols[card.suit]}</div>
+            <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
+        `;
+        container.appendChild(cardElement);
+    });
+}
 
     function displayCollectedCards(elementId, cards) {
         const container = document.getElementById(elementId);
@@ -128,24 +129,59 @@ document.addEventListener('DOMContentLoaded', () => {
         displayCards('middle-cards-container', middleCards);
     }
 
-    // Rest of the playCard logic...
-}
-
-function highlightCombinationCards(combinations) {
-    // أزل التمييز عن البطاقات السابقة
-    document.querySelectorAll('.highlight').forEach(el => {
-        el.classList.remove('highlight');
-    });
-
-    // قم بتمييز البطاقات في المجموعات الممكنة
-    combinations.forEach(combination => {
-        combination.forEach(card => {
-            const cardElement = document.querySelector(`.card.${card.suit}[data-value="${card.value}"]`);
-            if (cardElement) {
-                cardElement.classList.add('highlight');
-            }
+    // Allow the player to take all matching or summing cards
+    if (possibleCombinations.length > 0) {
+        possibleCombinations[0].forEach(mc => {
+            const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
+            if (index > -1) middleCards.splice(index, 1);
+            playerCollected.push(mc); // Add middle card to collected cards
         });
-    });
+
+        // Add the played card to the player's collected cards
+        playerCollected.push(card);
+
+        // Update the last player to take cards
+        lastPlayerToTake = currentPlayer;
+
+        // Display updated collected cards
+        displayCollectedCards(`player${currentPlayer}-collected`, playerCollected);
+
+        // Display "شكبـّة" if no cards left in the middle
+        if (middleCards.length === 0) {
+            alert("شكبـّة!");
+        }
+    }
+
+    // Display updated middle cards
+    displayCards('middle-cards-container', middleCards);
+
+    // Switch turn to the other player
+    currentPlayer = currentPlayer === 1 ? 2 : 1;
+
+    // Display updated hands
+    displayCards('player1-cards', player1Hand);
+    displayCards('player2-cards', player2Hand);
+
+    // Deal new cards if both players are out of cards
+    if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length > 0) {
+        dealNewCards();
+        displayCards('player1-cards', player1Hand);
+        displayCards('player2-cards', player2Hand);
+    }
+
+    // If no more cards in the deck and hands, give the remaining middle cards to the last player to take cards
+    if (deck.length === 0 && player1Hand.length === 0 && player2Hand.length === 0) {
+        if (lastPlayerToTake === 1) {
+            player1Collected.push(...middleCards);
+            middleCards.length = 0; // Clear middle cards
+        } else if (lastPlayerToTake === 2) {
+            player2Collected.push(...middleCards);
+            middleCards.length = 0; // Clear middle cards
+        }
+        displayCollectedCards('player1-collected', player1Collected);
+        displayCollectedCards('player2-collected', player2Collected);
+        displayCards('middle-cards-container', middleCards);
+    }
 }
 
 function findAllSummingCombinations(cards, targetValue) {
