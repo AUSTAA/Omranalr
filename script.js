@@ -102,92 +102,112 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function playCard(event, playerHand, playerCollected, playerRevealed, middleCards) {
-        const cardElement = event.target.closest('.card');
-        if (!cardElement) return;
+function playCard(event, playerHand, playerCollected, playerRevealed, middleCards) {
+    const cardElement = event.target.closest('.card');
+    if (!cardElement) return;
 
-        const cardValue = cardElement.querySelector('.top-left').textContent[0];
-        const cardSuit = cardElement.classList[1];
-        const card = { value: cardValue, suit: cardSuit };
+    const cardValue = cardElement.querySelector('.top-left').textContent[0];
+    const cardSuit = cardElement.classList[1];
+    const card = { value: cardValue, suit: cardSuit };
 
-        const cardIndex = playerHand.findIndex(c => c.value === card.value && c.suit === card.suit);
-        if (cardIndex === -1) return;
-        playerHand.splice(cardIndex, 1);
+    // إزالة البطاقة من يد اللاعب
+    const cardIndex = playerHand.findIndex(c => c.value === card.value && c.suit === card.suit);
+    if (cardIndex === -1) return;
+    playerHand.splice(cardIndex, 1);
 
-        const matchingCards = middleCards.filter(c => c.value === card.value);
+    const cardValueInt = cardValueToInt(card.value);
 
-        if (matchingCards.length > 0) {
-            matchingCards.forEach(mc => {
-                const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
-                if (index > -1) middleCards.splice(index, 1);
-                playerCollected.push(mc);
-            });
-            playerCollected.push(card);
-        } else {
-            const possibleCombinations = findAllSummingCombinations(middleCards, cardValueToInt(card.value));
-            if (possibleCombinations.length > 0) {
-                showCombinationOptions(possibleCombinations, combination => {
-                    combination.forEach(mc => {
-                        const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
-                        if (index > -1) middleCards.splice(index, 1);
-                        playerCollected.push(mc);
-                    });
-                    playerCollected.push(card);
-                });
-            } else {
-                middleCards.push(card);
-            }
-        }
+    // إيجاد جميع المجموعات الممكنة من الأوراق في الوسط
+    const possibleCombinations = findAllSummingCombinations(middleCards, cardValueInt);
 
+    if (possibleCombinations.length > 0) {
+        // عرض الخيارات للاعب للاختيار بينها
+        showCombinationOptions(possibleCombinations, card, playerCollected, middleCards);
+    } else {
+        // إذا لم توجد مجموعات، ضع البطاقة في الوسط
+        middleCards.push(card);
         displayCards('middle-cards-container', middleCards);
-        displayCollectedCards(`player${currentPlayer}-collected`, playerCollected);
-        currentPlayer = currentPlayer === 1 ? 2 : 1;
+        switchTurn();
     }
 
-    function showCombinationOptions(combinations, callback) {
-        const container = document.getElementById('combination-options');
-        container.innerHTML = '';
-        combinations.forEach((combination, index) => {
-            const button = document.createElement('button');
-            button.textContent = `Option ${index + 1}`;
-            button.addEventListener('click', () => {
-                callback(combination);
-                container.innerHTML = '';
-            });
-            container.appendChild(button);
+    // عرض الأوراق بعد التحديث
+    displayCards('player1-cards', player1Hand);
+    displayCards('player2-cards', player2Hand);
+}
+
+function showCombinationOptions(combinations, playedCard, playerCollected, middleCards) {
+    const choicesContainer = document.getElementById('choices-container');
+    choicesContainer.innerHTML = ''; // تفريغ المحتوى السابق
+    choicesContainer.style.display = 'block'; // إظهار عنصر الخيارات
+
+    combinations.forEach((combination, index) => {
+        const option = document.createElement('div');
+        option.className = 'combination-option';
+        option.textContent = `Option ${index + 1}: ${combination.map(c => `${c.value}${c.suit[0]}`).join(', ')}`;
+        option.addEventListener('click', () => {
+            // عند اختيار مجموعة
+            collectCards(combination, playedCard, playerCollected, middleCards);
+            choicesContainer.style.display = 'none'; // إخفاء الخيارات
+            displayCards('middle-cards-container', middleCards);
+            switchTurn();
         });
-    }
+        choicesContainer.appendChild(option);
+    });
+}
 
-    function findAllSummingCombinations(cards, targetValue) {
-        const results = [];
-        function findCombination(currentCombination, remainingCards, currentSum) {
-            if (currentSum === targetValue) {
-                results.push([...currentCombination]);
-                return;
-            }
-            if (currentSum > targetValue || remainingCards.length === 0) return;
+function collectCards(selectedCards, playedCard, playerCollected, middleCards) {
+    // إزالة الأوراق المختارة من الوسط
+    selectedCards.forEach(selected => {
+        const index = middleCards.findIndex(c => c.value === selected.value && c.suit === selected.suit);
+        if (index > -1) middleCards.splice(index, 1);
+    });
 
-            for (let i = 0; i < remainingCards.length; i++) {
-                findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
-            }
+    // إضافة الأوراق المجمعة إلى مجموعة اللاعب
+    playerCollected.push(...selectedCards, playedCard);
+    displayCollectedCards(`player${currentPlayer}-collected`, playerCollected);
+}
+
+function switchTurn() {
+    currentPlayer = currentPlayer === 1 ? 2 : 1; // تبديل الدور
+    document.getElementById('round-message').textContent = `دور اللاعب ${currentPlayer}`;
+}
+
+function findAllSummingCombinations(cards, targetValue) {
+    const results = [];
+
+    function findCombination(currentCombination, remainingCards, currentSum) {
+        if (currentSum === targetValue) {
+            results.push([...currentCombination]);
+            return;
         }
-        findCombination([], cards, 0);
-        return results;
-    }
+        if (currentSum > targetValue || remainingCards.length === 0) return;
 
-    function cardValueToInt(value) {
-        switch (value) {
-            case 'A': return 1;
-            case '2': return 2;
-            case '3': return 3;
-            case '4': return 4;
-            case '5': return 5;
-            case '6': return 6;
-            case '7': return 7;
-            case 'Q': return 8;
-            case 'J': return 9;
-            case 'K': return 10;
-            default: return 0;
+        for (let i = 0; i < remainingCards.length; i++) {
+            findCombination(
+                [...currentCombination, remainingCards[i]],
+                remainingCards.slice(i + 1),
+                currentSum + cardValueToInt(remainingCards[i].value)
+            );
         }
     }
+
+    findCombination([], cards, 0);
+    return results;
+}
+
+function cardValueToInt(value) {
+    switch (value) {
+        case 'A': return 1;
+        case '2': return 2;
+        case '3': return 3;
+        case '4': return 4;
+        case '5': return 5;
+        case '6': return 6;
+        case '7': return 7;
+        case 'Q': return 8;
+        case 'J': return 9;
+        case 'K': return 10;
+        default: return 0;
+    }
+}
 });
