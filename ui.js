@@ -1,11 +1,5 @@
-const suitSymbols = {
-    hearts: '♥',
-    spades: '♠',
-    diamonds: '♦',
-    clubs: '♣'
-};
-
-function displayCards(elementId, cards) {
+// ui.js
+export function displayCards(elementId, cards) {
     const container = document.getElementById(elementId);
     container.innerHTML = '';
     cards.forEach(card => {
@@ -13,15 +7,15 @@ function displayCards(elementId, cards) {
         cardElement.className = `card ${card.suit}`;
         cardElement.setAttribute('data-value', card.value);
         cardElement.innerHTML = `
-            <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
-            <div class="symbol">${suitSymbols[card.suit]}</div>
-            <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
+            <div class="top-left">${card.value}<br>${getSuitSymbol(card.suit)}</div>
+            <div class="symbol">${getSuitSymbol(card.suit)}</div>
+            <div class="bottom-right">${card.value}<br>${getSuitSymbol(card.suit)}</div>
         `;
         container.appendChild(cardElement);
     });
 }
 
-function displayCollectedCards(elementId, cards) {
+export function displayCollectedCards(elementId, cards) {
     const container = document.getElementById(elementId);
     container.innerHTML = '';
     cards.forEach((_, index) => {
@@ -31,4 +25,9 @@ function displayCollectedCards(elementId, cards) {
         cardElement.style.left = `${index * 2}px`;
         container.appendChild(cardElement);
     });
+}
+
+function getSuitSymbol(suit) {
+    const symbols = { hearts: '♥', spades: '♠', diamonds: '♦', clubs: '♣' };
+    return symbols[suit];
 }
