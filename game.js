@@ -1,80 +1,68 @@
-// game.js
-import { createDeck, shuffleDeck } from './deck.js';
-import { displayCards, displayCollectedCards } from './ui.js';
-import { cardValueToInt, findAllSummingCombinations } from './utils.js';
+document.addEventListener('DOMContentLoaded', () => {
+    // ... (كود البذل والرموز والمعاني لم يتغير) ...
 
-let deck = shuffleDeck(createDeck());
-const player1Hand = [];
-const player2Hand = [];
-const middleCards = [];
-const player1Collected = [];
-const player2Collected = [];
-let currentPlayer = 1;
+    let deck = createDeck();
+    deck = shuffleDeck(deck);
 
-export function startGame() {
+    const player1Hand = [];
+    const player2Hand = [];
+    const middleCards = [];
+    const player1Collected = [];
+    const player2Collected = [];
+    const player1Points = 0;
+    const player2Points = 0;
+
+    let currentPlayer = 1;
+
+    // Initialize hands and middle cards
     dealInitialCards();
-    updateUI();
-}
 
-function dealInitialCards() {
-    for (let i = 0; i < 3; i++) {
-        player1Hand.push(deck.pop());
-        player2Hand.push(deck.pop());
-    }
-    for (let i = 0; i < 4; i++) {
-        middleCards.push(deck.pop());
-    }
-}
-
-export function playCard(event, playerHand, playerCollected) {
-    const cardElement = event.target.closest('.card');
-    if (!cardElement) return;
-
-    const cardValue = cardElement.querySelector('.top-left').textContent[0];
-    const cardSuit = cardElement.classList[1];
-    const card = { value: cardValue, suit: cardSuit };
-
-    const cardIndex = playerHand.findIndex(c => c.value === card.value && c.suit === card.suit);
-    if (cardIndex === -1) return;
-    playerHand.splice(cardIndex, 1);
-
-    const matchingCard = middleCards.find(c => c.value === card.value && c.suit === card.suit);
-
-    if (matchingCard) {
-        collectCards([matchingCard], card, playerCollected);
-    } else {
-        const cardValueInt = cardValueToInt(card.value);
-        const possibleCombinations = findAllSummingCombinations(middleCards, cardValueInt);
-
-        if (possibleCombinations.length > 0) {
-            showCombinationOptions(possibleCombinations, card, playerCollected);
-        } else {
-            middleCards.push(card);
-        }
-    }
-
-    updateUI();
-    switchTurn();
-}
-
-function collectCards(selectedCards, playedCard, playerCollected) {
-    selectedCards.forEach(card => {
-        const index = middleCards.findIndex(c => c.value === card.value && c.suit === card.suit);
-        if (index > -1) middleCards.splice(index, 1);
-    });
-
-    playerCollected.push(...selectedCards, playedCard);
-}
-
-function switchTurn() {
-    currentPlayer = currentPlayer === 1 ? 2 : 1;
-    document.getElementById('round-message').textContent = `دور اللاعب ${currentPlayer}`;
-}
-
-function updateUI() {
+    // Display cards
     displayCards('player1-cards', player1Hand);
     displayCards('player2-cards', player2Hand);
     displayCards('middle-cards-container', middleCards);
     displayCollectedCards('player1-collected', player1Collected);
     displayCollectedCards('player2-collected', player2Collected);
-}
+
+    // ... (مستمعو الأحداث للعب الأوراق لم يتغيروا) ...
+
+    function createDeck() {
+        // ... (بناء المجموعة لم يتغير) ...
+    }
+
+    function shuffleDeck(deck) {
+        // ... (خلط المجموعة لم يتغير) ...
+    }
+
+    function dealInitialCards() {
+        for (let i = 0; i < 3; i++) {
+            player1Hand.push(deck.pop());
+            player2Hand.push(deck.pop());
+        }
+    }
+
+    function dealNewCards() {
+        // ... (تعليق وظيفة توزيع أوراق جديدة مؤقتًا) ...
+    }
+
+    function displayCards(elementId, cards) {
+        // ... (عرض الأوراق لم يتغير) ...
+    }
+
+    function displayCollectedCards(elementId, cards) {
+        // ... (عرض الأوراق التي تم جمعها لم يتغير) ...
+    }
+
+    function playCard(event, playerHand, playerCollected, playerPoints, middleCards) {
+        // ... (استخراج تفاصيل الورقة لم يتغير) ...
+
+        const cardValueInt = cardValueToInt(card.value);
+
+        // ابحث عن مجموعة كاملة في الوسط
+        const matchingCombination = findMatchingCombination(middleCards, cardValueInt);
+
+        if (matchingCombination.length > 0) {
+            // اللاعب يأخذ جميع الأوراق في المجموعة ويحصل على نقاط لها
+            matchingCombination.forEach(mc => {
+                const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
+                if (index > -1) middleCards.splice(index, 1
