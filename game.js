@@ -17,6 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const player2Collected = [];
     const player1Revealed = [];
     const player2Revealed = [];
+    let player1Points = 0;
+    let player2Points = 0;
 
     let currentPlayer = 1;
     let lastPlayerToTake = null;
@@ -75,20 +77,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayCards(elementId, cards) {
-    const container = document.getElementById(elementId);
-    container.innerHTML = '';
-    cards.forEach(card => {
-        const cardElement = document.createElement('div');
-        cardElement.className = `card ${card.suit}`;
-        cardElement.setAttribute('data-value', card.value); // إضافة data-value
-        cardElement.innerHTML = `
-            <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
-            <div class="symbol">${suitSymbols[card.suit]}</div>
-            <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
-        `;
-        container.appendChild(cardElement);
-    });
-}
+        const container = document.getElementById(elementId);
+        container.innerHTML = '';
+        cards.forEach(card => {
+            const cardElement = document.createElement('div');
+            cardElement.className = `card ${card.suit}`;
+            cardElement.setAttribute('data-value', card.value); // إضافة data-value
+            cardElement.innerHTML = `
+                <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
+                <div class="symbol">${suitSymbols[card.suit]}</div>
+                <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
+            `;
+            container.appendChild(cardElement);
+        });
+    }
 
     function displayCollectedCards(elementId, cards) {
         const container = document.getElementById(elementId);
@@ -103,105 +105,188 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playCard(event, playerHand, playerCollected, playerRevealed, middleCards) {
-    const cardElement = event.target.closest('.card');
-    if (!cardElement) return;
+        const cardElement = event.target.closest('.card');
+        if (!cardElement) return;
 
-    const cardValue = cardElement.querySelector('.top-left').textContent[0];
-    const cardSuit = cardElement.classList[1];
-    const card = { value: cardValue, suit: cardSuit };
+        const cardValue = cardElement.querySelector('.top-left').textContent[0];
+        const cardSuit = cardElement.classList[1];
+        const card = { value: cardValue, suit: cardSuit };
 
-    // Find and remove the card from the player's hand
-    const cardIndex = playerHand.findIndex(c => c.value === card.value && c.suit === card.suit);
-    if (cardIndex === -1) return;
-    playerHand.splice(cardIndex, 1);
+        // Find and remove the card from the player's hand
+        const cardIndex = playerHand.findIndex(c => c.value === card.value && c.suit === card.suit);
+        if (cardIndex === -1) return;
+        playerHand.splice(cardIndex, 1);
 
-    const cardValueInt = cardValueToInt(card.value);
+        const cardValueInt = cardValueToInt(card.value);
 
-    // Find all possible summing combinations
-    const possibleCombinations = findAllSummingCombinations(middleCards, cardValueInt);
+        // Find all possible summing combinations
+        const possibleCombinations = findAllSummingCombinations(middleCards, cardValueInt);
 
-    if (possibleCombinations.length > 0) {
-        // Highlight the cards in the middle that can be chosen
-        highlightCombinationCards(possibleCombinations);
-    } else {
-        // إذا لم يكن هناك أي مطابقة، أضف البطاقة إلى الوسط
-        middleCards.push(card);
-        displayCards('middle-cards-container', middleCards);
-    }
-
-    // Allow the player to take all matching or summing cards
-    if (possibleCombinations.length > 0) {
-        possibleCombinations[0].forEach(mc => {
-            const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
-            if (index > -1) middleCards.splice(index, 1);
-            playerCollected.push(mc); // Add middle card to collected cards
-        });
-
-        // Add the played card to the player's collected cards
-        playerCollected.push(card);
-
-        // Update the last player to take cards
-        lastPlayerToTake = currentPlayer;
-
-        // Display updated collected cards
-        displayCollectedCards(`player${currentPlayer}-collected`, playerCollected);
-
-        // Display "شكبـّة" if no cards left in the middle
-        if (middleCards.length === 0) {
-            alert("شكبـّة!");
+        if (possibleCombinations.length > 0) {
+            // Highlight the cards in the middle that can be chosen
+            highlightCombinationCards(possibleCombinations);
+        } else {
+            // إذا لم يكن هناك أي مطابقة، أضف البطاقة إلى الوسط
+            middleCards.push(card);
+            displayCards('middle-cards-container', middleCards);
         }
-    }
 
-    // Display updated middle cards
-    displayCards('middle-cards-container', middleCards);
+        // Allow the player to take all matching or summing cards
+        if (possibleCombinations.length > 0) {
+            possibleCombinations[0].forEach(mc => {
+                const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
+                if (index > -1) middleCards.splice(index, 1);
+                playerCollected.push(mc); // Add middle card to collected cards
+            });
 
-    // Switch turn to the other player
-    currentPlayer = currentPlayer === 1 ? 2 : 1;
+            // Add the played card to the player's collected cards
+            playerCollected.push(card);
 
-    // Display updated hands
-    displayCards('player1-cards', player1Hand);
-    displayCards('player2-cards', player2Hand);
+            // Update the last player to take cards
+            lastPlayerToTake = currentPlayer;
 
-    // Deal new cards if both players are out of cards
-    if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length > 0) {
-        dealNewCards();
+            // Display updated collected cards
+            displayCollectedCards(`player${currentPlayer}-collected`, playerCollected);
+
+            // Display "شكبـّة" if no cards left in the middle
+            if (middleCards.length === 0) {
+                alert("شكبـّة!");
+            }
+        }
+
+        // Display updated middle cards
+        displayCards('middle-cards-container', middleCards);
+
+        // Switch turn to the other player
+        currentPlayer = currentPlayer === 1 ? 2 : 1;
+
+        // Display updated hands
         displayCards('player1-cards', player1Hand);
         displayCards('player2-cards', player2Hand);
+
+        // Deal new cards if both players are out of cards
+        if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length > 0) {
+            dealNewCards();
+            displayCards('player1-cards', player1Hand);
+            displayCards('player2-cards', player2Hand);
+        }
+
+        // If no more cards in the deck and hands, give the remaining middle cards to the last player to take cards
+        if (deck.length === 0 && player1Hand.length === 0 && player2Hand.length === 0) {
+            if (lastPlayerToTake === 1) {
+                player1Collected.push(...middleCards);
+                middleCards.length = 0; // Clear middle cards
+            } else if (lastPlayerToTake === 2) {
+                player2Collected.push(...middleCards);
+                middleCards.length = 0; // Clear middle cards
+            }
+            displayCollectedCards('player1-collected', player1Collected);
+            displayCollectedCards('player2-collected', player2Collected);
+            displayCards('middle-cards-container', middleCards);
+        }
+
+        // Handle end of the round and scoring
+        checkAndCalculateScores();
     }
 
-    // If no more cards in the deck and hands, give the remaining middle cards to the last player to take cards
-    if (deck.length === 0 && player1Hand.length === 0 && player2Hand.length === 0) {
-        if (lastPlayerToTake === 1) {
-            player1Collected.push(...middleCards);
-            middleCards.length = 0; // Clear middle cards
-        } else if (lastPlayerToTake === 2) {
-            player2Collected.push(...middleCards);
-            middleCards.length = 0; // Clear middle cards
+    function checkAndCalculateScores() {
+        // Calculate and check scores for both players
+        player1Points = calculatePlayerPoints(player1Collected);
+        player2Points = calculatePlayerPoints(player2Collected);
+
+        // Check for players reaching
+        function checkAndCalculateScores() {
+        // حساب نقاط اللاعبين
+        const player1Diamonds = countDiamonds(player1Collected);
+        const player2Diamonds = countDiamonds(player2Collected);
+
+        if (player1Diamonds > player2Diamonds) {
+            player1Points += calculatePoints(player1Diamonds);
+            if (player1Diamonds >= 10) endGame(1);
+        } else if (player2Diamonds > player1Diamonds) {
+            player2Points += calculatePoints(player2Diamonds);
+            if (player2Diamonds >= 10) endGame(2);
+        } else {
+            // في حالة التعادل، لا يتم احتساب نقاط لأي منهما
         }
+
+        // تحقق من شرط التصفير
+        if (player1Diamonds === 8 || player1Diamonds === 9) {
+            player1Points = 0;
+        }
+        if (player2Diamonds === 8 || player2Diamonds === 9) {
+            player2Points = 0;
+        }
+
+        // تحقق إذا انتهت الجولة
+        if (deck.length === 0 && player1Hand.length === 0 && player2Hand.length === 0) {
+            alert(`نهاية الجولة!\nنقاط اللاعب 1: ${player1Points}\nنقاط اللاعب 2: ${player2Points}`);
+            startNewRound();
+        }
+    }
+
+    function countDiamonds(cards) {
+        // حساب عدد أوراق الديناري في مجموعة اللاعب
+        return cards.filter(card => card.suit === 'diamonds').length;
+    }
+
+    function calculatePoints(diamondsCount) {
+        if (diamondsCount === 8 || diamondsCount === 9) {
+            return 0; // التصفير
+        } else if (diamondsCount >= 6 && diamondsCount <= 7) {
+            return 1; // نقطة واحدة
+        } else if (diamondsCount >= 10) {
+            return 10; // نهاية الشوط
+        }
+        return 0;
+    }
+
+    function endGame(winner) {
+        alert(`انتهى الشوط! اللاعب ${winner} فاز!`);
+        resetGame();
+    }
+
+    function resetGame() {
+        // إعادة ضبط اللعبة لبدء شوط جديد
+        deck = createDeck();
+        deck = shuffleDeck(deck);
+        player1Hand.length = 0;
+        player2Hand.length = 0;
+        middleCards.length = 0;
+        player1Collected.length = 0;
+        player2Collected.length = 0;
+        player1Revealed.length = 0;
+        player2Revealed.length = 0;
+        player1Points = 0;
+        player2Points = 0;
+        lastPlayerToTake = null;
+
+        dealInitialCards();
+        displayCards('player1-cards', player1Hand);
+        displayCards('player2-cards', player2Hand);
+        displayCards('middle-cards-container', middleCards);
         displayCollectedCards('player1-collected', player1Collected);
         displayCollectedCards('player2-collected', player2Collected);
+    }
+
+    function startNewRound() {
+        // بدء جولة جديدة بنفس النقاط
+        deck = createDeck();
+        deck = shuffleDeck(deck);
+        player1Hand.length = 0;
+        player2Hand.length = 0;
+        middleCards.length = 0;
+        player1Collected.length = 0;
+        player2Collected.length = 0;
+        lastPlayerToTake = null;
+
+        dealInitialCards();
+        displayCards('player1-cards', player1Hand);
+        displayCards('player2-cards', player2Hand);
         displayCards('middle-cards-container', middleCards);
+        displayCollectedCards('player1-collected', player1Collected);
+        displayCollectedCards('player2-collected', player2Collected);
     }
-}
-
-function findAllSummingCombinations(cards, targetValue) {
-    const results = [];
-
-    function findCombination(currentCombination, remainingCards, currentSum) {
-        if (currentSum === targetValue) {
-            results.push([...currentCombination]);
-            return;
-        }
-        if (currentSum > targetValue || remainingCards.length === 0) return;
-
-        for (let i = 0; i < remainingCards.length; i++) {
-            findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
-        }
-    }
-
-    findCombination([], cards, 0);
-    return results;
-}
 
     function cardValueToInt(value) {
         switch (value) {
@@ -218,23 +303,4 @@ function findAllSummingCombinations(cards, targetValue) {
             default: return 0;
         }
     }
-
-    function findSummingCards(cards, targetValue) {
-        const result = [];
-        function findCombination(currentCombination, remainingCards, currentSum) {
-            if (currentSum === targetValue) {
-                result.push([...currentCombination]);
-                return;
-            }
-            if (currentSum > targetValue || remainingCards.length === 0) return;
-
-            for (let i = 0; i < remainingCards.length; i++) {
-                findCombination([...currentCombination, remainingCards[i]], remainingCards.slice(i + 1), currentSum + cardValueToInt(remainingCards[i].value));
-            }
-        }
-
-        findCombination([], cards, 0);
-        return result.length > 0 ? result[0] : [];
-        // Return the first valid combination found
-}
 });
