@@ -1,3 +1,4 @@
+/* الأسلوب الأساسي */
 body {
     font-family: Arial, sans-serif;
     display: flex;
@@ -6,6 +7,7 @@ body {
     height: 100vh;
     margin: 0;
     overflow: hidden;
+    background-color: #f0f0f0; /* لون خلفية فاتح */
 }
 
 #game-container {
@@ -16,6 +18,10 @@ body {
     width: 100%;
     max-width: 1200px;
     height: 100%;
+    padding: 20px; /* إضافة مساحة داخلية */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #fff; /* خلفية بيضاء للعبة */
+    border-radius: 10px;
 }
 
 .player-area {
@@ -39,7 +45,7 @@ body {
     align-items: center;
     gap: 20px;
     width: 100%;
-    margin: 40px 0;
+    margin: 20px 0; /* تقليل المسافة قليلاً */
 }
 
 .cards-container {
@@ -59,6 +65,12 @@ body {
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s; /* تأثير حركة */
+}
+
+.card:hover {
+    transform: translateY(-5px); /* رفع البطاقة عند التمرير عليها */
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2); /* ظل عند التمرير */
 }
 
 .card.hearts, .card.diamonds {
@@ -98,13 +110,7 @@ body {
     position: absolute;
 }
 
-.collected-container {
-    position: relative;
-    width: 100px;
-    height: 140px;
-}
-
-.revealed-container {
+.collected-container, .revealed-container {
     position: relative;
     width: 100px;
     height: 140px;
@@ -123,6 +129,8 @@ body {
 
 .score-container {
     margin-top: 10px;
+    font-size: 18px;
+    font-weight: bold;
 }
 
 .round-message {
@@ -136,6 +144,7 @@ body {
     padding: 10px 20px;
     border-radius: 10px;
     display: none;
+    text-align: center;
 }
 
 .choices-container {
@@ -150,9 +159,12 @@ body {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .choice-highlight {
     border: 3px solid yellow;
     transform: scale(1.1);
+    transition: transform 0.2s, border-color 0.2s;
 }
