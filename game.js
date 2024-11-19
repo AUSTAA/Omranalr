@@ -304,3 +304,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+// تحديد الحاويات
+const player1Cards = document.getElementById('player1-cards');
+const player2Cards = document.getElementById('player2-cards');
+const middleContainer = document.getElementById('middle-cards-container');
+
+// إنشاء بطاقات مبدئية
+function createCard(value, suit) {
+    const card = document.createElement('div');
+    card.classList.add('card', suit);
+    card.innerHTML = `
+        <div class="top-left">${value}</div>
+        <div class="symbol">${suit}</div>
+        <div class="bottom-right">${value}</div>
+    `;
+    return card;
+}
+
+// إنشاء بطاقات لكل لاعب
+function initializeGame() {
+    const suits = ['hearts', 'diamonds', 'spades', 'clubs'];
+    const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+
+    // إنشاء بطاقات للاعب الأول
+    for (let i = 0; i < 5; i++) {
+        const randomSuit = suits[Math.floor(Math.random() * suits.length)];
+        const randomValue = values[Math.floor(Math.random() * values.length)];
+        const card = createCard(randomValue, randomSuit);
+        player1Cards.appendChild(card);
+    }
+
+    // إنشاء بطاقات للاعب الثاني
+    for (let i = 0; i < 5; i++) {
+        const randomSuit = suits[Math.floor(Math.random() * suits.length)];
+        const randomValue = values[Math.floor(Math.random() * values.length)];
+        const card = createCard(randomValue, randomSuit);
+        player2Cards.appendChild(card);
+    }
+}
+
+// بدء اللعبة
+initializeGame();
