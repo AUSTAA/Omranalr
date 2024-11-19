@@ -8,6 +8,7 @@
 </head>
 <body>
     <div id="game-container">
+        <!-- منطقة اللاعب الأول -->
         <div class="player-area">
             <div id="player1-cards" class="cards-container"></div>
             <div class="side-containers">
@@ -16,7 +17,11 @@
                 <div id="player1-score" class="score-container">Score: 0</div>
             </div>
         </div>
+
+        <!-- منطقة الوسط -->
         <div id="middle-cards-container" class="middle-container"></div>
+
+        <!-- منطقة اللاعب الثاني -->
         <div class="player-area">
             <div id="player2-cards" class="cards-container"></div>
             <div class="side-containers">
@@ -26,8 +31,13 @@
             </div>
         </div>
     </div>
-    <div id="round-message" class="round-message">اجري</div>
+
+    <!-- رسائل الجولة -->
+    <div id="round-message" class="round-message" style="display: none;">اجري</div>
+
+    <!-- خيارات اختيار المجموعات -->
     <div id="choices-container" class="choices-container" style="display: none;"></div>
+
     <script src="game.js"></script>
 </body>
 </html>
