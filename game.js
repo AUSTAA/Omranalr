@@ -1,32 +1,35 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const suits = ['hearts', 'diamonds', 'spades', 'clubs'];
-    const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
-    let deck = [];
-    let player1Hand = [];
-    let player2Hand = [];
-    let middleCards = [];
-    let player1Score = 0;
-    let player2Score = 0;
-    let currentPlayer = 1;
+    const suits = ['hearts', 'spades', 'diamonds', 'clubs'];
+    const suitSymbols = { hearts: '♥', spades: '♠', diamonds: '♦', clubs: '♣' };
+    const values = ['A', '2', '3', '4', '5', '6', '7', 'J', 'Q', 'K'];
+    let deck, player1Hand, player2Hand, middleCards, player1Collected, player2Collected;
+    let currentPlayer = 1, lastPlayerToTake = null;
 
-    const player1HandContainer = document.getElementById('player1-hand');
-    const player2HandContainer = document.getElementById('player2-hand');
-    const middleContainer = document.getElementById('middle-cards-container');
-    const startGameButton = document.getElementById('start-game');
-    const player1ScoreDisplay = document.getElementById('player1-score');
-    const player2ScoreDisplay = document.getElementById('player2-score');
+    // تهيئة اللعبة
+    function initializeGame() {
+        deck = createDeck();
+        shuffleDeck(deck);
+        player1Hand = [];
+        player2Hand = [];
+        middleCards = [];
+        player1Collected = [];
+        player2Collected = [];
+        dealInitialCards();
+        updateDisplay();
+    }
 
-    // Initialize the deck
+    // إنشاء مجموعة الأوراق
     function createDeck() {
-        deck = [];
+        const deck = [];
         for (let suit of suits) {
             for (let value of values) {
                 deck.push({ suit, value });
             }
         }
-        shuffleDeck(deck);
+        return deck;
     }
 
+    // خلط الأوراق
     function shuffleDeck(deck) {
         for (let i = deck.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -34,74 +37,94 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // توزيع الأوراق الأولية
     function dealInitialCards() {
-        player1Hand = deck.splice(0, 3);
-        player2Hand = deck.splice(0, 3);
-        middleCards = deck.splice(0, 4);
-        updateDisplay();
+        for (let i = 0; i < 3; i++) {
+            player1Hand.push(deck.pop());
+            player2Hand.push(deck.pop());
+        }
+        for (let i = 0; i < 4; i++) {
+            middleCards.push(deck.pop());
+        }
     }
 
+    // تحديث العرض
     function updateDisplay() {
-        renderCards(player1HandContainer, player1Hand);
-        renderCards(player2HandContainer, player2Hand);
-        renderCards(middleContainer, middleCards);
-        player1ScoreDisplay.textContent = player1Score;
-        player2ScoreDisplay.textContent = player2Score;
+        renderCards('player1-hand', player1Hand);
+        renderCards('player2-hand', player2Hand);
+        renderCards('middle-cards', middleCards);
     }
 
-    function renderCards(container, cards) {
+    // عرض الأوراق
+    function renderCards(containerId, cards) {
+        const container = document.getElementById(containerId);
         container.innerHTML = '';
         cards.forEach(card => {
             const cardElement = document.createElement('div');
             cardElement.className = `card ${card.suit}`;
-            cardElement.textContent = card.value;
-            cardElement.addEventListener('click', () => handleCardPlay(card));
+            cardElement.innerHTML = `
+                <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
+                <div class="symbol">${suitSymbols[card.suit]}</div>
+                <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
+            `;
             container.appendChild(cardElement);
         });
     }
 
-    function handleCardPlay(card) {
-        if ((currentPlayer === 1 && player1Hand.includes(card)) || 
-            (currentPlayer === 2 && player2Hand.includes(card))) {
-            playCard(card);
+    // قيمة الورقة كرقم
+    function cardValueToInt(value) {
+        switch (value) {
+            case 'A': return 1;
+            case 'J': return 9;
+            case 'Q': return 8;
+            case 'K': return 10;
+            default: return parseInt(value);
         }
     }
 
-    function playCard(card) {
-        const playerHand = currentPlayer === 1 ? player1Hand : player2Hand;
+    // لعب الورقة
+    function playCard(card, playerHand, collectedCards) {
+        const cardValue = cardValueToInt(card.value);
+        const combinations = findSummingCombinations(middleCards, cardValue);
 
-        // Remove card from player's hand
-        const cardIndex = playerHand.findIndex(c => c.value === card.value && c.suit === card.suit);
-        if (cardIndex !== -1) {
-            playerHand.splice(cardIndex, 1);
-        }
-
-        // Match logic
-        const matchingCards = middleCards.filter(mc => mc.value === card.value);
-        if (matchingCards.length > 0) {
-            // Take the matching card
-            matchingCards.forEach(mc => {
-                middleCards.splice(middleCards.indexOf(mc), 1);
+        if (combinations.length > 0) {
+            combinations[0].forEach(match => {
+                const index = middleCards.findIndex(c => c.value === match.value && c.suit === match.suit);
+                if (index !== -1) {
+                    middleCards.splice(index, 1);
+                    collectedCards.push(match);
+                }
             });
-            if (currentPlayer === 1) player1Score++; else player2Score++;
+            collectedCards.push(card);
         } else {
             middleCards.push(card);
         }
 
-        // Switch turn
+        const cardIndex = playerHand.indexOf(card);
+        if (cardIndex !== -1) playerHand.splice(cardIndex, 1);
+
+        if (middleCards.length === 0) alert("شكبـّة!");
         currentPlayer = currentPlayer === 1 ? 2 : 1;
-
-        // Deal new cards if hands are empty
-        if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length > 0) {
-            dealInitialCards();
-        }
-
         updateDisplay();
     }
 
-    // Start the game
-    startGameButton.addEventListener('click', () => {
-        createDeck();
-        dealInitialCards();
-    });
+    // إيجاد كل التركيبات الممكنة
+    function findSummingCombinations(cards, targetValue) {
+        const results = [];
+        function search(current, remaining, sum) {
+            if (sum === targetValue) {
+                results.push(current);
+                return;
+            }
+            if (sum > targetValue || remaining.length === 0) return;
+            for (let i = 0; i < remaining.length; i++) {
+                search([...current, remaining[i]], remaining.slice(i + 1), sum + cardValueToInt(remaining[i].value));
+            }
+        }
+        search([], cards, 0);
+        return results;
+    }
+
+    // بدء اللعبة
+    initializeGame();
 });
