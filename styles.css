@@ -47,9 +47,51 @@ h1 {
 
 .hand, .middle-cards {
     display: flex;
-    flex-wrap: wrap;
+    justify-content: center;  /* جعل الأوراق في صف أفقي */
+    gap: 5px; /* المسافة بين الأوراق */
+    flex-wrap: nowrap; /* عدم التفاف الأوراق في السطر */
+    margin: 10px 0;
+}
+
+.card {
+    width: 45px; /* تصغير العرض */
+    height: 70px; /* تصغير الارتفاع */
+    border: 1px solid #000;
+    border-radius: 8px;
+    background-color: #fff;
+    display: flex;
     justify-content: center;
-    gap: 10px;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.card.hearts, .card.diamonds {
+    color: red;
+}
+
+.card.spades, .card.clubs {
+    color: black;
+}
+
+.card .top-left, .card .bottom-right {
+    position: absolute;
+    font-size: 10px;
+}
+
+.card .top-left {
+    top: 3px;
+    left: 3px;
+}
+
+.card .bottom-right {
+    bottom: 3px;
+    right: 3px;
+    transform: rotate(180deg);
+}
+
+.card .symbol {
+    font-size: 16px;
 }
 
 button {
