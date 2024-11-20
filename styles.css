@@ -1,79 +1,46 @@
-/* الأسلوب الأساسي */
 body {
     font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    overflow: hidden;
-    background-color: #f0f0f0; /* لون خلفية فاتح */
+    background-color: #f8f8f8;
+    text-align: center;
+    padding: 20px;
 }
 
-#game-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 40px;
-    width: 100%;
-    max-width: 1200px;
-    height: 100%;
-    padding: 20px; /* إضافة مساحة داخلية */
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    background-color: #fff; /* خلفية بيضاء للعبة */
-    border-radius: 10px;
+.game-container {
+    max-width: 800px;
+    margin: auto;
 }
 
-.player-area {
+#game-board {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    width: 100%;
+    justify-content: space-between;
+    margin: 20px 0;
 }
 
-.side-containers {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-items: center;
-}
-
-.middle-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    width: 100%;
-    margin: 20px 0; /* تقليل المسافة قليلاً */
-}
-
-.cards-container {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
+.player-hand, #middle-cards-container {
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    width: 200px;
+    min-height: 100px;
+    background-color: #fff;
+    text-align: center;
 }
 
 .card {
-    width: 60px;
-    height: 90px;
+    display: inline-block;
+    width: 50px;
+    height: 70px;
+    margin: 5px;
+    border-radius: 5px;
     border: 1px solid #000;
-    border-radius: 8px;
-    position: relative;
-    background-color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    background-color: #f1f1f1;
+    font-size: 16px;
+    text-align: center;
+    line-height: 70px;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s; /* تأثير حركة */
 }
 
-.card:hover {
-    transform: translateY(-5px); /* رفع البطاقة عند التمرير عليها */
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2); /* ظل عند التمرير */
-}
-
-.card.hearts, .card.diamonds {
+.card.diamonds, .card.hearts {
     color: red;
 }
 
@@ -81,90 +48,8 @@ body {
     color: black;
 }
 
-.card .top-left, .card .bottom-right {
-    position: absolute;
-    font-size: 14px;
-}
-
-.card .top-left {
-    top: 5px;
-    left: 5px;
-}
-
-.card .bottom-right {
-    bottom: 5px;
-    right: 5px;
-    transform: rotate(180deg);
-}
-
-.card .symbol {
-    font-size: 24px;
-}
-
-.collected-card {
-    width: 60px;
-    height: 90px;
-    background-color: #2e86de;
-    border: 1px solid #2e86de;
-    cursor: default;
-    position: absolute;
-}
-
-.collected-container, .revealed-container {
-    position: relative;
-    width: 100px;
-    height: 140px;
-}
-
-.revealed-card {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 60px;
-    height: 45px;
-    background-color: rgba(46, 134, 222, 0.5);
-    border: 1px solid #2e86de;
-    z-index: 10;
-}
-
-.score-container {
-    margin-top: 10px;
-    font-size: 18px;
-    font-weight: bold;
-}
-
-.round-message {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 24px;
-    background-color: rgba(0, 0, 0, 0.7);
-    color: white;
+button {
     padding: 10px 20px;
-    border-radius: 10px;
-    display: none;
-    text-align: center;
-}
-
-.choices-container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    border: 1px solid #000;
-    padding: 20px;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-}
-
-.choice-highlight {
-    border: 3px solid yellow;
-    transform: scale(1.1);
-    transition: transform 0.2s, border-color 0.2s;
+    font-size: 16px;
+    cursor: pointer;
 }
