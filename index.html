@@ -9,17 +9,32 @@
 <body>
     <div class="game-container">
         <h1>لعبة الورق</h1>
-        <div id="scores">
+        <div class="scores">
             <div>نقاط اللاعب 1: <span id="player1-score">0</span></div>
             <div>نقاط اللاعب 2: <span id="player2-score">0</span></div>
         </div>
-        <div id="game-board">
-            <div id="player1-hand" class="player-hand">يد اللاعب 1</div>
-            <div id="middle-cards-container">الوسط</div>
-            <div id="player2-hand" class="player-hand">يد اللاعب 2</div>
+
+        <div class="table">
+            <div id="player1-area" class="player-area">
+                <h2>يد اللاعب 1</h2>
+                <div id="player1-hand" class="hand"></div>
+            </div>
+
+            <div id="middle-area" class="middle-area">
+                <h2>الأوراق في الوسط</h2>
+                <div id="middle-cards-container" class="middle-cards"></div>
+            </div>
+
+            <div id="player2-area" class="player-area">
+                <h2>يد اللاعب 2</h2>
+                <div id="player2-hand" class="hand"></div>
+            </div>
         </div>
+
         <button id="start-game">ابدأ اللعبة</button>
+        <p id="game-log"></p>
     </div>
+
     <script src="game.js"></script>
 </body>
 </html>
