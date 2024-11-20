@@ -3,41 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Card Game</title>
+    <title>لعبة الورق</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="game-container">
-        <!-- منطقة اللاعب الأول -->
-        <div class="player-area">
-            <div id="player1-cards" class="cards-container"></div>
-            <div class="side-containers">
-                <div id="player1-collected" class="collected-container"></div>
-                <div id="player1-revealed" class="revealed-container"></div>
-                <div id="player1-score" class="score-container">Score: 0</div>
-            </div>
+    <div class="game-container">
+        <h1>لعبة الورق</h1>
+        <div id="scores">
+            <div>نقاط اللاعب 1: <span id="player1-score">0</span></div>
+            <div>نقاط اللاعب 2: <span id="player2-score">0</span></div>
         </div>
-
-        <!-- منطقة الوسط -->
-        <div id="middle-cards-container" class="middle-container"></div>
-
-        <!-- منطقة اللاعب الثاني -->
-        <div class="player-area">
-            <div id="player2-cards" class="cards-container"></div>
-            <div class="side-containers">
-                <div id="player2-collected" class="collected-container"></div>
-                <div id="player2-revealed" class="revealed-container"></div>
-                <div id="player2-score" class="score-container">Score: 0</div>
-            </div>
+        <div id="game-board">
+            <div id="player1-hand" class="player-hand">يد اللاعب 1</div>
+            <div id="middle-cards-container">الوسط</div>
+            <div id="player2-hand" class="player-hand">يد اللاعب 2</div>
         </div>
+        <button id="start-game">ابدأ اللعبة</button>
     </div>
-
-    <!-- رسائل الجولة -->
-    <div id="round-message" class="round-message" style="display: none;">اجري</div>
-
-    <!-- خيارات اختيار المجموعات -->
-    <div id="choices-container" class="choices-container" style="display: none;"></div>
-
     <script src="game.js"></script>
 </body>
 </html>
