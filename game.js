@@ -1,54 +1,30 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const suits = ['hearts', 'spades', 'diamonds', 'clubs'];
-    const suitSymbols = {
-        hearts: '♥',
-        spades: '♠',
-        diamonds: '♦',
-        clubs: '♣'
-    };
-    const values = ['A', '2', '3', '4', '5', '6', '7', 'Q', 'J', 'K'];
-    let deck = createDeck();
-    deck = shuffleDeck(deck);
-
-    const player1Hand = [];
-    const player2Hand = [];
-    const middleCards = [];
-    const player1Collected = [];
-    const player2Collected = [];
-    const player1Revealed = [];
-    const player2Revealed = [];
-    let player1Points = 0;
-    let player2Points = 0;
-
+    const suits = ['hearts', 'diamonds', 'spades', 'clubs'];
+    const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
+    let deck = [];
+    let player1Hand = [];
+    let player2Hand = [];
+    let middleCards = [];
+    let player1Score = 0;
+    let player2Score = 0;
     let currentPlayer = 1;
-    let lastPlayerToTake = null;
 
-    // Initialize hands and middle cards
-    dealInitialCards();
+    const player1HandContainer = document.getElementById('player1-hand');
+    const player2HandContainer = document.getElementById('player2-hand');
+    const middleContainer = document.getElementById('middle-cards-container');
+    const startGameButton = document.getElementById('start-game');
+    const player1ScoreDisplay = document.getElementById('player1-score');
+    const player2ScoreDisplay = document.getElementById('player2-score');
 
-    // Display cards
-    displayCards('player1-cards', player1Hand);
-    displayCards('player2-cards', player2Hand);
-    displayCards('middle-cards-container', middleCards);
-    displayCollectedCards('player1-collected', player1Collected);
-    displayCollectedCards('player2-collected', player2Collected);
-
-    // Event listeners for playing cards
-    document.getElementById('player1-cards').addEventListener('click', event => {
-        if (currentPlayer === 1) playCard(event, player1Hand, player1Collected, player1Revealed, middleCards);
-    });
-    document.getElementById('player2-cards').addEventListener('click', event => {
-        if (currentPlayer === 2) playCard(event, player2Hand, player2Collected, player2Revealed, middleCards);
-    });
-
+    // Initialize the deck
     function createDeck() {
-        const deck = [];
+        deck = [];
         for (let suit of suits) {
             for (let value of values) {
-                deck.push({ value, suit });
+                deck.push({ suit, value });
             }
         }
-        return deck;
+        shuffleDeck(deck);
     }
 
     function shuffleDeck(deck) {
@@ -56,292 +32,76 @@ document.addEventListener('DOMContentLoaded', () => {
             const j = Math.floor(Math.random() * (i + 1));
             [deck[i], deck[j]] = [deck[j], deck[i]];
         }
-        return deck;
     }
 
     function dealInitialCards() {
-        for (let i = 0; i < 3; i++) {
-            player1Hand.push(deck.pop());
-            player2Hand.push(deck.pop());
-        }
-        for (let i = 0; i < 4; i++) {
-            middleCards.push(deck.pop());
-        }
+        player1Hand = deck.splice(0, 3);
+        player2Hand = deck.splice(0, 3);
+        middleCards = deck.splice(0, 4);
+        updateDisplay();
     }
 
-    function dealNewCards() {
-        for (let i = 0; i < 3; i++) {
-            if (deck.length > 0) player1Hand.push(deck.pop());
-            if (deck.length > 0) player2Hand.push(deck.pop());
-        }
+    function updateDisplay() {
+        renderCards(player1HandContainer, player1Hand);
+        renderCards(player2HandContainer, player2Hand);
+        renderCards(middleContainer, middleCards);
+        player1ScoreDisplay.textContent = player1Score;
+        player2ScoreDisplay.textContent = player2Score;
     }
 
-    function displayCards(elementId, cards) {
-        const container = document.getElementById(elementId);
+    function renderCards(container, cards) {
         container.innerHTML = '';
         cards.forEach(card => {
             const cardElement = document.createElement('div');
             cardElement.className = `card ${card.suit}`;
-            cardElement.setAttribute('data-value', card.value); // إضافة data-value
-            cardElement.innerHTML = `
-                <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
-                <div class="symbol">${suitSymbols[card.suit]}</div>
-                <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
-            `;
+            cardElement.textContent = card.value;
+            cardElement.addEventListener('click', () => handleCardPlay(card));
             container.appendChild(cardElement);
         });
     }
 
-    function displayCollectedCards(elementId, cards) {
-        const container = document.getElementById(elementId);
-        container.innerHTML = '';
-        cards.forEach((card, index) => {
-            const cardElement = document.createElement('div');
-            cardElement.className = 'card collected-card';
-            cardElement.style.top = `${index * 2}px`;
-            cardElement.style.left = `${index * 2}px`;
-            container.appendChild(cardElement);
-        });
+    function handleCardPlay(card) {
+        if ((currentPlayer === 1 && player1Hand.includes(card)) || 
+            (currentPlayer === 2 && player2Hand.includes(card))) {
+            playCard(card);
+        }
     }
 
-    function playCard(event, playerHand, playerCollected, playerRevealed, middleCards) {
-        const cardElement = event.target.closest('.card');
-        if (!cardElement) return;
+    function playCard(card) {
+        const playerHand = currentPlayer === 1 ? player1Hand : player2Hand;
 
-        const cardValue = cardElement.querySelector('.top-left').textContent[0];
-        const cardSuit = cardElement.classList[1];
-        const card = { value: cardValue, suit: cardSuit };
-
-        // Find and remove the card from the player's hand
+        // Remove card from player's hand
         const cardIndex = playerHand.findIndex(c => c.value === card.value && c.suit === card.suit);
-        if (cardIndex === -1) return;
-        playerHand.splice(cardIndex, 1);
-
-        const cardValueInt = cardValueToInt(card.value);
-
-        // Find all possible summing combinations
-        const possibleCombinations = findAllSummingCombinations(middleCards, cardValueInt);
-
-        if (possibleCombinations.length > 0) {
-            // Highlight the cards in the middle that can be chosen
-            highlightCombinationCards(possibleCombinations);
-        } else {
-            // إذا لم يكن هناك أي مطابقة، أضف البطاقة إلى الوسط
-            middleCards.push(card);
-            displayCards('middle-cards-container', middleCards);
+        if (cardIndex !== -1) {
+            playerHand.splice(cardIndex, 1);
         }
 
-        // Allow the player to take all matching or summing cards
-        if (possibleCombinations.length > 0) {
-            possibleCombinations[0].forEach(mc => {
-                const index = middleCards.findIndex(c => c.value === mc.value && c.suit === mc.suit);
-                if (index > -1) middleCards.splice(index, 1);
-                playerCollected.push(mc); // Add middle card to collected cards
+        // Match logic
+        const matchingCards = middleCards.filter(mc => mc.value === card.value);
+        if (matchingCards.length > 0) {
+            // Take the matching card
+            matchingCards.forEach(mc => {
+                middleCards.splice(middleCards.indexOf(mc), 1);
             });
-
-            // Add the played card to the player's collected cards
-            playerCollected.push(card);
-
-            // Update the last player to take cards
-            lastPlayerToTake = currentPlayer;
-
-            // Display updated collected cards
-            displayCollectedCards(`player${currentPlayer}-collected`, playerCollected);
-
-            // Display "شكبـّة" if no cards left in the middle
-            if (middleCards.length === 0) {
-                alert("شكبـّة!");
-            }
+            if (currentPlayer === 1) player1Score++; else player2Score++;
+        } else {
+            middleCards.push(card);
         }
 
-        // Display updated middle cards
-        displayCards('middle-cards-container', middleCards);
-
-        // Switch turn to the other player
+        // Switch turn
         currentPlayer = currentPlayer === 1 ? 2 : 1;
 
-        // Display updated hands
-        displayCards('player1-cards', player1Hand);
-        displayCards('player2-cards', player2Hand);
-
-        // Deal new cards if both players are out of cards
+        // Deal new cards if hands are empty
         if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length > 0) {
-            dealNewCards();
-            displayCards('player1-cards', player1Hand);
-            displayCards('player2-cards', player2Hand);
+            dealInitialCards();
         }
 
-        // If no more cards in the deck and hands, give the remaining middle cards to the last player to take cards
-        if (deck.length === 0 && player1Hand.length === 0 && player2Hand.length === 0) {
-            if (lastPlayerToTake === 1) {
-                player1Collected.push(...middleCards);
-                middleCards.length = 0; // Clear middle cards
-            } else if (lastPlayerToTake === 2) {
-                player2Collected.push(...middleCards);
-                middleCards.length = 0; // Clear middle cards
-            }
-            displayCollectedCards('player1-collected', player1Collected);
-            displayCollectedCards('player2-collected', player2Collected);
-            displayCards('middle-cards-container', middleCards);
-        }
-
-        // Handle end of the round and scoring
-        checkAndCalculateScores();
+        updateDisplay();
     }
 
-    function checkAndCalculateScores() {
-        // Calculate and check scores for both players
-        player1Points = calculatePlayerPoints(player1Collected);
-        player2Points = calculatePlayerPoints(player2Collected);
-
-        // Check for players reaching
-        function checkAndCalculateScores() {
-        // حساب نقاط اللاعبين
-        const player1Diamonds = countDiamonds(player1Collected);
-        const player2Diamonds = countDiamonds(player2Collected);
-
-        if (player1Diamonds > player2Diamonds) {
-            player1Points += calculatePoints(player1Diamonds);
-            if (player1Diamonds >= 10) endGame(1);
-        } else if (player2Diamonds > player1Diamonds) {
-            player2Points += calculatePoints(player2Diamonds);
-            if (player2Diamonds >= 10) endGame(2);
-        } else {
-            // في حالة التعادل، لا يتم احتساب نقاط لأي منهما
-        }
-
-        // تحقق من شرط التصفير
-        if (player1Diamonds === 8 || player1Diamonds === 9) {
-            player1Points = 0;
-        }
-        if (player2Diamonds === 8 || player2Diamonds === 9) {
-            player2Points = 0;
-        }
-
-        // تحقق إذا انتهت الجولة
-        if (deck.length === 0 && player1Hand.length === 0 && player2Hand.length === 0) {
-            alert(`نهاية الجولة!\nنقاط اللاعب 1: ${player1Points}\nنقاط اللاعب 2: ${player2Points}`);
-            startNewRound();
-        }
-    }
-
-    function countDiamonds(cards) {
-        // حساب عدد أوراق الديناري في مجموعة اللاعب
-        return cards.filter(card => card.suit === 'diamonds').length;
-    }
-
-    function calculatePoints(diamondsCount) {
-        if (diamondsCount === 8 || diamondsCount === 9) {
-            return 0; // التصفير
-        } else if (diamondsCount >= 6 && diamondsCount <= 7) {
-            return 1; // نقطة واحدة
-        } else if (diamondsCount >= 10) {
-            return 10; // نهاية الشوط
-        }
-        return 0;
-    }
-
-    function endGame(winner) {
-        alert(`انتهى الشوط! اللاعب ${winner} فاز!`);
-        resetGame();
-    }
-
-    function resetGame() {
-        // إعادة ضبط اللعبة لبدء شوط جديد
-        deck = createDeck();
-        deck = shuffleDeck(deck);
-        player1Hand.length = 0;
-        player2Hand.length = 0;
-        middleCards.length = 0;
-        player1Collected.length = 0;
-        player2Collected.length = 0;
-        player1Revealed.length = 0;
-        player2Revealed.length = 0;
-        player1Points = 0;
-        player2Points = 0;
-        lastPlayerToTake = null;
-
+    // Start the game
+    startGameButton.addEventListener('click', () => {
+        createDeck();
         dealInitialCards();
-        displayCards('player1-cards', player1Hand);
-        displayCards('player2-cards', player2Hand);
-        displayCards('middle-cards-container', middleCards);
-        displayCollectedCards('player1-collected', player1Collected);
-        displayCollectedCards('player2-collected', player2Collected);
-    }
-
-    function startNewRound() {
-        // بدء جولة جديدة بنفس النقاط
-        deck = createDeck();
-        deck = shuffleDeck(deck);
-        player1Hand.length = 0;
-        player2Hand.length = 0;
-        middleCards.length = 0;
-        player1Collected.length = 0;
-        player2Collected.length = 0;
-        lastPlayerToTake = null;
-
-        dealInitialCards();
-        displayCards('player1-cards', player1Hand);
-        displayCards('player2-cards', player2Hand);
-        displayCards('middle-cards-container', middleCards);
-        displayCollectedCards('player1-collected', player1Collected);
-        displayCollectedCards('player2-collected', player2Collected);
-    }
-
-    function cardValueToInt(value) {
-        switch (value) {
-            case 'A': return 1;
-            case '2': return 2;
-            case '3': return 3;
-            case '4': return 4;
-            case '5': return 5;
-            case '6': return 6;
-            case '7': return 7;
-            case 'Q': return 8;
-            case 'J': return 9;
-            case 'K': return 10;
-            default: return 0;
-        }
-    }
+    });
 });
-// تحديد الحاويات
-const player1Cards = document.getElementById('player1-cards');
-const player2Cards = document.getElementById('player2-cards');
-const middleContainer = document.getElementById('middle-cards-container');
-
-// إنشاء بطاقات مبدئية
-function createCard(value, suit) {
-    const card = document.createElement('div');
-    card.classList.add('card', suit);
-    card.innerHTML = `
-        <div class="top-left">${value}</div>
-        <div class="symbol">${suit}</div>
-        <div class="bottom-right">${value}</div>
-    `;
-    return card;
-}
-
-// إنشاء بطاقات لكل لاعب
-function initializeGame() {
-    const suits = ['hearts', 'diamonds', 'spades', 'clubs'];
-    const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-
-    // إنشاء بطاقات للاعب الأول
-    for (let i = 0; i < 5; i++) {
-        const randomSuit = suits[Math.floor(Math.random() * suits.length)];
-        const randomValue = values[Math.floor(Math.random() * values.length)];
-        const card = createCard(randomValue, randomSuit);
-        player1Cards.appendChild(card);
-    }
-
-    // إنشاء بطاقات للاعب الثاني
-    for (let i = 0; i < 5; i++) {
-        const randomSuit = suits[Math.floor(Math.random() * suits.length)];
-        const randomValue = values[Math.floor(Math.random() * values.length)];
-        const card = createCard(randomValue, randomSuit);
-        player2Cards.appendChild(card);
-    }
-}
-
-// بدء اللعبة
-initializeGame();
