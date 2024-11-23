@@ -125,6 +125,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return results;
     }
 
-    // بدء اللعبة
+    // بدء اللعبة عند الضغط على الزر
+    const startButton = document.getElementById('start-game');
+    startButton.addEventListener('click', () => {
+        initializeGame();
+        console.log("اللعبة بدأت!");
+    });
+
+    // تهيئة اللعبة عند تحميل الصفحة
     initializeGame();
 });
