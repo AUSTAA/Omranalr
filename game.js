@@ -50,13 +50,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // تحديث العرض
     function updateDisplay() {
-        renderCards('player1-hand', player1Hand);
-        renderCards('player2-hand', player2Hand);
+        renderCards('player1-hand', player1Hand, player1Hand, player1Collected);
+        renderCards('player2-hand', player2Hand, player2Hand, player2Collected);
         renderCards('middle-cards', middleCards);
     }
 
     // عرض الأوراق
-    function renderCards(containerId, cards) {
+    function renderCards(containerId, cards, playerHand = null, collectedCards = null) {
         const container = document.getElementById(containerId);
         container.innerHTML = '';
         cards.forEach(card => {
@@ -67,6 +67,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="symbol">${suitSymbols[card.suit]}</div>
                 <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
             `;
+            
+            // إضافة مستمع للنقر إذا كانت الورقة في يد اللاعب
+            if (playerHand && collectedCards) {
+                cardElement.addEventListener('click', () => {
+                    playCard(card, playerHand, collectedCards);
+                });
+            }
+            
             container.appendChild(cardElement);
         });
     }
@@ -125,13 +133,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return results;
     }
 
-    // بدء اللعبة عند الضغط على الزر
-    const startButton = document.getElementById('start-game');
-    startButton.addEventListener('click', () => {
-        initializeGame();
-        console.log("اللعبة بدأت!");
-    });
+    // إضافة مستمع لزر "ابدأ اللعبة"
+    const startGameButton = document.getElementById('start-game');
+    startGameButton.addEventListener('click', initializeGame);
 
-    // تهيئة اللعبة عند تحميل الصفحة
+    // بدء اللعبة عند التحميل
     initializeGame();
 });
