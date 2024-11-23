@@ -1,9 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     const suits = ['hearts', 'spades', 'diamonds', 'clubs'];
     const suitSymbols = { hearts: '♥', spades: '♠', diamonds: '♦', clubs: '♣' };
-    const values = ['A', '2', '3', '4', '5', '6', '7', 'J', 'Q', 'K'];
+    const values = ['A', '2', '3', '4', '5', '6', '7', 'Q', 'J', 'K'];
     let deck, player1Hand, player2Hand, middleCards, player1Collected, player2Collected;
-    let currentPlayer = 1, lastPlayerToTake = null;
+    let currentPlayer = 1;
+    let roundOver = false;
 
     // تهيئة اللعبة
     function initializeGame() {
@@ -15,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
         player1Collected = [];
         player2Collected = [];
         dealInitialCards();
+        currentPlayer = 1;
+        roundOver = false;
         updateDisplay();
     }
 
@@ -50,16 +53,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // تحديث العرض
     function updateDisplay() {
-        renderCards('player1-hand', player1Hand, player1Hand, player1Collected);
-        renderCards('player2-hand', player2Hand, player2Hand, player2Collected);
-        renderCards('middle-cards', middleCards);
+        renderCards('player1-hand', player1Hand);
+        renderCards('player2-hand', player2Hand);
+        renderCards('middle-cards-container', middleCards);
+        document.getElementById('player1-score').textContent = player1Collected.length;
+        document.getElementById('player2-score').textContent = player2Collected.length;
     }
 
     // عرض الأوراق
-    function renderCards(containerId, cards, playerHand = null, collectedCards = null) {
+    function renderCards(containerId, cards) {
         const container = document.getElementById(containerId);
         container.innerHTML = '';
-        cards.forEach(card => {
+        cards.forEach((card, index) => {
             const cardElement = document.createElement('div');
             cardElement.className = `card ${card.suit}`;
             cardElement.innerHTML = `
@@ -67,31 +72,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="symbol">${suitSymbols[card.suit]}</div>
                 <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
             `;
-            
-            // إضافة مستمع للنقر إذا كانت الورقة في يد اللاعب
-            if (playerHand && collectedCards) {
-                cardElement.addEventListener('click', () => {
-                    playCard(card, playerHand, collectedCards);
-                });
-            }
-            
+            cardElement.addEventListener('click', () => playCard(index));
             container.appendChild(cardElement);
         });
     }
 
-    // قيمة الورقة كرقم
-    function cardValueToInt(value) {
-        switch (value) {
-            case 'A': return 1;
-            case 'J': return 9;
-            case 'Q': return 8;
-            case 'K': return 10;
-            default: return parseInt(value);
-        }
-    }
-
     // لعب الورقة
-    function playCard(card, playerHand, collectedCards) {
+    function playCard(cardIndex) {
+        if (roundOver) return;
+
+        const currentHand = currentPlayer === 1 ? player1Hand : player2Hand;
+        const collectedCards = currentPlayer === 1 ? player1Collected : player2Collected;
+
+        if (cardIndex < 0 || cardIndex >= currentHand.length) return;
+
+        const card = currentHand[cardIndex];
         const cardValue = cardValueToInt(card.value);
         const combinations = findSummingCombinations(middleCards, cardValue);
 
@@ -99,8 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
             combinations[0].forEach(match => {
                 const index = middleCards.findIndex(c => c.value === match.value && c.suit === match.suit);
                 if (index !== -1) {
-                    middleCards.splice(index, 1);
-                    collectedCards.push(match);
+                    collectedCards.push(middleCards.splice(index, 1)[0]);
                 }
             });
             collectedCards.push(card);
@@ -108,12 +102,58 @@ document.addEventListener('DOMContentLoaded', () => {
             middleCards.push(card);
         }
 
-        const cardIndex = playerHand.indexOf(card);
-        if (cardIndex !== -1) playerHand.splice(cardIndex, 1);
+        currentHand.splice(cardIndex, 1);
 
         if (middleCards.length === 0) alert("شكبـّة!");
-        currentPlayer = currentPlayer === 1 ? 2 : 1;
+
+        // التحقق من نهاية الجولة
+        if (player1Hand.length === 0 && player2Hand.length === 0) {
+            dealNextCards();
+        } else {
+            currentPlayer = currentPlayer === 1 ? 2 : 1;
+        }
+
         updateDisplay();
+    }
+
+    // توزيع أوراق جديدة
+    function dealNextCards() {
+        if (deck.length >= 6) {
+            for (let i = 0; i < 3; i++) {
+                player1Hand.push(deck.pop());
+                player2Hand.push(deck.pop());
+            }
+        } else {
+            endRound();
+        }
+    }
+
+    // إنهاء الجولة
+    function endRound() {
+        roundOver = true;
+        const player1Score = player1Collected.length;
+        const player2Score = player2Collected.length;
+
+        alert(`الجولة انتهت! نقاط اللاعب 1: ${player1Score}, نقاط اللاعب 2: ${player2Score}`);
+
+        if (player1Score > player2Score) {
+            currentPlayer = 1;
+        } else {
+            currentPlayer = 2;
+        }
+
+        initializeGame();
+    }
+
+    // قيمة الورقة كرقم
+    function cardValueToInt(value) {
+        switch (value) {
+            case 'A': return 1;
+            case 'Q': return 8;
+            case 'J': return 9;
+            case 'K': return 10;
+            default: return parseInt(value);
+        }
     }
 
     // إيجاد كل التركيبات الممكنة
@@ -133,10 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return results;
     }
 
-    // إضافة مستمع لزر "ابدأ اللعبة"
-    const startGameButton = document.getElementById('start-game');
-    startGameButton.addEventListener('click', initializeGame);
-
-    // بدء اللعبة عند التحميل
+    // بدء اللعبة
+    document.getElementById('start-game').addEventListener('click', initializeGame);
     initializeGame();
 });
