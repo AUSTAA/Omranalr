@@ -54,48 +54,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // تحديث العرض
     function updateDisplay() {
-        renderCards('player1-hand', player1Hand);
-        renderCards('player2-hand', player2Hand);
-        renderCards('middle-cards', middleCards); // تم التصحيح هنا
-        document.getElementById('player1-score').textContent = player1Collected.length;
-        document.getElementById('player2-score').textContent = player2Collected.length;
-    }
+    renderCards('player1-hand', player1Hand, 1);
+    renderCards('player2-hand', player2Hand, 2);
+    renderCards('middle-cards', middleCards);
+
+    // تحديث النقاط
+    document.getElementById('player1-score').textContent = player1Collected.length;
+    document.getElementById('player2-score').textContent = player2Collected.length;
+}
+
 
     // عرض الأوراق
-    function renderCards(containerId, cards) {
-        const container = document.getElementById(containerId);
-        if (!container) {
-            console.error(`Container with ID '${containerId}' not found.`);
-            return;
-        }
-        container.innerHTML = '';
-        cards.forEach((card, index) => {
-            const cardElement = document.createElement('div');
-            cardElement.className = `card ${card.suit}`;
-            cardElement.innerHTML = `
-                <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
-                <div class="symbol">${suitSymbols[card.suit]}</div>
-                <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
-            `;
-            cardElement.addEventListener('click', () => playCard(index));
-            container.appendChild(cardElement);
-        });
-    }
+    function renderCards(containerId, cards, player) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    cards.forEach((card, index) => {
+        const cardElement = document.createElement('div');
+        cardElement.className = `card ${card.suit}`;
+        cardElement.innerHTML = `
+            <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
+            <div class="symbol">${suitSymbols[card.suit]}</div>
+            <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
+        `;
+        cardElement.addEventListener('click', () => playCard(index, player)); // تمرير اللاعب الحالي
+        container.appendChild(cardElement);
+    });
+}
 
     // لعب الورقة
-    function playCard(cardIndex) {
-    if (roundOver) return;
+    function playCard(cardIndex, player) {
+    if (roundOver) return; // منع اللعب إذا انتهت الجولة
 
-    // تأكد أن اللاعب يلعب دوره فقط
+    // التأكد من أن الورقة التي يتم النقر عليها تخص اللاعب الحالي
+    if ((currentPlayer === 1 && player !== 1) || (currentPlayer === 2 && player !== 2)) {
+        alert("ليس دورك!");
+        return;
+    }
+
     const currentHand = currentPlayer === 1 ? player1Hand : player2Hand;
     const collectedCards = currentPlayer === 1 ? player1Collected : player2Collected;
 
+    // التأكد أن الورقة التي تم اختيارها تخص اللاعب الحالي
     if (cardIndex < 0 || cardIndex >= currentHand.length) return;
 
+    // الورقة التي يلعبها اللاعب
     const card = currentHand[cardIndex];
     const cardValue = cardValueToInt(card.value);
 
-    // 1. التحقق من وجود ورقة مطابقة في الوسط
+    // 1. التحقق من وجود ورقة مطابقة مباشرة في الوسط
     const matchingCardIndex = middleCards.findIndex(c => cardValueToInt(c.value) === cardValue);
 
     if (matchingCardIndex !== -1) {
@@ -123,18 +129,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     currentHand.splice(cardIndex, 1); // إزالة الورقة من يد اللاعب
 
+    // إذا كانت أوراق الوسط فارغة بعد الحركة
     if (middleCards.length === 0) alert("شكبـّة!");
 
     // التحقق من نهاية الجولة
     if (player1Hand.length === 0 && player2Hand.length === 0) {
-        dealNextCards();
+        dealNextCards(); // توزيع أوراق جديدة
     } else {
         // التبديل إلى اللاعب الآخر
         currentPlayer = currentPlayer === 1 ? 2 : 1;
     }
 
+    // تحديث العرض بعد كل حركة
     updateDisplay();
 }
+
 
     // توزيع أوراق جديدة
     function dealNextCards() {
