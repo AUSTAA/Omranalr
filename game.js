@@ -53,12 +53,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // تحديث العرض
     function updateDisplay() {
-        renderCards('player1-hand', player1Hand);
-        renderCards('player2-hand', player2Hand);
-        renderCards('middle-cards-container', middleCards);
-        document.getElementById('player1-score').textContent = player1Collected.length;
-        document.getElementById('player2-score').textContent = player2Collected.length;
-    }
+    renderCards('player1-hand', player1Hand);
+    renderCards('player2-hand', player2Hand);
+    renderCards('middle-cards', middleCards); // الاسم الصحيح للعنصر
+    document.getElementById('player1-score').textContent = player1Collected.length;
+    document.getElementById('player2-score').textContent = player2Collected.length;
+}
 
     // عرض الأوراق
     function renderCards(containerId, cards) {
