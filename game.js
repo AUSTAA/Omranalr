@@ -84,42 +84,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // لعب الورقة
     function playCard(cardIndex) {
-        if (roundOver) return;
+    if (roundOver) return;
 
-        const currentHand = currentPlayer === 1 ? player1Hand : player2Hand;
-        const collectedCards = currentPlayer === 1 ? player1Collected : player2Collected;
+    // تأكد أن اللاعب يلعب دوره فقط
+    const currentHand = currentPlayer === 1 ? player1Hand : player2Hand;
+    const collectedCards = currentPlayer === 1 ? player1Collected : player2Collected;
 
-        if (cardIndex < 0 || cardIndex >= currentHand.length) return;
+    if (cardIndex < 0 || cardIndex >= currentHand.length) return;
 
-        const card = currentHand[cardIndex];
-        const cardValue = cardValueToInt(card.value);
+    const card = currentHand[cardIndex];
+    const cardValue = cardValueToInt(card.value);
+
+    // 1. التحقق من وجود ورقة مطابقة في الوسط
+    const matchingCardIndex = middleCards.findIndex(c => cardValueToInt(c.value) === cardValue);
+
+    if (matchingCardIndex !== -1) {
+        // إذا وُجدت ورقة مطابقة، يتم أخذها فقط
+        collectedCards.push(middleCards.splice(matchingCardIndex, 1)[0]); // أخذ الورقة المطابقة
+        collectedCards.push(card); // أخذ الورقة التي لعبها اللاعب
+    } else {
+        // 2. إذا لم تكن هناك ورقة مطابقة، نبحث عن مجموع مطابق
         const combinations = findSummingCombinations(middleCards, cardValue);
 
         if (combinations.length > 0) {
+            // إذا وُجدت مجموعة مطابقة، يتم أخذ المجموعة
             combinations[0].forEach(match => {
                 const index = middleCards.findIndex(c => c.value === match.value && c.suit === match.suit);
                 if (index !== -1) {
                     collectedCards.push(middleCards.splice(index, 1)[0]);
                 }
             });
-            collectedCards.push(card);
+            collectedCards.push(card); // أخذ الورقة التي لعبها اللاعب
         } else {
+            // إذا لم تكن هناك مطابقة مباشرة أو مجموع، تُضاف الورقة إلى الوسط
             middleCards.push(card);
         }
-
-        currentHand.splice(cardIndex, 1);
-
-        if (middleCards.length === 0) alert("شكبـّة!");
-
-        // التحقق من نهاية الجولة
-        if (player1Hand.length === 0 && player2Hand.length === 0) {
-            dealNextCards();
-        } else {
-            currentPlayer = currentPlayer === 1 ? 2 : 1;
-        }
-
-        updateDisplay();
     }
+
+    currentHand.splice(cardIndex, 1); // إزالة الورقة من يد اللاعب
+
+    if (middleCards.length === 0) alert("شكبـّة!");
+
+    // التحقق من نهاية الجولة
+    if (player1Hand.length === 0 && player2Hand.length === 0) {
+        dealNextCards();
+    } else {
+        // التبديل إلى اللاعب الآخر
+        currentPlayer = currentPlayer === 1 ? 2 : 1;
+    }
+
+    updateDisplay();
+}
 
     // توزيع أوراق جديدة
     function dealNextCards() {
