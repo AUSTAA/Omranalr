@@ -49,20 +49,25 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 0; i < 4; i++) {
             middleCards.push(deck.pop());
         }
+        console.log('Middle cards distributed:', middleCards); // نقطة تفتيش
     }
 
     // تحديث العرض
     function updateDisplay() {
-    renderCards('player1-hand', player1Hand);
-    renderCards('player2-hand', player2Hand);
-    renderCards('middle-cards', middleCards); // الاسم الصحيح للعنصر
-    document.getElementById('player1-score').textContent = player1Collected.length;
-    document.getElementById('player2-score').textContent = player2Collected.length;
-}
+        renderCards('player1-hand', player1Hand);
+        renderCards('player2-hand', player2Hand);
+        renderCards('middle-cards', middleCards); // تم التصحيح هنا
+        document.getElementById('player1-score').textContent = player1Collected.length;
+        document.getElementById('player2-score').textContent = player2Collected.length;
+    }
 
     // عرض الأوراق
     function renderCards(containerId, cards) {
         const container = document.getElementById(containerId);
+        if (!container) {
+            console.error(`Container with ID '${containerId}' not found.`);
+            return;
+        }
         container.innerHTML = '';
         cards.forEach((card, index) => {
             const cardElement = document.createElement('div');
