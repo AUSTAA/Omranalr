@@ -12,7 +12,7 @@ h1 {
 }
 
 .game-container {
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
     padding: 20px;
     background: #fff;
@@ -24,8 +24,9 @@ h1 {
     display: flex;
     justify-content: space-between;
     margin-bottom: 20px;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: bold;
+    color: #333;
 }
 
 .table {
@@ -43,19 +44,20 @@ h1 {
 .middle-area {
     width: 40%;
     padding: 10px;
+    text-align: center;
 }
 
 .hand, .middle-cards {
     display: flex;
     justify-content: center;  /* جعل الأوراق في صف أفقي */
-    gap: 5px; /* المسافة بين الأوراق */
+    gap: 10px; /* المسافة بين الأوراق */
     flex-wrap: nowrap; /* عدم التفاف الأوراق في السطر */
     margin: 10px 0;
 }
 
 .card {
-    width: 45px; /* تصغير العرض */
-    height: 70px; /* تصغير الارتفاع */
+    width: 50px; /* تصغير العرض */
+    height: 75px; /* تصغير الارتفاع */
     border: 1px solid #000;
     border-radius: 8px;
     background-color: #fff;
@@ -64,6 +66,12 @@ h1 {
     align-items: center;
     cursor: pointer;
     position: relative;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: scale(1.1); /* تكبير الورقة عند المرور فوقها */
 }
 
 .card.hearts, .card.diamonds {
@@ -76,33 +84,34 @@ h1 {
 
 .card .top-left, .card .bottom-right {
     position: absolute;
-    font-size: 10px;
+    font-size: 12px; /* تكبير النص في الورقة */
 }
 
 .card .top-left {
-    top: 3px;
-    left: 3px;
+    top: 5px;
+    left: 5px;
 }
 
 .card .bottom-right {
-    bottom: 3px;
-    right: 3px;
+    bottom: 5px;
+    right: 5px;
     transform: rotate(180deg);
 }
 
 .card .symbol {
-    font-size: 16px;
+    font-size: 20px; /* تكبير الرموز داخل الورقة */
 }
 
 button {
-    padding: 10px 20px;
-    font-size: 16px;
+    padding: 12px 25px;
+    font-size: 18px;
     color: #fff;
     background-color: #007bff;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    margin-top: 20px;
+    margin-top: 30px;
+    transition: background-color 0.3s;
 }
 
 button:hover {
@@ -111,6 +120,21 @@ button:hover {
 
 #game-log {
     margin-top: 20px;
-    font-size: 14px;
-    color: #666;
+    font-size: 16px;
+    color: #444;
+    font-weight: bold;
+    text-align: center;
+}
+
+#game-log span {
+    font-size: 18px;
+    color: #ff5722; /* تغيير لون الرسائل لتكون أكثر بروزًا */
+}
+
+#game-log .success {
+    color: green;
+}
+
+#game-log .failure {
+    color: red;
 }
