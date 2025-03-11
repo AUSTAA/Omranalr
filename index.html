@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,29 +10,42 @@
     <div class="game-container">
         <h1>لعبة الورق</h1>
 
+        <!-- عرض النقاط -->
         <div class="scores">
             <div>نقاط اللاعب 1: <span id="player1-score">0</span></div>
             <div>نقاط اللاعب 2: <span id="player2-score">0</span></div>
         </div>
 
+        <!-- عرض حالة الرسائل -->
+        <div id="game-message" class="game-message">
+            <!-- سيتم عرض رسائل مثل "كبووووط 🤣" أو "البرميلة" هنا -->
+        </div>
+
+        <!-- منطقة الأوراق -->
         <div class="table">
+            <!-- يد اللاعب 1 -->
             <div id="player1-area" class="player-area">
                 <h2>يد اللاعب 1</h2>
                 <div id="player1-hand" class="hand"></div>
             </div>
 
+            <!-- الأوراق في الوسط -->
             <div id="middle-area" class="middle-area">
                 <h2>الأوراق في الوسط</h2>
                 <div id="middle-cards" class="middle-cards"></div>
             </div>
 
+            <!-- يد اللاعب 2 -->
             <div id="player2-area" class="player-area">
                 <h2>يد اللاعب 2</h2>
                 <div id="player2-hand" class="hand"></div>
             </div>
         </div>
 
+        <!-- زر بدء اللعبة -->
         <button id="start-game">ابدأ اللعبة</button>
+
+        <!-- سجل اللعبة لعرض التنبيهات -->
         <p id="game-log"></p>
     </div>
 
