@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let player1Score = 0, player2Score = 0;
     let currentPlayer = 1;
     let roundOver = false;
-    let totalRoundsPlayed = 0;
 
     function initializeGame() {
         deck = createDeck();
@@ -85,35 +84,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const card = currentHand[cardIndex];
         const cardValue = cardValueToInt(card.value);
-        const matchingCardIndex = middleCards.findIndex(c => cardValueToInt(c.value) === cardValue);
 
+        // 1️⃣ البحث عن ورقة مطابقة مباشرة، مع إعطاء الأولوية للديناري
+        let matchingCardIndex = middleCards.findIndex(c => cardValueToInt(c.value) === cardValue);
         if (matchingCardIndex !== -1) {
-            collectedCards.push(middleCards.splice(matchingCardIndex, 1)[0]);
-            collectedCards.push(card);
-        } else {
-            const combinations = findSummingCombinations(middleCards, cardValue);
-            if (combinations.length > 0) {
-                combinations[0].forEach(match => {
-                    const index = middleCards.findIndex(c => c.value === match.value && c.suit === match.suit);
-                    if (index !== -1) {
-                        collectedCards.push(middleCards.splice(index, 1)[0]);
-                    }
-                });
+            let matchingCard = middleCards[matchingCardIndex];
+            if (matchingCard.suit === 'diamonds') {
+                collectedCards.push(middleCards.splice(matchingCardIndex, 1)[0]);
                 collectedCards.push(card);
-            } else {
-                middleCards.push(card);
+                currentHand.splice(cardIndex, 1);
+                switchTurn();
+                return;
             }
         }
 
-        currentHand.splice(cardIndex, 1);
-        if (middleCards.length === 0) alert("شكبـّة!");
+        // 2️⃣ إذا لم يكن هناك تطابق مباشر، البحث عن مجموعة تساوي قيمة الورقة
+        const combinations = findSummingCombinations(middleCards, cardValue);
+        if (combinations.length > 0) {
+            let bestCombination = combinations.find(comb => comb.some(c => c.suit === 'diamonds')) || combinations[0];
 
+            bestCombination.forEach(match => {
+                const index = middleCards.findIndex(c => c.value === match.value && c.suit === match.suit);
+                if (index !== -1) {
+                    collectedCards.push(middleCards.splice(index, 1)[0]);
+                }
+            });
+
+            collectedCards.push(card);
+        } else {
+            // 3️⃣ إذا لم يكن هناك أي تطابق، توضع الورقة في الوسط
+            middleCards.push(card);
+        }
+
+        currentHand.splice(cardIndex, 1);
+        switchTurn();
+    }
+
+    function switchTurn() {
         if (player1Hand.length === 0 && player2Hand.length === 0) {
             dealNextCards();
         } else {
             currentPlayer = currentPlayer === 1 ? 2 : 1;
         }
-
         updateDisplay();
     }
 
