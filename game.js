@@ -74,100 +74,72 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // لعب الورقة
-    function playCard(cardIndex, player) {
-        if (roundOver) return; // منع اللعب إذا انتهت الجولة
+    // لعب الورقة
+function playCard(cardIndex, player) {
+    if (roundOver) return; // منع اللعب إذا انتهت الجولة
 
-        // التأكد من أن الورقة التي يتم النقر عليها تخص اللاعب الحالي
-        if ((currentPlayer === 1 && player !== 1) || (currentPlayer === 2 && player !== 2)) {
-            alert("ليس دورك!");
-            return;
-        }
+    // التأكد من أن الورقة التي يتم النقر عليها تخص اللاعب الحالي
+    if ((currentPlayer === 1 && player !== 1) || (currentPlayer === 2 && player !== 2)) {
+        alert("ليس دورك!");
+        return;
+    }
 
-        const currentHand = currentPlayer === 1 ? player1Hand : player2Hand;
-        const collectedCards = currentPlayer === 1 ? player1Collected : player2Collected;
+    const currentHand = currentPlayer === 1 ? player1Hand : player2Hand;
+    const collectedCards = currentPlayer === 1 ? player1Collected : player2Collected;
 
-        // التأكد أن الورقة التي تم اختيارها تخص اللاعب الحالي
-        if (cardIndex < 0 || cardIndex >= currentHand.length) return;
+    // التأكد أن الورقة التي تم اختيارها تخص اللاعب الحالي
+    if (cardIndex < 0 || cardIndex >= currentHand.length) return;
 
-        // الورقة التي يلعبها اللاعب
-        const card = currentHand[cardIndex];
-        const cardValue = cardValueToInt(card.value);
+    // الورقة التي يلعبها اللاعب
+    const card = currentHand[cardIndex];
+    const cardValue = cardValueToInt(card.value);
 
-        // 1. التحقق من وجود ورقة مطابقة مباشرة في الوسط
-        const matchingCardIndex = middleCards.findIndex(c => cardValueToInt(c.value) === cardValue);
+    // 1. التحقق من وجود ورقة مطابقة مباشرة في الوسط
+    const matchingCardIndex = middleCards.findIndex(c => cardValueToInt(c.value) === cardValue);
 
-        if (matchingCardIndex !== -1) {
-            // إذا وُجدت ورقة مطابقة، يتم أخذها فقط
-            collectedCards.push(middleCards.splice(matchingCardIndex, 1)[0]); // أخذ الورقة المطابقة
+    if (matchingCardIndex !== -1) {
+        // إذا وُجدت ورقة مطابقة، يتم أخذها فقط
+        collectedCards.push(middleCards.splice(matchingCardIndex, 1)[0]); // أخذ الورقة المطابقة
+        collectedCards.push(card); // أخذ الورقة التي لعبها اللاعب
+    } else {
+        // 2. إذا لم تكن هناك ورقة مطابقة، نبحث عن مجموع مطابق
+        const combinations = findSummingCombinations(middleCards, cardValue);
+
+        if (combinations.length > 0) {
+            // إذا وُجدت مجموعة مطابقة، يتم أخذ المجموعة
+            combinations[0].forEach(match => {
+                const index = middleCards.findIndex(c => c.value === match.value && c.suit === match.suit);
+                if (index !== -1) {
+                    collectedCards.push(middleCards.splice(index, 1)[0]);
+                }
+            });
             collectedCards.push(card); // أخذ الورقة التي لعبها اللاعب
         } else {
-            // 2. إذا لم تكن هناك ورقة مطابقة، نبحث عن مجموع مطابق
-            const combinations = findSummingCombinations(middleCards, cardValue);
-
-            if (combinations.length > 0) {
-                // إذا وُجدت مجموعة مطابقة، يتم أخذ المجموعة
-                combinations[0].forEach(match => {
-                    const index = middleCards.findIndex(c => c.value === match.value && c.suit === match.suit);
-                    if (index !== -1) {
-                        collectedCards.push(middleCards.splice(index, 1)[0]);
-                    }
-                });
-                collectedCards.push(card); // أخذ الورقة التي لعبها اللاعب
-            } else {
-                // إذا لم تكن هناك مطابقة مباشرة أو مجموع، تُضاف الورقة إلى الوسط
-                middleCards.push(card);
-            }
+            // إذا لم تكن هناك مطابقة مباشرة أو مجموع، تُضاف الورقة إلى الوسط
+            middleCards.push(card);
         }
-
-        currentHand.splice(cardIndex, 1); // إزالة الورقة من يد اللاعب
-
-        // التحقق من الشكبة (إذا كانت أوراق الوسط فارغة بعد الحركة)
-        if (middleCards.length === 0) {
-            const lastCardValue = cardValueToInt(card.value); // قيمة آخر ورقة
-            collectedCards.push({ value: card.value, suit: card.suit }); // إضافة الشكبة
-            if (currentPlayer === 1) {
-                player1Score += lastCardValue;  // إضافة النقاط للاعب 1
-            } else {
-                player2Score += lastCardValue;  // إضافة النقاط للاعب 2
-            }
-            alert("شكبـّة! + " + lastCardValue + " نقطة");
-        }
-
-        // التحقق من نظام "باجي" للديناري والبرميلة والكارطة
-        // نظام الديناري باجي
-        if (card.suit === "diamonds" && card.value === "5") {
-            alert("الديناري باجي! لا تُحسب النقاط.");
-            currentPlayer = currentPlayer === 1 ? 2 : 1; // التبديل إلى اللاعب الآخر
-            updateDisplay();
-            return;  // لا تُحسب النقاط للاعب في هذه الحالة
-        }
-        // نظام البرميلة
-        if ((card.value === "7" && middleCards.filter(c => c.value === "7").length === 3) ||
-            (card.value === "6" && middleCards.filter(c => c.value === "6").length === 3)) {
-            alert("برميلة! لا تُحسب النقاط.");
-            currentPlayer = currentPlayer === 1 ? 2 : 1; // التبديل إلى اللاعب الآخر
-            updateDisplay();
-            return;  // لا تُحسب النقاط للاعب في هذه الحالة
-        }
-        // نظام الكارطة باجي
-        if (player1Hand.length === 20 || player2Hand.length === 20) {
-            alert("الكارطة باجي! لا تُحسب النقاط.");
-            currentPlayer = currentPlayer === 1 ? 2 : 1; // التبديل إلى اللاعب الآخر
-            updateDisplay();
-            return;  // لا تُحسب النقاط في هذه الحالة
-        }
-
-        // التحقق من نهاية الجولة
-        if (player1Hand.length === 0 && player2Hand.length === 0) {
-            dealNextCards(); // توزيع أوراق جديدة
-        } else {
-            // التبديل إلى اللاعب الآخر
-            currentPlayer = currentPlayer === 1 ? 2 : 1;
-        }
-
-        // تحديث العرض بعد كل حركة
-        updateDisplay();
     }
+
+    currentHand.splice(cardIndex, 1); // إزالة الورقة من يد اللاعب
+
+    // التحقق من الشكبة (إذا كانت أوراق الوسط فارغة بعد الحركة)
+    if (middleCards.length === 0) {
+        const lastCard = cardValueToInt(card.value); // قيمة آخر ورقة
+        collectedCards.push({value: lastCard, suit: card.suit}); // إضافة الشكبة
+        alert("شكبـّة! + " + lastCard + " نقطة");
+    }
+
+    // التحقق من نهاية الجولة
+    if (player1Hand.length === 0 && player2Hand.length === 0) {
+        dealNextCards(); // توزيع أوراق جديدة
+    } else {
+        // التبديل إلى اللاعب الآخر
+        currentPlayer = currentPlayer === 1 ? 2 : 1;
+    }
+
+    // تحديث العرض بعد كل حركة
+    updateDisplay();
+}
 
     function findBestMatch(card, middleCards) {
         let possibleMatches = middleCards.filter(c => cardValueToInt(c.value) === cardValueToInt(card.value));
