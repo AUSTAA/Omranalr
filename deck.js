@@ -1,4 +1,4 @@
-// قانون الشكبة: إضافة قيمة الشكبة إلى النقاط
+// قانون الشكبة: إضافة قيمة الشكبة إلىالنقاط
 function checkShkba(card) {
     if (middleCards.length === 0) {
         const lastCard = cardValueToInt(card.value);
