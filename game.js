@@ -73,79 +73,85 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // لعب الورقة
-    // لعب الورقة
-function playCard(cardIndex, player) {
-    if (roundOver) return; // منع اللعب إذا انتهت الجولة
+    function playCard(cardIndex, player) {
+        if (roundOver) return;
 
-    // التأكد من أن الورقة التي يتم النقر عليها تخص اللاعب الحالي
-    if ((currentPlayer === 1 && player !== 1) || (currentPlayer === 2 && player !== 2)) {
-        alert("ليس دورك!");
-        return;
-    }
-
-    const currentHand = currentPlayer === 1 ? player1Hand : player2Hand;
-    const collectedCards = currentPlayer === 1 ? player1Collected : player2Collected;
-
-    // التأكد أن الورقة التي تم اختيارها تخص اللاعب الحالي
-    if (cardIndex < 0 || cardIndex >= currentHand.length) return;
-
-    // الورقة التي يلعبها اللاعب
-    const card = currentHand[cardIndex];
-    const cardValue = cardValueToInt(card.value);
-
-    // 1. التحقق من وجود ورقة مطابقة مباشرة في الوسط
-    const matchingCardIndex = middleCards.findIndex(c => cardValueToInt(c.value) === cardValue);
-
-    if (matchingCardIndex !== -1) {
-        // إذا وُجدت ورقة مطابقة، يتم أخذها فقط
-        collectedCards.push(middleCards.splice(matchingCardIndex, 1)[0]); // أخذ الورقة المطابقة
-        collectedCards.push(card); // أخذ الورقة التي لعبها اللاعب
-    } else {
-        // 2. إذا لم تكن هناك ورقة مطابقة، نبحث عن مجموع مطابق
-        const combinations = findSummingCombinations(middleCards, cardValue);
-
-        if (combinations.length > 0) {
-            // إذا وُجدت مجموعة مطابقة، يتم أخذ المجموعة
-            combinations[0].forEach(match => {
-                const index = middleCards.findIndex(c => c.value === match.value && c.suit === match.suit);
-                if (index !== -1) {
-                    collectedCards.push(middleCards.splice(index, 1)[0]);
-                }
-            });
-            collectedCards.push(card); // أخذ الورقة التي لعبها اللاعب
-        } else {
-            // إذا لم تكن هناك مطابقة مباشرة أو مجموع، تُضاف الورقة إلى الوسط
-            middleCards.push(card);
+        if ((currentPlayer === 1 && player !== 1) || (currentPlayer === 2 && player !== 2)) {
+            alert("ليس دورك!");
+            return;
         }
+
+        const currentHand = currentPlayer === 1 ? player1Hand : player2Hand;
+        const collectedCards = currentPlayer === 1 ? player1Collected : player2Collected;
+
+        if (cardIndex < 0 || cardIndex >= currentHand.length) return;
+
+        const card = currentHand[cardIndex];
+        const cardValue = cardValueToInt(card.value);
+
+        const matchingCardIndex = middleCards.findIndex(c => cardValueToInt(c.value) === cardValue);
+
+        if (matchingCardIndex !== -1) {
+            collectedCards.push(middleCards.splice(matchingCardIndex, 1)[0]);
+            collectedCards.push(card);
+        } else {
+            const combinations = findSummingCombinations(middleCards, cardValue);
+            if (combinations.length > 0) {
+                combinations[0].forEach(match => {
+                    const index = middleCards.findIndex(c => c.value === match.value && c.suit === match.suit);
+                    if (index !== -1) {
+                        collectedCards.push(middleCards.splice(index, 1)[0]);
+                    }
+                });
+                collectedCards.push(card);
+            } else {
+                middleCards.push(card);
+            }
+        }
+
+        currentHand.splice(cardIndex, 1);
+
+        if (middleCards.length === 0) {
+            const lastCardValue = cardValueToInt(card.value);
+            if (currentPlayer === 1) player1Score += lastCardValue;
+            else player2Score += lastCardValue;
+            alert("شكبـّة! + " + lastCardValue + " نقطة");
+        }
+
+        checkSpecialRules(collectedCards);
+
+        if (player1Hand.length === 0 && player2Hand.length === 0) {
+            dealNextCards();
+        } else {
+            currentPlayer = currentPlayer === 1 ? 2 : 1;
+        }
+
+        updateDisplay();
     }
 
-    currentHand.splice(cardIndex, 1); // إزالة الورقة من يد اللاعب
+    function checkSpecialRules(collectedCards) {
+        let count7 = collectedCards.filter(c => c.value === "7").length;
+        let count6 = collectedCards.filter(c => c.value === "6").length;
+        let countDinari7 = collectedCards.filter(c => c.value === "7" && c.suit === "diamonds").length;
+        let countDinari = collectedCards.filter(c => c.suit === "diamonds").length;
 
-    // التحقق من الشكبة (إذا كانت أوراق الوسط فارغة بعد الحركة)
-    if (middleCards.length === 0) {
-        const lastCard = cardValueToInt(card.value); // قيمة آخر ورقة
-        collectedCards.push({value: lastCard, suit: card.suit}); // إضافة الشكبة
-        alert("شكبـّة! + " + lastCard + " نقطة");
-    }
+        if (count7 >= 3 || (count7 >= 2 && count6 >= 3)) {
+            alert("برميلة! +1 نقطة");
+            if (currentPlayer === 1) player1Score++;
+            else player2Score++;
+        }
 
-    // التحقق من نهاية الجولة
-    if (player1Hand.length === 0 && player2Hand.length === 0) {
-        dealNextCards(); // توزيع أوراق جديدة
-    } else {
-        // التبديل إلى اللاعب الآخر
-        currentPlayer = currentPlayer === 1 ? 2 : 1;
-    }
+        if (countDinari7 > 0) {
+            alert("🐍 الحية! +1 نقطة");
+            if (currentPlayer === 1) player1Score++;
+            else player2Score++;
+        }
 
-    // تحديث العرض بعد كل حركة
-    updateDisplay();
-}
-
-    function findBestMatch(card, middleCards) {
-        let possibleMatches = middleCards.filter(c => cardValueToInt(c.value) === cardValueToInt(card.value));
-        let diamondMatches = possibleMatches.filter(c => c.suit === "diamonds");
-
-        return diamondMatches.length > 0 ? diamondMatches : possibleMatches;
+        if (countDinari >= 5) {
+            alert("الديناري باجي! النقاط ملغية");
+            player1Score = 0;
+            player2Score = 0;
+        }
     }
 
     function dealNextCards() {
@@ -159,43 +165,8 @@ function playCard(cardIndex, player) {
         }
     }
 
-    function endRound() {
-        roundOver = true;
-
-        let player1Diamonds = player1Collected.filter(card => card.suit === "diamonds").length;
-        let player2Diamonds = player2Collected.filter(card => card.suit === "diamonds").length;
-
-        if (player1Diamonds > player2Diamonds) player1Score += 1;
-        else if (player2Diamonds > player1Diamonds) player2Score += 1;
-
-        if (player1Diamonds >= 8) {
-            player1Score += 10;
-            player2Score = 0;
-        } else if (player2Diamonds >= 8) {
-            player2Score += 10;
-            player1Score = 0;
-        }
-
-        alert(`الجولة انتهت! نقاط اللاعب 1: ${player1Score}, نقاط اللاعب 2: ${player2Score}`);
-
-        // التحقق من انتهاء الشوط عند 61 نقطة
-        if (player1Score >= 61 || player2Score >= 61) {
-            alert(player1Score >= 61 ? "اللاعب 1 فاز!" : "اللاعب 2 فاز!");
-            player1Score = 0;
-            player2Score = 0;
-        }
-
-        initializeGame();
-    }
-
     function cardValueToInt(value) {
-        switch (value) {
-            case "A": return 1;
-            case "Q": return 8;
-            case "J": return 9;
-            case "K": return 10;
-            default: return parseInt(value);
-        }
+        return value === "A" ? 1 : value === "Q" ? 8 : value === "J" ? 9 : value === "K" ? 10 : parseInt(value);
     }
 
     document.getElementById("start-game").addEventListener("click", initializeGame);
