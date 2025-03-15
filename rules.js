@@ -1,56 +1,30 @@
-// قانون الشكبة: إضافة قيمة الشكبة إلى النقاط
-function checkShkba(card) {
-    if (middleCards.length === 0) {
-        const lastCard = cardValueToInt(card.value);
-        collectedCards.push({ value: lastCard, suit: card.suit });
-        alert("شكبـّة! + " + lastCard + " نقطة");
-    }
-}
+const Rules = {
+    checkShkba: function (middleCards, lastCard, collectedCards, playerScore) {
+        if (middleCards.length === 0) {
+            playerScore += parseInt(lastCard.value);
+            UI.showMessage("شكبـّة! +" + lastCard.value + " نقطة");
+        }
+    },
 
-// قانون البرميلة والحية
-function checkBarmeelaAndSnake() {
-    // 3 سبعات
-    if (middleCards.filter(card => card.value === "7").length === 3) {
-        alert("برميلة!");
-        player1Score += 1;
-    }
-    // 2 سبعات و3 ستات
-    if (middleCards.filter(card => card.value === "7").length === 2 && middleCards.filter(card => card.value === "6").length === 3) {
-        alert("برميلة!");
-        player1Score += 1;
-    }
-    // 7 ديناري
-    if (middleCards.some(card => card.value === "7" && card.suit === "diamonds")) {
-        alert("🐍");
-        player1Score += 1;
-    }
-}
+    checkBarmeela: function (collectedCards, playerScore) {
+        const sevens = collectedCards.filter(c => c.value === "7").length;
+        const sixes = collectedCards.filter(c => c.value === "6").length;
+        const sevenDiamonds = collectedCards.some(c => c.value === "7" && c.suit === "diamonds");
 
-// قوانين الباجي
-function checkBaji() {
-    // ديناري باجي
-    if (player1Hand.filter(card => card.suit === "diamonds").length === 5) {
-        alert("الديناري باجي");
-        return false;
-    }
-    // البرميلة باجي
-    if (middleCards.filter(card => card.value === "7").length === 2 && middleCards.filter(card => card.value === "6").length === 2) {
-        alert("البرميلة باجي");
-        return false;
-    }
-    // الكارطة باجي
-    if (player1Hand.length === 20) {
-        alert("الكارطة باجي");
-        return false;
-    }
-    return true;
-}
+        if (sevens >= 3 || (sevens >= 2 && sixes >= 3)) {
+            playerScore += 1;
+            UI.showMessage("برميلة! +1 نقطة");
+        }
 
-// نهاية الشوط
-function checkEndOfGame() {
-    if (player1Score >= 61 || player2Score >= 61) {
-        alert(player1Score >= 61 ? "اللاعب 1 فاز!" : "اللاعب 2 فاز!");
-        player1Score = 0;
-        player2Score = 0;
+        if (sevenDiamonds) {
+            playerScore += 1;
+            UI.showMessage("🐍 7 ديناري! +1 نقطة");
+        }
+    },
+
+    checkBaji: function (player1Cards, player2Cards) {
+        return (player1Cards.length === 20 && player2Cards.length === 20) ||
+               (player1Cards.filter(c => c.suit === "diamonds").length === 5 ||
+                player2Cards.filter(c => c.suit === "diamonds").length === 5);
     }
-}
+};
