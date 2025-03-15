@@ -1,33 +1,24 @@
-// ui.js
-export function displayCards(elementId, cards) {
-    const container = document.getElementById(elementId);
-    container.innerHTML = '';
-    cards.forEach(card => {
-        const cardElement = document.createElement('div');
+// تابع تحديث العرض
+function updateDisplay() {
+    renderCards("player1-hand", player1Hand, 1);
+    renderCards("player2-hand", player2Hand, 2);
+    renderCards("middle-cards", middleCards);
+    document.getElementById("player1-score").textContent = player1Score;
+    document.getElementById("player2-score").textContent = player2Score;
+}
+
+function renderCards(containerId, cards, player) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    cards.forEach((card, index) => {
+        const cardElement = document.createElement("div");
         cardElement.className = `card ${card.suit}`;
-        cardElement.setAttribute('data-value', card.value);
         cardElement.innerHTML = `
-            <div class="top-left">${card.value}<br>${getSuitSymbol(card.suit)}</div>
-            <div class="symbol">${getSuitSymbol(card.suit)}</div>
-            <div class="bottom-right">${card.value}<br>${getSuitSymbol(card.suit)}</div>
+            <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
+            <div class="symbol">${suitSymbols[card.suit]}</div>
+            <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
         `;
+        cardElement.addEventListener("click", () => playCard(index, player));
         container.appendChild(cardElement);
     });
-}
-
-export function displayCollectedCards(elementId, cards) {
-    const container = document.getElementById(elementId);
-    container.innerHTML = '';
-    cards.forEach((_, index) => {
-        const cardElement = document.createElement('div');
-        cardElement.className = 'card collected-card';
-        cardElement.style.top = `${index * 2}px`;
-        cardElement.style.left = `${index * 2}px`;
-        container.appendChild(cardElement);
-    });
-}
-
-function getSuitSymbol(suit) {
-    const symbols = { hearts: '♥', spades: '♠', diamonds: '♦', clubs: '♣' };
-    return symbols[suit];
 }
