@@ -1,24 +1,20 @@
-// تابع تحديث العرض
-function updateDisplay() {
-    renderCards("player1-hand", player1Hand, 1);
-    renderCards("player2-hand", player2Hand, 2);
-    renderCards("middle-cards", middleCards);
-    document.getElementById("player1-score").textContent = player1Score;
-    document.getElementById("player2-score").textContent = player2Score;
-}
+const UI = {
+    updateDisplay: function () {
+        this.renderCards("player1-hand", Game.player1Hand, 1);
+        this.renderCards("player2-hand", Game.player2Hand, 2);
+        this.renderCards("middle-cards", Game.middleCards);
 
-function renderCards(containerId, cards, player) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = "";
-    cards.forEach((card, index) => {
-        const cardElement = document.createElement("div");
-        cardElement.className = `card ${card.suit}`;
-        cardElement.innerHTML = `
-            <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
-            <div class="symbol">${suitSymbols[card.suit]}</div>
-            <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
-        `;
-        cardElement.addEventListener("click", () => playCard(index, player));
-        container.appendChild(cardElement);
-    });
-}
+        document.getElementById("player1-score").textContent = Game.player1Score;
+        document.getElementById("player2-score").textContent = Game.player2Score;
+    },
+
+    showMessage: function (message) {
+        const messageBox = document.getElementById("game-message");
+        messageBox.textContent = message;
+        messageBox.style.display = "block";
+
+        setTimeout(() => {
+            messageBox.style.display = "none";
+        }, 3000);
+    }
+};
