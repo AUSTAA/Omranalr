@@ -1,30 +1,29 @@
-const Rules = {
-    checkShkba: function (middleCards, lastCard, collectedCards, playerScore) {
-        if (middleCards.length === 0) {
-            playerScore += parseInt(lastCard.value);
-            UI.showMessage("شكبـّة! +" + lastCard.value + " نقطة");
-        }
-    },
+// ui.js - مسؤول عن تحديث الواجهة وعرض الرسائل
 
-    checkBarmeela: function (collectedCards, playerScore) {
-        const sevens = collectedCards.filter(c => c.value === "7").length;
-        const sixes = collectedCards.filter(c => c.value === "6").length;
-        const sevenDiamonds = collectedCards.some(c => c.value === "7" && c.suit === "diamonds");
+function renderCards(containerId, cards) {
+    let container = document.getElementById(containerId);
+    container.innerHTML = "";
 
-        if (sevens >= 3 || (sevens >= 2 && sixes >= 3)) {
-            playerScore += 1;
-            UI.showMessage("برميلة! +1 نقطة");
-        }
+    cards.forEach((card, index) => {
+        let cardDiv = document.createElement("div");
+        cardDiv.className = "card";
+        cardDiv.textContent = `${card.value} ${card.suit}`;
+        cardDiv.onclick = () => playCard(containerId.includes("player1") ? 1 : 2, index);
+        container.appendChild(cardDiv);
+    });
+}
 
-        if (sevenDiamonds) {
-            playerScore += 1;
-            UI.showMessage("🐍 7 ديناري! +1 نقطة");
-        }
-    },
+function updateDisplay() {
+    renderCards("player1-hand", player1Hand);
+    renderCards("player2-hand", player2Hand);
+    renderCards("middle-cards", middleCards);
 
-    checkBaji: function (player1Cards, player2Cards) {
-        return (player1Cards.length === 20 && player2Cards.length === 20) ||
-               (player1Cards.filter(c => c.suit === "diamonds").length === 5 ||
-                player2Cards.filter(c => c.suit === "diamonds").length === 5);
-    }
-};
+    document.getElementById("player1-score").textContent = player1Score;
+    document.getElementById("player2-score").textContent = player2Score;
+}
+
+function showMessage(message) {
+    let messageDiv = document.getElementById("game-message");
+    messageDiv.textContent = message;
+    setTimeout(() => { messageDiv.textContent = ""; }, 3000);
+}
