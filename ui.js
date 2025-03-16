@@ -1,15 +1,18 @@
-// ui.js - مسؤول عن تحديث الواجهة وعرض الرسائل
+// دوال الواجهة الرسومية لعرض الأوراق وتحديث النقاط
 
 function renderCards(containerId, cards) {
-    let container = document.getElementById(containerId);
+    const container = document.getElementById(containerId);
     container.innerHTML = "";
-
-    cards.forEach((card, index) => {
-        let cardDiv = document.createElement("div");
-        cardDiv.className = "card";
-        cardDiv.textContent = `${card.value} ${card.suit}`;
-        cardDiv.onclick = () => playCard(containerId.includes("player1") ? 1 : 2, index);
-        container.appendChild(cardDiv);
+    cards.forEach((card) => {
+        const cardElement = document.createElement("div");
+        cardElement.className = `card ${card.suit}`;
+        cardElement.innerHTML = `
+            <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
+            <div class="symbol">${suitSymbols[card.suit]}</div>
+            <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
+        `;
+        cardElement.addEventListener("click", () => playCard(card));
+        container.appendChild(cardElement);
     });
 }
 
@@ -20,10 +23,4 @@ function updateDisplay() {
 
     document.getElementById("player1-score").textContent = player1Score;
     document.getElementById("player2-score").textContent = player2Score;
-}
-
-function showMessage(message) {
-    let messageDiv = document.getElementById("game-message");
-    messageDiv.textContent = message;
-    setTimeout(() => { messageDiv.textContent = ""; }, 3000);
 }
