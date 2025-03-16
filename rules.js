@@ -1,29 +1,28 @@
-// ui.js - مسؤول عن تحديث الواجهة وعرض الرسائل
+// rules.js - يحتوي على القوانين الخاصة باللعبة
 
-function renderCards(containerId, cards) {
-    let container = document.getElementById(containerId);
-    container.innerHTML = "";
+// حساب النقاط بناءً على القوانين
+function calculatePoints(playerHand, middleCards, playerScore) {
+    let points = 0;
 
-    cards.forEach((card, index) => {
-        let cardDiv = document.createElement("div");
-        cardDiv.className = "card";
-        cardDiv.textContent = `${card.value} ${card.suit}`;
-        cardDiv.onclick = () => playCard(containerId.includes("player1") ? 1 : 2, index);
-        container.appendChild(cardDiv);
-    });
-}
+    // 1. شكبة - عند حدوثها، تُضاف قيمة الورقة الأخيرة في الوسط إلى نقاط اللاعب
+    if (middleCards.length === 0) {
+        points += playerHand[playerHand.length - 1].value;
+    }
 
-function updateDisplay() {
-    renderCards("player1-hand", player1Hand);
-    renderCards("player2-hand", player2Hand);
-    renderCards("middle-cards", middleCards);
+    // 2. البرميلة - عند جمع أنواع محددة من الأوراق
+    let sevens = playerHand.filter(card => card.value === 7).length;
+    let sixes = playerHand.filter(card => card.value === 6).length;
+    let hasSevenDinars = playerHand.some(card => card.value === 7 && card.suit === "ديناري");
 
-    document.getElementById("player1-score").textContent = player1Score;
-    document.getElementById("player2-score").textContent = player2Score;
-}
+    if (sevens === 3 || (sevens === 2 && sixes === 3)) {
+        points += 1;
+        showMessage("برميلة!");
+    }
 
-function showMessage(message) {
-    let messageDiv = document.getElementById("game-message");
-    messageDiv.textContent = message;
-    setTimeout(() => { messageDiv.textContent = ""; }, 3000);
+    if (hasSevenDinars) {
+        points += 1;
+        showMessage("🐍 الحية! (7 ديناري)");
+    }
+
+    return playerScore + points;
 }
