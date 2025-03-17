@@ -100,37 +100,38 @@ function renderCards(containerId, cards, player) {
 
 // === لعب ورقة ===
 function playCard(cardIndex, player) {
-    if (roundOver) return;
-    if (player !== currentPlayer) {
+    if (roundOver) return; 
+
+    if ((currentPlayer === 1 && player !== 1) || (currentPlayer === 2 && player !== 2)) {
         alert("ليس دورك!");
         return;
     }
 
-    let currentHand = currentPlayer === 1 ? player1Hand : player2Hand;
-    let collectedCards = currentPlayer === 1 ? player1Collected : player2Collected;
+    const currentHand = currentPlayer === 1 ? player1Hand : player2Hand;
+    const collectedCards = currentPlayer === 1 ? player1Collected : player2Collected;
 
     if (cardIndex < 0 || cardIndex >= currentHand.length) return;
 
-    let card = currentHand[cardIndex];
-    let cardValue = cardValueToInt(card.value);
+    const card = currentHand[cardIndex];
+    const cardValue = cardValueToInt(card.value);
 
-    // البحث عن تطابق مباشر
-    let matchIndex = middleCards.findIndex(c => cardValueToInt(c.value) === cardValue);
-    if (matchIndex !== -1) {
-        collectedCards.push(middleCards.splice(matchIndex, 1)[0]);
+    const matchingCardIndex = middleCards.findIndex(c => cardValueToInt(c.value) === cardValue);
+
+    if (matchingCardIndex !== -1) {
+        collectedCards.push(middleCards.splice(matchingCardIndex, 1)[0]);
         collectedCards.push(card);
-        lastPlayerToTake = currentPlayer; // تحديث آخر لاعب أخذ أوراق
+        lastWinner = currentPlayer;
     } else {
-        let combinations = findSummingCombinations(middleCards, cardValue);
+        const combinations = findSummingCombinations(middleCards, cardValue);
         if (combinations.length > 0) {
             combinations[0].forEach(match => {
-                let index = middleCards.findIndex(c => c.value === match.value && c.suit === match.suit);
+                const index = middleCards.findIndex(c => c.value === match.value && c.suit === match.suit);
                 if (index !== -1) {
                     collectedCards.push(middleCards.splice(index, 1)[0]);
                 }
             });
             collectedCards.push(card);
-            lastPlayerToTake = currentPlayer;
+            lastWinner = currentPlayer;
         } else {
             middleCards.push(card);
         }
@@ -138,15 +139,16 @@ function playCard(cardIndex, player) {
 
     currentHand.splice(cardIndex, 1);
 
-    // === التحقق من الشكبة ===
     if (middleCards.length === 0) {
-        player1Score += cardValue;
-        alert("شكبـّة! +" + cardValue + " نقطة");
+        const lastCard = cardValueToInt(card.value);
+        collectedCards.push({ value: lastCard, suit: card.suit });
+        alert("شكبـّة! + " + lastCard + " نقطة");
     }
 
-    // === إنهاء الجولة ===
-    if (player1Hand.length === 0 && player2Hand.length === 0) {
+    if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length === 0) {
         endRound();
+    } else if (player1Hand.length === 0 && player2Hand.length === 0) {
+        dealNextCards();
     } else {
         currentPlayer = currentPlayer === 1 ? 2 : 1;
     }
@@ -158,22 +160,40 @@ function playCard(cardIndex, player) {
 function endRound() {
     roundOver = true;
 
-    // قانون 11: إذا بقيت أوراق غير مأخوذة، يأخذها آخر لاعب أخذ من الوسط
-    if (middleCards.length > 0 && lastPlayerToTake !== null) {
-        let collectedCards = lastPlayerToTake === 1 ? player1Collected : player2Collected;
-        collectedCards.push(...middleCards);
-        middleCards = [];
+    let player1Diamonds = player1Collected.filter(card => card.suit === "diamonds").length;
+    let player2Diamonds = player2Collected.filter(card => card.suit === "diamonds").length;
+
+    if (player1Diamonds > player2Diamonds) player1Score += 1;
+    else if (player2Diamonds > player1Diamonds) player2Score += 1;
+
+    if (player1Diamonds >= 8) {
+        player1Score += 10;
+        player2Score = 0;
+    } else if (player2Diamonds >= 8) {
+        player2Score += 10;
+        player1Score = 0;
     }
 
-    // حساب النقاط بناءً على القوانين المختلفة
-    calculatePoints();
-
-    // === قانون 13: اللاعب الأكثر نقاطًا يبدأ الجولة الجديدة ===
-    currentPlayer = player1Score > player2Score ? 1 : 2;
+    // إضافة جميع الأوراق المتبقية في الوسط إلى آخر لاعب أخذ ورق
+    if (lastWinner === 1) {
+        player1Collected.push(...middleCards);
+    } else if (lastWinner === 2) {
+        player2Collected.push(...middleCards);
+    }
+    middleCards = [];
 
     alert(`الجولة انتهت! نقاط اللاعب 1: ${player1Score}, نقاط اللاعب 2: ${player2Score}`);
 
-    // التحقق من نهاية الشوط
+    // تحديد من يبدأ الجولة التالية
+    if (player1Score > player2Score) {
+        currentPlayer = 1;
+    } else if (player2Score > player1Score) {
+        currentPlayer = 2;
+    } else {
+        currentPlayer = Math.random() < 0.5 ? 1 : 2; // في حال التعادل
+    }
+
+    // التحقق من انتهاء اللعبة عند 61 نقطة
     if (player1Score >= 61 || player2Score >= 61) {
         alert(player1Score >= 61 ? "اللاعب 1 فاز!" : "اللاعب 2 فاز!");
         player1Score = 0;
