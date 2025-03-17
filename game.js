@@ -30,7 +30,7 @@ function initializeGame() {
 // === إنشاء رزمة الأوراق ===
 function createDeck() {
     let suits = ["hearts", "diamonds", "clubs", "spades"];
-    let values = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+    let values = ["A", "2", "3", "4", "5", "6", "7", "Q", "J", "K"];
     let deck = [];
     for (let suit of suits) {
         for (let value of values) {
@@ -79,19 +79,12 @@ function renderCards(containerId, cards, player) {
     const container = document.getElementById(containerId);
     container.innerHTML = "";
     cards.forEach((card, index) => {
-        let displayValue = card.value; // القيمة الأصلية
-
-        // تحويل القيم إلى الرموز المطلوبة
-        if (card.value === "8") displayValue = "Q";
-        else if (card.value === "9") displayValue = "J";
-        else if (card.value === "10") displayValue = "K";
-
         const cardElement = document.createElement("div");
         cardElement.className = `card ${card.suit}`;
         cardElement.innerHTML = `
-            <div class="top-left">${displayValue}<br>${suitSymbols[card.suit]}</div>
+            <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
             <div class="symbol">${suitSymbols[card.suit]}</div>
-            <div class="bottom-right">${displayValue}<br>${suitSymbols[card.suit]}</div>
+            <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
         `;
         cardElement.addEventListener("click", () => playCard(index, player));
         container.appendChild(cardElement);
@@ -222,5 +215,22 @@ function cardValueToInt(value) {
 
 // === البحث عن مجموع مطابق ===
 function findSummingCombinations(cards, targetValue) {
-    return cards.filter(c => cardValueToInt(c.value) === targetValue);
+    let result = [];
+
+    function findSubset(currentSubset, remainingCards, sum) {
+        if (sum === targetValue) {
+            result.push([...currentSubset]);
+            return;
+        }
+        if (sum > targetValue || remainingCards.length === 0) return;
+
+        // تضمين البطاقة الحالية في المجموعة
+        findSubset([...currentSubset, remainingCards[0]], remainingCards.slice(1), sum + cardValueToInt(remainingCards[0].value));
+
+        // تخطي البطاقة الحالية
+        findSubset(currentSubset, remainingCards.slice(1), sum);
+    }
+
+    findSubset([], cards, 0);
+    return result;
 }
