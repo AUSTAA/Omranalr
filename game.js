@@ -68,14 +68,24 @@ function updateDisplay() {
     document.getElementById("player2-score").textContent = player2Score;
 }
 
-// === عرض الأوراق في الواجهة ===
+const suitSymbols = {
+    "hearts": "♥",
+    "diamonds": "♦",
+    "clubs": "♣",
+    "spades": "♠"
+};
+
 function renderCards(containerId, cards, player) {
     const container = document.getElementById(containerId);
     container.innerHTML = "";
     cards.forEach((card, index) => {
         const cardElement = document.createElement("div");
         cardElement.className = `card ${card.suit}`;
-        cardElement.innerHTML = `<div class="top-left">${card.value}<br>${card.suit}</div>`;
+        cardElement.innerHTML = `
+            <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
+            <div class="symbol">${suitSymbols[card.suit]}</div>
+            <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
+        `;
         cardElement.addEventListener("click", () => playCard(index, player));
         container.appendChild(cardElement);
     });
