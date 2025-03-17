@@ -79,12 +79,19 @@ function renderCards(containerId, cards, player) {
     const container = document.getElementById(containerId);
     container.innerHTML = "";
     cards.forEach((card, index) => {
+        let displayValue = card.value; // القيمة الأصلية
+
+        // تحويل القيم إلى الرموز المطلوبة
+        if (card.value === "8") displayValue = "Q";
+        else if (card.value === "9") displayValue = "J";
+        else if (card.value === "10") displayValue = "K";
+
         const cardElement = document.createElement("div");
         cardElement.className = `card ${card.suit}`;
         cardElement.innerHTML = `
-            <div class="top-left">${card.value}<br>${suitSymbols[card.suit]}</div>
+            <div class="top-left">${displayValue}<br>${suitSymbols[card.suit]}</div>
             <div class="symbol">${suitSymbols[card.suit]}</div>
-            <div class="bottom-right">${card.value}<br>${suitSymbols[card.suit]}</div>
+            <div class="bottom-right">${displayValue}<br>${suitSymbols[card.suit]}</div>
         `;
         cardElement.addEventListener("click", () => playCard(index, player));
         container.appendChild(cardElement);
