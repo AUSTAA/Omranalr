@@ -159,39 +159,112 @@ function endRound() {
     let player1Diamonds = player1Collected.filter(card => card.suit === "diamonds").length;
     let player2Diamonds = player2Collected.filter(card => card.suit === "diamonds").length;
 
-    if (player1Diamonds > player2Diamonds) player1Score += 1;
-    else if (player2Diamonds > player1Diamonds) player2Score += 1;
+    let player1Sevens = player1Collected.filter(card => card.value === "7").length;
+    let player2Sevens = player2Collected.filter(card => card.value === "7").length;
 
-    if (player1Diamonds >= 8) {
-        player1Score += 10;
-        player2Score = 0;
-    } else if (player2Diamonds >= 8) {
-        player2Score += 10;
-        player1Score = 0;
+    let player1Sixes = player1Collected.filter(card => card.value === "6").length;
+    let player2Sixes = player2Collected.filter(card => card.value === "6").length;
+
+    let player1CardsCount = player1Collected.length;
+    let player2CardsCount = player2Collected.length;
+
+    let player1Points = 0;
+    let player2Points = 0;
+    let player1Details = [];
+    let player2Details = [];
+
+    // === تطبيق "الباجي" ===
+    let bajiActive = false;
+
+    if (player1Diamonds >= 5 || player2Diamonds >= 5) {
+        bajiActive = true;
+        player1Details.push("الديناري باجي");
+        player2Details.push("الديناري باجي");
     }
 
-    // إضافة جميع الأوراق المتبقية في الوسط إلى آخر لاعب أخذ ورق
-    if (lastWinner === 1) {
-        player1Collected.push(...middleCards);
-    } else if (lastWinner === 2) {
-        player2Collected.push(...middleCards);
-    }
-    middleCards = [];
-
-    alert(`الجولة انتهت! نقاط اللاعب 1: ${player1Score}, نقاط اللاعب 2: ${player2Score}`);
-
-    // تحديد من يبدأ الجولة التالية
-    if (player1Score > player2Score) {
-        currentPlayer = 1;
-    } else if (player2Score > player1Score) {
-        currentPlayer = 2;
-    } else {
-        currentPlayer = Math.random() < 0.5 ? 1 : 2; // في حال التعادل
+    if ((player1Sevens >= 2 && player1Sixes >= 2) || (player2Sevens >= 2 && player2Sixes >= 2)) {
+        bajiActive = true;
+        player1Details.push("البرميلة باجي");
+        player2Details.push("البرميلة باجي");
     }
 
-    // التحقق من انتهاء اللعبة عند 61 نقطة
+    if (player1CardsCount === 20 && player2CardsCount === 20) {
+        bajiActive = true;
+        player1Details.push("الكارطة باجي");
+        player2Details.push("الكارطة باجي");
+    }
+
+    // إذا لم يكن هناك "باجي"، يتم احتساب النقاط
+    if (!bajiActive) {
+        if (player1Diamonds > player2Diamonds) {
+            player1Points += 1;
+            player1Details.push("ديناري 1");
+        } else if (player2Diamonds > player1Diamonds) {
+            player2Points += 1;
+            player2Details.push("ديناري 1");
+        }
+
+        if (player1Sevens >= 3 || (player1Sevens >= 2 && player1Sixes >= 3)) {
+            player1Points += 1;
+            player1Details.push("البرميلة 1");
+        }
+
+        if (player2Sevens >= 3 || (player2Sevens >= 2 && player2Sixes >= 3)) {
+            player2Points += 1;
+            player2Details.push("البرميلة 1");
+        }
+
+        if (player1Collected.some(card => card.value === "7" && card.suit === "diamonds")) {
+            player1Points += 1;
+            player1Details.push("🐍 الحية 1");
+        }
+
+        if (player2Collected.some(card => card.value === "7" && card.suit === "diamonds")) {
+            player2Points += 1;
+            player2Details.push("🐍 الحية 1");
+        }
+
+        if (lastWinner === 1) {
+            player1Collected.push(...middleCards);
+            middleCards.forEach(card => {
+                if (card.value === "7" && card.suit === "diamonds") {
+                    player1Points += 1;
+                    player1Details.push("🐍 الحية 1");
+                }
+            });
+        } else if (lastWinner === 2) {
+            player2Collected.push(...middleCards);
+            middleCards.forEach(card => {
+                if (card.value === "7" && card.suit === "diamonds") {
+                    player2Points += 1;
+                    player2Details.push("🐍 الحية 1");
+                }
+            });
+        }
+    }
+
+    // === تحديث النقاط ===
+    if (!bajiActive) {
+        player1Score += player1Points;
+        player2Score += player2Points;
+    }
+
+    // === عرض تقرير النقاط ===
+    let report = `
+        <strong>نتائج الجولة:</strong><br>
+        <strong>لاعب 1:</strong> ${player1Details.length > 0 ? player1Details.join(" ، ") : "لا شيء"} <br>
+        <strong>لاعب 2:</strong> ${player2Details.length > 0 ? player2Details.join(" ، ") : "لا شيء"} <br>
+        <br>
+        <strong>النتيجة:</strong><br>
+        لاعب 1 = ${player1Score} / لاعب 2 = ${player2Score}
+    `;
+
+    alert(report.replace(/<br>/g, "\n")); // إظهار النتائج في Alert
+    document.getElementById("round-summary").innerHTML = report; // عرض التقرير في صفحة HTML
+
+    // === التحقق من الفوز ===
     if (player1Score >= 61 || player2Score >= 61) {
-        alert(player1Score >= 61 ? "اللاعب 1 فاز!" : "اللاعب 2 فاز!");
+        alert(player1Score >= 61 ? "🎉 اللاعب 1 فاز!" : "🎉 اللاعب 2 فاز!");
         player1Score = 0;
         player2Score = 0;
     }
