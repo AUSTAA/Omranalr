@@ -138,13 +138,16 @@ function playCard(cardIndex, player) {
         alert("شكبـّة! + " + lastCard + " نقطة");
     }
 
-    if (player1Hand.length === 0 && player2Hand.length === 0 && deck.length === 0) {
-        endRound();
-    } else if (player1Hand.length === 0 && player2Hand.length === 0) {
+    if (player1Hand.length === 0 && player2Hand.length === 0) {
+    if (deck.length > 0) {
         dealNextCards();
+        currentPlayer = currentPlayer === 1 ? 2 : 1; // تبديل اللاعب بعد توزيع الأوراق
     } else {
-        currentPlayer = currentPlayer === 1 ? 2 : 1;
+        endRound();
     }
+} else {
+    currentPlayer = currentPlayer === 1 ? 2 : 1;
+}
 
     updateDisplay();
 }
@@ -207,7 +210,13 @@ function calculatePoints() {
     if (player1Diamonds >= 8) player1Score += 10;
     if (player2Diamonds >= 8) player2Score += 10;
 }
-
+function dealNextCards() {
+    for (let i = 0; i < 3; i++) {
+        if (deck.length > 0) player1Hand.push(deck.pop());
+        if (deck.length > 0) player2Hand.push(deck.pop());
+    }
+    updateDisplay();
+}
 // === تحويل قيمة البطاقة إلى رقمية ===
 function cardValueToInt(value) {
     return value === "A" ? 1 : value === "Q" ? 8 : value === "J" ? 9 : value === "K" ? 10 : parseInt(value);
