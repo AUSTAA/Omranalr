@@ -173,23 +173,24 @@ function endRound() {
     let player1Details = [];
     let player2Details = [];
 
-    // === تطبيق "الباجي" ===
-    let bajiActive = false;
+    // === التحقق من "الباجي" ===
+    let bajiConditions = {
+        "الديناري باجي": player1Diamonds >= 5 && player2Diamonds >= 5,
+        "البرميلة باجي": (player1Sevens >= 2 && player1Sixes >= 2) && (player2Sevens >= 2 && player2Sixes >= 2),
+        "الكارطة باجي": player1CardsCount === 20 && player2CardsCount === 20
+    };
 
-    if (player1Diamonds >= 5 || player2Diamonds >= 5) {
-        bajiActive = true;
+    let bajiActive = Object.values(bajiConditions).some(value => value); // يتحقق إذا كان أي شرط للباجي صحيحًا
+
+    if (bajiConditions["الديناري باجي"]) {
         player1Details.push("الديناري باجي");
         player2Details.push("الديناري باجي");
     }
-
-    if ((player1Sevens >= 2 && player1Sixes >= 2) || (player2Sevens >= 2 && player2Sixes >= 2)) {
-        bajiActive = true;
+    if (bajiConditions["البرميلة باجي"]) {
         player1Details.push("البرميلة باجي");
         player2Details.push("البرميلة باجي");
     }
-
-    if (player1CardsCount === 20 && player2CardsCount === 20) {
-        bajiActive = true;
+    if (bajiConditions["الكارطة باجي"]) {
         player1Details.push("الكارطة باجي");
         player2Details.push("الكارطة باجي");
     }
