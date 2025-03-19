@@ -194,7 +194,20 @@ function endRound() {
         player2Details.push("الكارطة باجي");
     }
 
-    // إذا لم يكن هناك "باجي"، يتم احتساب النقاط
+    // === احتساب الشكبة ===
+    let player1ShkbaPoints = player1Collected.filter(card => card.shkba).reduce((sum, card) => sum + cardValueToInt(card.value), 0);
+    let player2ShkbaPoints = player2Collected.filter(card => card.shkba).reduce((sum, card) => sum + cardValueToInt(card.value), 0);
+
+    if (player1ShkbaPoints > 0) {
+        player1Points += player1ShkbaPoints;
+        player1Details.push(`شكبة ${player1ShkbaPoints}`);
+    }
+    if (player2ShkbaPoints > 0) {
+        player2Points += player2ShkbaPoints;
+        player2Details.push(`شكبة ${player2ShkbaPoints}`);
+    }
+
+    // === إذا لم يكن هناك "باجي"، يتم احتساب النقاط العادية ===
     if (!bajiActive) {
         if (player1Diamonds > player2Diamonds) {
             player1Points += 1;
@@ -224,6 +237,7 @@ function endRound() {
             player2Details.push("🐍 الحية 1");
         }
 
+        // === توزيع الأوراق المتبقية في الوسط ===
         if (lastWinner === 1) {
             player1Collected.push(...middleCards);
             middleCards.forEach(card => {
