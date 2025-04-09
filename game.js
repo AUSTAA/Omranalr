@@ -93,7 +93,7 @@ function renderCards(containerId, cards, player) {
 
 // === لعب ورقة ===
 function playCard(cardIndex, player) {
-    if (roundOver) return; 
+    if (roundOver) return;
 
     if ((currentPlayer === 1 && player !== 1) || (currentPlayer === 2 && player !== 2)) {
         alert("ليس دورك!");
@@ -108,46 +108,55 @@ function playCard(cardIndex, player) {
     const card = currentHand[cardIndex];
     const cardValue = cardValueToInt(card.value);
 
+    let takenCards = [];
     const matchingCardIndex = middleCards.findIndex(c => cardValueToInt(c.value) === cardValue);
 
     if (matchingCardIndex !== -1) {
+        takenCards.push(middleCards[matchingCardIndex], card);
         collectedCards.push(middleCards.splice(matchingCardIndex, 1)[0]);
         collectedCards.push(card);
-        lastWinner = currentPlayer;
+        lastPlayerToTake = currentPlayer;
     } else {
         const combinations = findSummingCombinations(middleCards, cardValue);
         if (combinations.length > 0) {
             combinations[0].forEach(match => {
+                takenCards.push(match);
                 const index = middleCards.findIndex(c => c.value === match.value && c.suit === match.suit);
                 if (index !== -1) {
                     collectedCards.push(middleCards.splice(index, 1)[0]);
                 }
             });
             collectedCards.push(card);
-            lastWinner = currentPlayer;
+            takenCards.push(card);
+            lastPlayerToTake = currentPlayer;
         } else {
             middleCards.push(card);
         }
     }
 
+    // عرض الأوراق التي تم أخذها
+    if (takenCards.length > 0) {
+        alert(`اللاعب ${currentPlayer} أخذ: ${takenCards.map(c => c.value + suitSymbols[c.suit]).join(", ")}`);
+    }
+
     currentHand.splice(cardIndex, 1);
 
     if (middleCards.length === 0) {
-        const lastCard = cardValueToInt(card.value);
-        collectedCards.push({ value: lastCard, suit: card.suit });
-        alert("شكبـّة! + " + lastCard + " نقطة");
+        card.shkba = true;
+        collectedCards.push(card);
+        alert("شكبـّة! + " + cardValue + " نقطة");
     }
 
     if (player1Hand.length === 0 && player2Hand.length === 0) {
-    if (deck.length > 0) {
-        dealNextCards();
-        currentPlayer = currentPlayer === 1 ? 2 : 1; // تبديل اللاعب بعد توزيع الأوراق
+        if (deck.length > 0) {
+            dealNextCards();
+            currentPlayer = currentPlayer === 1 ? 2 : 1;
+        } else {
+            endRound();
+        }
     } else {
-        endRound();
+        currentPlayer = currentPlayer === 1 ? 2 : 1;
     }
-} else {
-    currentPlayer = currentPlayer === 1 ? 2 : 1;
-}
 
     updateDisplay();
 }
@@ -155,6 +164,13 @@ function playCard(cardIndex, player) {
 // === إنهاء الجولة وحساب النقاط ===
 function endRound() {
     roundOver = true;
+
+    // توزيع الأوراق المتبقية في الوسط
+    if (lastPlayerToTake === 1) {
+        player1Collected.push(...middleCards);
+    } else if (lastPlayerToTake === 2) {
+        player2Collected.push(...middleCards);
+    }
 
     let player1Diamonds = player1Collected.filter(card => card.suit === "diamonds").length;
     let player2Diamonds = player2Collected.filter(card => card.suit === "diamonds").length;
@@ -173,14 +189,13 @@ function endRound() {
     let player1Details = [];
     let player2Details = [];
 
-    // === التحقق من "الباجي" ===
     let bajiConditions = {
         "الديناري باجي": player1Diamonds >= 5 && player2Diamonds >= 5,
         "البرميلة باجي": (player1Sevens >= 2 && player1Sixes >= 2) && (player2Sevens >= 2 && player2Sixes >= 2),
         "الكارطة باجي": player1CardsCount === 20 && player2CardsCount === 20
     };
 
-    let bajiActive = Object.values(bajiConditions).some(value => value); // يتحقق إذا كان أي شرط للباجي صحيحًا
+    let bajiActive = Object.values(bajiConditions).some(value => value);
 
     if (bajiConditions["الديناري باجي"]) {
         player1Details.push("الديناري باجي");
@@ -195,7 +210,6 @@ function endRound() {
         player2Details.push("الكارطة باجي");
     }
 
-    // === احتساب الشكبة ===
     let player1ShkbaPoints = player1Collected.filter(card => card.shkba).reduce((sum, card) => sum + cardValueToInt(card.value), 0);
     let player2ShkbaPoints = player2Collected.filter(card => card.shkba).reduce((sum, card) => sum + cardValueToInt(card.value), 0);
 
@@ -208,7 +222,6 @@ function endRound() {
         player2Details.push(`شكبة ${player2ShkbaPoints}`);
     }
 
-    // === إذا لم يكن هناك "باجي"، يتم احتساب النقاط العادية ===
     if (!bajiActive) {
         if (player1Diamonds > player2Diamonds) {
             player1Points += 1;
@@ -238,33 +251,12 @@ function endRound() {
             player2Details.push("🐍 الحية 1");
         }
 
-        // === توزيع الأوراق المتبقية في الوسط ===
-        if (lastWinner === 1) {
-            player1Collected.push(...middleCards);
-            middleCards.forEach(card => {
-                if (card.value === "7" && card.suit === "diamonds") {
-                    player1Points += 1;
-                    player1Details.push("🐍 الحية 1");
-                }
-            });
-        } else if (lastWinner === 2) {
-            player2Collected.push(...middleCards);
-            middleCards.forEach(card => {
-                if (card.value === "7" && card.suit === "diamonds") {
-                    player2Points += 1;
-                    player2Details.push("🐍 الحية 1");
-                }
-            });
-        }
-    }
-
-    // === تحديث النقاط ===
-    if (!bajiActive) {
         player1Score += player1Points;
         player2Score += player2Points;
     }
 
-    // === عرض تقرير النقاط ===
+    updateDisplay();
+
     let report = `
         <strong>نتائج الجولة:</strong><br>
         <strong>لاعب 1:</strong> ${player1Details.length > 0 ? player1Details.join(" ، ") : "لا شيء"} <br>
@@ -274,10 +266,9 @@ function endRound() {
         لاعب 1 = ${player1Score} / لاعب 2 = ${player2Score}
     `;
 
-    alert(report.replace(/<br>/g, "\n")); // إظهار النتائج في Alert
-    document.getElementById("round-summary").innerHTML = report; // عرض التقرير في صفحة HTML
+    alert(report.replace(/<br>/g, "\n"));
+    document.getElementById("round-summary").innerHTML = report;
 
-    // === التحقق من الفوز ===
     if (player1Score >= 61 || player2Score >= 61) {
         alert(player1Score >= 61 ? "🎉 اللاعب 1 فاز!" : "🎉 اللاعب 2 فاز!");
         player1Score = 0;
@@ -287,30 +278,10 @@ function endRound() {
     initializeGame();
 }
 
-// === حساب النقاط بناءً على القوانين ===
-function calculatePoints() {
-    let player1Diamonds = player1Collected.filter(c => c.suit === "diamonds").length;
-    let player2Diamonds = player2Collected.filter(c => c.suit === "diamonds").length;
-
-    if (player1Diamonds > player2Diamonds) player1Score += 1;
-    else if (player2Diamonds > player1Diamonds) player2Score += 1;
-
-    if (player1Diamonds >= 8) player1Score += 10;
-    if (player2Diamonds >= 8) player2Score += 10;
-}
-function dealNextCards() {
-    for (let i = 0; i < 3; i++) {
-        if (deck.length > 0) player1Hand.push(deck.pop());
-        if (deck.length > 0) player2Hand.push(deck.pop());
-    }
-    updateDisplay();
-}
-// === تحويل قيمة البطاقة إلى رقمية ===
 function cardValueToInt(value) {
     return value === "A" ? 1 : value === "Q" ? 8 : value === "J" ? 9 : value === "K" ? 10 : parseInt(value);
 }
 
-// === البحث عن مجموع مطابق ===
 function findSummingCombinations(cards, targetValue) {
     let result = [];
 
@@ -321,13 +292,18 @@ function findSummingCombinations(cards, targetValue) {
         }
         if (sum > targetValue || remainingCards.length === 0) return;
 
-        // تضمين البطاقة الحالية في المجموعة
         findSubset([...currentSubset, remainingCards[0]], remainingCards.slice(1), sum + cardValueToInt(remainingCards[0].value));
-
-        // تخطي البطاقة الحالية
         findSubset(currentSubset, remainingCards.slice(1), sum);
     }
 
     findSubset([], cards, 0);
     return result;
+}
+
+function dealNextCards() {
+    for (let i = 0; i < 3; i++) {
+        if (deck.length > 0) player1Hand.push(deck.pop());
+        if (deck.length > 0) player2Hand.push(deck.pop());
+    }
+    updateDisplay();
 }
